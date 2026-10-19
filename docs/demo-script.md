@@ -2,7 +2,7 @@
 
 Use a verified public Vercel deployment in a browser that supports WebGL. Allow five minutes for the demo within a 10–15 minute customer presentation. Start with a fresh visitor session if you want a reproducible room.
 
-**Current readiness, October 19, 2026:** [the hosted app](https://voxbuild-nu.vercel.app) runs in **Local sample** mode, and [the source repository](https://github.com/kyuhunlee/voxbuild) is public. Desktop/mobile sample rendering, anonymous hosted access, and real Gateway primary/policy-fallback requests have been checked. Atlas persistence and live audio remain pending. The sequence below is a presentation runbook to rehearse after those dependencies are verified; it is not a record of a completed end-to-end demo.
+**Current readiness, October 19, 2026:** [the hosted app](https://voxbuild-nu.vercel.app) runs in **Local sample** mode, and [the source repository](https://github.com/kyuhunlee/voxbuild) is public. Desktop/mobile sample rendering, anonymous hosted access, real Gateway primary/policy-fallback requests, and synthetic Realtime text/audio checks over server WebSocket have passed. Atlas persistence and browser microphone/WebRTC/playback/interruption remain pending. The sequence below is a presentation runbook to rehearse after those dependencies are verified; it is not a record of a completed end-to-end demo.
 
 ## Before presenting
 
@@ -27,6 +27,7 @@ Confirm the deployment actually reports live storage and Gateway capabilities. T
 ## If a live dependency fails
 
 - **Microphone blocked:** continue with the identical text command, acknowledge that voice was not verified in this session, and inspect browser permissions after the presentation.
+- **Showing existing Realtime evidence:** use the [text](evidence/realtime-text-compatibility.json) and [synthetic audio](evidence/realtime-audio-compatibility.json) reports to explain accepted configuration, completed tool calls, and audio continuation. State that these used server WebSocket and an in-memory fixture with zero Atlas writes. The 670 ms speech-stop-to-tool observation is one sample; it is not a browser latency or p95 result.
 - **Gateway unavailable:** demonstrate manual validated controls and the last real report. Do not present canned local previews as live model responses.
 - **Atlas unavailable:** show the recoverable error and the last accepted state. Sample mode is a separately labeled local walkthrough, not a persistence fallback.
 - **Text response lost:** reload the saved room to determine whether the edit committed. Retrying a text request with the old revision returns `409 REVISION_CONFLICT` after a successful commit; receipt-based replay applies to identical manual/voice operation requests, not the whole text-generation endpoint.

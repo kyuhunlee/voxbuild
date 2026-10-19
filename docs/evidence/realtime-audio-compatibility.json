@@ -1,0 +1,169 @@
+{
+  "checkedAt": "2026-10-19T07:42:40.393Z",
+  "transport": "server WebSocket",
+  "input": "synthetic TTS audio: Make the sofa sage green",
+  "atlasWrites": 0,
+  "microphoneAccess": false,
+  "browserWebRtcVerified": false,
+  "maximumSessionMs": 30000,
+  "responseLimit": 2,
+  "eventCounts": {
+    "session.created": 1,
+    "session.updated": 1,
+    "input_audio_buffer.speech_started": 1,
+    "input_audio_buffer.speech_stopped": 1,
+    "input_audio_buffer.committed": 1,
+    "conversation.item.added": 5,
+    "conversation.item.done": 5,
+    "response.created": 2,
+    "response.output_item.added": 2,
+    "response.function_call_arguments.delta": 23,
+    "conversation.item.input_audio_transcription.delta": 6,
+    "response.function_call_arguments.done": 1,
+    "response.output_item.done": 2,
+    "response.done": 2,
+    "rate_limits.updated": 1,
+    "conversation.item.input_audio_transcription.completed": 1,
+    "response.content_part.added": 1,
+    "response.output_audio_transcript.delta": 39,
+    "response.output_audio.delta": 23,
+    "response.output_audio.done": 1,
+    "response.output_audio_transcript.done": 1,
+    "response.content_part.done": 1
+  },
+  "responses": [
+    {
+      "phase": "planning",
+      "status": "completed",
+      "metadata": null,
+      "outputTypes": [
+        {
+          "type": "function_call",
+          "status": "completed"
+        }
+      ],
+      "durationMs": 4437,
+      "afterSpeechStoppedMs": 670,
+      "usage": {
+        "total_tokens": 1946,
+        "input_tokens": 1909,
+        "output_tokens": 37,
+        "input_token_details": {
+          "text_tokens": 1876,
+          "audio_tokens": 33,
+          "image_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_token_details": {
+          "text_tokens": 37,
+          "audio_tokens": 0
+        }
+      }
+    },
+    {
+      "phase": "speech",
+      "status": "completed",
+      "metadata": {
+        "phase": "speech"
+      },
+      "outputTypes": [
+        {
+          "type": "message",
+          "status": "completed"
+        }
+      ],
+      "durationMs": 2394,
+      "usage": {
+        "total_tokens": 2923,
+        "input_tokens": 2681,
+        "output_tokens": 242,
+        "input_token_details": {
+          "text_tokens": 2444,
+          "audio_tokens": 237,
+          "image_tokens": 0,
+          "cached_tokens": 1024
+        },
+        "output_token_details": {
+          "text_tokens": 59,
+          "audio_tokens": 183
+        }
+      }
+    }
+  ],
+  "tts": {
+    "model": "gpt-4o-mini-tts",
+    "voice": "coral",
+    "status": 200,
+    "requestCount": 1,
+    "microphone": false,
+    "bytes": 144000,
+    "durationMs": 3000,
+    "requestMs": 2101,
+    "format": "PCM signed16 little-endian mono 24000Hz",
+    "retainedAudioFile": false
+  },
+  "model": "gpt-realtime-2.1",
+  "configuration": {
+    "extractedFromCurrentRoute": true,
+    "sha256": "f184fd359e453dde8d2b1851ecf778b4f86d76ac5620604be3c9da434c9ab4fc",
+    "outputModalities": [
+      "text"
+    ],
+    "maxOutputTokens": 1600,
+    "voice": "marin",
+    "transcriptionModel": "gpt-4o-mini-transcribe",
+    "turnDetection": {
+      "type": "server_vad",
+      "create_response": true,
+      "interrupt_response": true,
+      "silence_duration_ms": 500
+    },
+    "toolName": "apply_scene_operations",
+    "toolSchemaUsesAnyOf": true
+  },
+  "connectedMs": 3156,
+  "sessionAccepted": true,
+  "resolvedSession": {
+    "model": "gpt-realtime-2.1",
+    "outputModalities": [
+      "text"
+    ],
+    "voice": "marin",
+    "toolCount": 1,
+    "inputFormat": {
+      "type": "audio/pcm",
+      "rate": 24000
+    }
+  },
+  "inputMode": "PCM chunks paced at 100ms with 250ms leading and 1000ms trailing silence; automatic server VAD response; no manual commit or response.create",
+  "speechStartedMs": 1607,
+  "speechStoppedMs": 4885,
+  "toolValidation": {
+    "completeCall": true,
+    "strictDomainSchema": true,
+    "sceneEngine": true,
+    "semanticPass": true,
+    "operations": [
+      {
+        "type": "recolor",
+        "objectId": "studio-sofa",
+        "color": "#687761"
+      }
+    ]
+  },
+  "inputTranscript": "Make the sofa sage green.",
+  "audioContinuation": {
+    "audioBytes": 439200,
+    "transcript": "The sofa recolor was accepted in the fixture, but it wasn’t saved anywhere. If you want it to stick, you’ll need to apply the change in a setup that actually persists updates.",
+    "toolCallCount": 0,
+    "persistenceResultSent": "ok:true; synthetic in-memory fixture only; persistence:none",
+    "sentEventOrder": [
+      "conversation.item.create system scene",
+      "conversation.item.create function_call_output",
+      "response.create audio tool_choice none metadata.phase speech"
+    ]
+  },
+  "websocketSessionMs": 7953,
+  "outcome": "passed_synthetic_audio_vad_tool_audio_compatibility",
+  "elapsedMs": 10067
+}

@@ -1,0 +1,143 @@
+{
+  "checkedAt": "2026-10-19T07:41:32.268Z",
+  "transport": "server WebSocket",
+  "input": "synthetic text: Make the sofa sage green",
+  "atlasWrites": 0,
+  "microphoneAccess": false,
+  "browserWebRtcVerified": false,
+  "maximumSessionMs": 30000,
+  "responseLimit": 2,
+  "eventCounts": {
+    "session.created": 1,
+    "session.updated": 1,
+    "conversation.item.added": 5,
+    "conversation.item.done": 5,
+    "response.created": 2,
+    "response.output_item.added": 2,
+    "response.function_call_arguments.delta": 23,
+    "response.function_call_arguments.done": 1,
+    "response.output_item.done": 2,
+    "response.done": 2,
+    "rate_limits.updated": 1,
+    "response.content_part.added": 1,
+    "response.output_audio_transcript.delta": 43,
+    "response.output_audio.delta": 26,
+    "response.output_audio.done": 1,
+    "response.output_audio_transcript.done": 1,
+    "response.content_part.done": 1
+  },
+  "responses": [
+    {
+      "phase": "planning",
+      "status": "completed",
+      "metadata": null,
+      "outputTypes": [
+        {
+          "type": "function_call",
+          "status": "completed"
+        }
+      ],
+      "durationMs": 1077,
+      "usage": {
+        "total_tokens": 1941,
+        "input_tokens": 1877,
+        "output_tokens": 64,
+        "input_token_details": {
+          "text_tokens": 1877,
+          "audio_tokens": 0,
+          "image_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_token_details": {
+          "text_tokens": 64,
+          "audio_tokens": 0,
+          "reasoning_tokens": 27
+        }
+      }
+    },
+    {
+      "phase": "speech",
+      "status": "completed",
+      "metadata": {
+        "phase": "speech"
+      },
+      "outputTypes": [
+        {
+          "type": "message",
+          "status": "completed"
+        }
+      ],
+      "durationMs": 2588,
+      "usage": {
+        "total_tokens": 2918,
+        "input_tokens": 2649,
+        "output_tokens": 269,
+        "input_token_details": {
+          "text_tokens": 2445,
+          "audio_tokens": 204,
+          "image_tokens": 0,
+          "cached_tokens": 1024
+        },
+        "output_token_details": {
+          "text_tokens": 63,
+          "audio_tokens": 206
+        }
+      }
+    }
+  ],
+  "model": "gpt-realtime-2.1",
+  "configuration": {
+    "extractedFromCurrentRoute": true,
+    "sha256": "d776fa8e360e716e3430f464ad82d1ea3df5e3608b8329519315761ed066060d",
+    "outputModalities": [
+      "text"
+    ],
+    "maxOutputTokens": 1600,
+    "voice": "marin",
+    "transcriptionModel": "gpt-4o-mini-transcribe",
+    "turnDetection": {
+      "type": "server_vad",
+      "create_response": true,
+      "interrupt_response": true,
+      "silence_duration_ms": 500
+    },
+    "toolName": "apply_scene_operations",
+    "toolSchemaUsesAnyOf": true
+  },
+  "connectedMs": 1391,
+  "sessionAccepted": true,
+  "resolvedSession": {
+    "model": "gpt-realtime-2.1",
+    "outputModalities": [
+      "text"
+    ],
+    "voice": "marin",
+    "toolCount": 1
+  },
+  "toolValidation": {
+    "completeCall": true,
+    "strictDomainSchema": true,
+    "sceneEngine": true,
+    "semanticPass": true,
+    "operations": [
+      {
+        "type": "recolor",
+        "objectId": "studio-sofa",
+        "color": "#687761"
+      }
+    ]
+  },
+  "audioContinuation": {
+    "audioBytes": 494400,
+    "transcript": "The sofa is now set to a sage green color in the current fixture, but it wasn’t saved anywhere permanent, so you’ll need to apply the change again in a saved scene if you want it to persist.",
+    "toolCallCount": 0,
+    "persistenceResultSent": "ok:true; synthetic in-memory fixture only; persistence:none",
+    "sentEventOrder": [
+      "conversation.item.create system scene",
+      "conversation.item.create function_call_output",
+      "response.create audio tool_choice none metadata.phase speech"
+    ]
+  },
+  "outcome": "passed_synthetic_text_tool_audio_compatibility",
+  "elapsedMs": 5143
+}

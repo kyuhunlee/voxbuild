@@ -6,7 +6,7 @@ Prospective tenants can explore a sample apartment, add catalog furniture, and r
 
 **Submission links:** [hosted sample](https://voxbuild-nu.vercel.app) · [public source repository](https://github.com/kyuhunlee/voxbuild). The deployed app currently shows **Local sample**: rendering and local controls are available, but cloud persistence, free-form AI, and voice are not enabled in that mode. The live integrated assessment remains incomplete.
 
-**Verified on October 19, 2026:** 34 unit tests, TypeScript checking, the production build, desktop/mobile sample rendering, and real Gateway primary-model and policy-driven fallback requests passed. Atlas save/reload and live microphone/audio behavior remain unverified. See the [evidence ledger](docs/assessment.md#verification-record) for the precise scope.
+**Verified on October 19, 2026:** 34 unit tests, TypeScript checking, the production build, desktop/mobile sample rendering, real Gateway primary-model and policy-driven fallback requests, and two real Realtime compatibility checks over **server WebSocket** passed. Atlas save/reload and browser microphone/WebRTC behavior remain unverified. See the [evidence ledger](docs/assessment.md#verification-record) for the precise scope.
 
 - [Customer brief and assessment map](docs/assessment.md)
 - [Architecture and operating decisions](docs/architecture.md)
@@ -53,7 +53,7 @@ OPENAI_API_KEY=YOUR_SERVER_SIDE_OPENAI_KEY
 OPENAI_REALTIME_MODEL=gpt-realtime-2.1
 ```
 
-The text-model IDs above were present in the [public Gateway catalog](https://ai-gateway.vercel.sh/v1/models), and real requests verified both the primary and the policy-selected fallback. Command accuracy across the live semantic suite remains unmeasured. An authenticated model-availability request for `gpt-realtime-2.1` returned HTTP 200; no live voice/audio session has been verified. `AI_GATEWAY_FALLBACK_MODEL` is optional. A Vercel OIDC token can authenticate Gateway on Vercel or in linked local development; do not expose it to the browser. OpenAI voice intentionally uses its own server-side key and direct media path.
+The text-model IDs above were present in the [public Gateway catalog](https://ai-gateway.vercel.sh/v1/models), and real requests verified both the primary and the policy-selected fallback. Command accuracy across the live semantic suite remains unmeasured. Two short server WebSocket sessions verified `gpt-realtime-2.1` configuration and tool/audio compatibility using synthetic input; the browser WebRTC and persisted-edit path remains pending. `AI_GATEWAY_FALLBACK_MODEL` is optional. A Vercel OIDC token can authenticate Gateway on Vercel or in linked local development; do not expose it to the browser. OpenAI voice intentionally uses its own server-side key and direct media path.
 
 Use a separate VoxBuild Atlas project and Free/M0 cluster for the demo, a database user limited to the application database, and an authorized network access rule for the application. A free cluster is separate from other application data but is not Atlas's paid **Dedicated** tier. For connector provisioning, an Organization Owner must first enable AI client access under **Organization Settings → App Connections**; this is an organization-wide setting. [Atlas instructions](https://www.mongodb.com/docs/mcp-server/remote-mcp/manage-ai-client-access/).
 
@@ -73,9 +73,14 @@ npm test
 npm run typecheck
 npm run build
 npx tsx scripts/evaluate.ts --list
+npx tsx scripts/verify-storage.ts --help
 ```
 
 On October 19, 2026, all 34 unit tests, the type check, and the production build passed. Tests exercise domain bounds and colors, atomic batch rejection, owner isolation, revision races, duplicate receipts, provider-schema compatibility, and voice ordering/interruption. They do not replace a real Atlas or microphone test.
+
+Before model evaluation, run `npx tsx scripts/verify-storage.ts` with `BASE_URL` set to the deployment. This makes no AI calls. Ten live HTTP checks use two fresh visitor sessions and one new studio to verify ownership, atomic rejection, duplicate receipts, competing writes, and canonical rereads. Reports go to ignored `.local/evidence/`; sample mode exits 2 as blocked without creating a fixture. Its October 19 sample-mode run correctly reported blocked; the Atlas checks have not run yet.
+
+The sanitized [Realtime text report](docs/evidence/realtime-text-compatibility.json) records a synthetic text request producing a completed tool call and audio continuation. The [Realtime audio report](docs/evidence/realtime-audio-compatibility.json) records a three-second TTS fixture triggering actual voice activity detection, transcription, a completed tool call, and audio continuation. Both used the current route's session configuration over server WebSocket, validated the full emitted edit locally, and made **zero Atlas writes**. The audio sample's tool completed 670 ms after the service's speech-stopped event; this is one sample, not p95 or browser end-to-end latency. Browser microphone permission, SDP/WebRTC negotiation, playback/interruption, and persisted voice edits still require testing. Reports contain synthetic data and returned usage, without credentials, SDP, or audio files. The private diagnostic script remains ignored under `.local`.
 
 With the live application configured, run the semantic evaluation against a public deployment or local server:
 
@@ -96,6 +101,8 @@ The report includes success rate, p50/p95 request latency, returned token usage,
 
 ## Deployment and scope
 
+The GitHub repository is connected to the Vercel project, with `main` configured as the Production branch. Branch and pull-request deployments use Preview configuration. Production and Preview have separate session secrets and database names; Atlas credentials remain pending.
+
 Deploy this Next.js project to Vercel with environment variables scoped separately for Preview and Production: use distinct `SESSION_SECRET` values and `MONGODB_DB=voxbuild_preview` for Preview versus `MONGODB_DB=voxbuild` for Production. Validate the effective configuration and a Preview URL before promoting a verified deployment. The staged production rollout, private connectivity, and rollback process are described in [architecture.md](docs/architecture.md); an implemented app is not evidence that those operational steps have been exercised.
 
 The first Vercel deployment automatically targeted Production and serves the sample at [voxbuild-nu.vercel.app](https://voxbuild-nu.vercel.app). Anonymous HTTP access returned 200, and the hosted sample rendered and applied a local edit without console errors. Its API rejected a cross-origin session request with 403 and an unauthenticated room read with 401. This initial deployment did not exercise Preview promotion or a canary rollout. `.vercelignore` excludes environment secrets, `.local`/`.claude` diagnostics, dependency/build directories, and test reports; the replacement deployment's manifest confirmed these exclusions. `.env.example` remains included.
@@ -106,4 +113,4 @@ The reference prioritizes a polished 4–6 hour slice: known-size room → text/
 
 Built with Codex desktop and collaborating coding agents. The human submitter owns the final decisions and should be able to explain and debug the command schema, persistence race behavior, model routing, and voice trade-offs. Deliberate boundaries have `// [SA DECISION]:` comments. Preserve the actual incremental Git history; do not squash or invent a development narrative for submission.
 
-The [assessment evidence table](docs/assessment.md) distinguishes the verified sample deployment and real Gateway routing requests from pending end-to-end verification. Atlas provisioning is awaiting organization AI-client access. The public repository preserves incremental development history. Atlas save/reload, the semantic suite, and live voice still need verification before this is a complete integrated demo.
+The [assessment evidence table](docs/assessment.md) distinguishes the verified sample deployment, real Gateway routing requests, and isolated Realtime provider checks from pending end-to-end verification. Atlas provisioning is awaiting organization AI-client access. The public repository preserves incremental development history. Atlas save/reload, the semantic suite, and browser voice still need verification before this is a complete integrated demo.
