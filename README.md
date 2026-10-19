@@ -20,7 +20,7 @@ The initial post-artwork furniture regression passed [13/14](docs/evidence/seman
 
 ## What is implemented
 
-- A client-rendered React Three Fiber apartment with procedural furniture, orbit/top views, dimensions, selection, and manual controls. The default perspective view is now 30% more zoomed in than the preceding default; top-view framing is unchanged.
+- A client-rendered React Three Fiber apartment with procedural furniture, orbit/top views, dimensions, selection, and manual controls. The default view uses 1.495× perspective zoom; top-view framing is unchanged.
 - Six presets: Sunlit studio, Work from home, Quiet bedroom, Gathering room, Evening lounge, and Blank canvas. They have distinct window arrangements, lighting, and wall art; City loft is no longer offered for new rooms.
 - Fourteen furniture SKUs, including beds, dining furniture, storage, and an ottoman, with category filtering and search on desktop and mobile.
 - Six saved environment styles—Sunlit, Gallery, Forest, Desert, Coastal, and Midnight—change wall/floor finishes and lighting together, with furniture preserved. Style changes use the shared operation path from manual controls, text, and voice.

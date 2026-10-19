@@ -10,7 +10,7 @@ import type { Scene, SceneObject } from "@/lib/schema";
 import Architecture, { Dimensions } from "./Architecture";
 import Furniture from "./Furniture";
 
-const DEFAULT_PERSPECTIVE_ZOOM = 1.3;
+const DEFAULT_PERSPECTIVE_ZOOM = 1.495;
 
 export interface RoomCanvasProps {
   scene: Scene;
