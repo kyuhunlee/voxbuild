@@ -85,6 +85,8 @@ Voice admission is limited to five sessions per hour per visitor and 20 sessions
 
 ## Rollout and incident plan — proposed
 
+The initial [hosted sample](https://voxbuild-nu.vercel.app) automatically deployed to Vercel's Production target. It runs in Local sample mode while Atlas provisioning is pending. That deployment did not exercise the Preview promotion or pilot rollout described below. Node.js is pinned to 24.x, and `.vercelignore` keeps environment secrets, local diagnostics, build/dependency directories, and test reports out of deployment uploads.
+
 1. **Preview:** deploy each change with a distinct Preview `SESSION_SECRET` and `MONGODB_DB=voxbuild_preview`; Production uses its own secret and `MONGODB_DB=voxbuild`. Verify effective environment scoping before the first release. Run unit/type/build checks, the 14-case live evaluation, and a short browser/microphone check. Inspect usage and latency before promotion.
 2. **Pilot canary:** expose the planner to an internal cohort, then a small property/visitor cohort. Use a feature flag or supported Rolling Releases configuration; neither staged traffic control nor statistical experimentation is implemented in this demo.
 3. **Cutover:** expand only when error, semantic-success, latency, and cost guardrails hold, and product evidence supports the experience. Existing listing pages remain available throughout.

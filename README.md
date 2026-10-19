@@ -4,7 +4,7 @@
 
 Prospective tenants can explore a sample apartment, add catalog furniture, and request changes by text or voice. The model proposes a bounded edit; the server validates it and commits it to MongoDB Atlas before the browser accepts it.
 
-**Submission links:** public demo and public repository URLs are pending verified publication. A local build or sample-mode preview does not complete the deployed assessment.
+**Submission links:** [hosted sample](https://voxbuild-nu.vercel.app) · [public source repository](https://github.com/kyuhunlee/voxbuild). The deployed app currently shows **Local sample**: rendering and local controls are available, but cloud persistence, free-form AI, and voice are not enabled in that mode. The live integrated assessment remains incomplete.
 
 **Verified on October 19, 2026:** 34 unit tests, TypeScript checking, the production build, desktop/mobile sample rendering, and real Gateway primary-model and policy-driven fallback requests passed. Atlas save/reload and live microphone/audio behavior remain unverified. See the [evidence ledger](docs/assessment.md#verification-record) for the precise scope.
 
@@ -30,7 +30,7 @@ Photo upload/reconstruction, Vercel Blob, automatic room measurement, and a simu
 
 ## Run locally
 
-Use Node.js 22 or newer and npm.
+Use Node.js 24.x and npm, matching the runtime pinned in `package.json`.
 
 ```sh
 npm ci
@@ -98,10 +98,12 @@ The report includes success rate, p50/p95 request latency, returned token usage,
 
 Deploy this Next.js project to Vercel with environment variables scoped separately for Preview and Production: use distinct `SESSION_SECRET` values and `MONGODB_DB=voxbuild_preview` for Preview versus `MONGODB_DB=voxbuild` for Production. Validate the effective configuration and a Preview URL before promoting a verified deployment. The staged production rollout, private connectivity, and rollback process are described in [architecture.md](docs/architecture.md); an implemented app is not evidence that those operational steps have been exercised.
 
+The first Vercel deployment automatically targeted Production and serves the sample at [voxbuild-nu.vercel.app](https://voxbuild-nu.vercel.app). Anonymous HTTP access returned 200, and the hosted sample rendered and applied a local edit without console errors. Its API rejected a cross-origin session request with 403 and an unauthenticated room read with 401. This initial deployment did not exercise Preview promotion or a canary rollout. `.vercelignore` excludes environment secrets, `.local`/`.claude` diagnostics, dependency/build directories, and test reports; the replacement deployment's manifest confirmed these exclusions. `.env.example` remains included.
+
 The reference prioritizes a polished 4–6 hour slice: known-size room → text/manual command → validated Atlas save/reload → voice → inspectable evidence. It does not provide real property inventory, checkout, accounts, collision-free packing, accessibility clearance, or certified furniture fit. Anonymous designs belong to one browser cookie and are not recoverable after that cookie is lost.
 
 ## Development tooling and evidence
 
 Built with Codex desktop and collaborating coding agents. The human submitter owns the final decisions and should be able to explain and debug the command schema, persistence race behavior, model routing, and voice trade-offs. Deliberate boundaries have `// [SA DECISION]:` comments. Preserve the actual incremental Git history; do not squash or invent a development narrative for submission.
 
-The [assessment evidence table](docs/assessment.md) distinguishes the verified local checks and real Gateway routing requests from pending end-to-end verification. Atlas provisioning is awaiting organization AI-client access. Public repository creation was rejected by automatic approval review and awaits explicit source-publication consent; no public repository or deployment URL is available yet.
+The [assessment evidence table](docs/assessment.md) distinguishes the verified sample deployment and real Gateway routing requests from pending end-to-end verification. Atlas provisioning is awaiting organization AI-client access. The public repository preserves incremental development history. Atlas save/reload, the semantic suite, and live voice still need verification before this is a complete integrated demo.

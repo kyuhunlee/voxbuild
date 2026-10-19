@@ -14,9 +14,9 @@ The central contract is simple: **the model proposes operations; the server vali
 | --- | --- | --- |
 | Customer, pain, current stack, business consequence | This brief; [architecture](architecture.md) | Reference scenario and hypotheses documented |
 | Current/target architecture and what stays | Mermaid diagrams in [architecture](architecture.md) | Design documented |
-| Three or more Vercel primitives, including AI | Functions/Next.js, AI SDK, AI Gateway, Preview Deployments | Implementation/rationale documented; deployment behavior requires release evidence |
-| Public Vercel demo URL | **Pending verified public URL** | Not asserted in this document |
-| Public repository with full history | **Pending verified public repository URL** | Automatic approval review rejected creation; explicit source-publication consent is pending. Preserve actual incremental Git history |
+| Three or more Vercel primitives, including AI | Functions/Next.js, AI SDK, AI Gateway, Preview Deployments | Functions deployed and isolated Gateway requests verified; Preview promotion remains proposed |
+| Public Vercel demo URL | [voxbuild-nu.vercel.app](https://voxbuild-nu.vercel.app) | Deployed in **Local sample** mode; live integrated flow incomplete |
+| Public repository with full history | [github.com/kyuhunlee/voxbuild](https://github.com/kyuhunlee/voxbuild) | Created and pushed after explicit publication approval; incremental history preserved |
 | Real external boundary | Atlas owner-scoped scene write and subsequent read | Live proof pending recorded run |
 | Meaningful AI | AI SDK structured plans through Gateway; direct Realtime voice tool calls | Real primary and policy-fallback Gateway requests passed; Atlas-backed semantic suite and live voice pending |
 | Reviewer-ready inputs | Sample rooms, canned prompts, manual controls | Desktop/mobile sample UI checked; live integrated flow pending |
@@ -41,8 +41,11 @@ This evidence ledger records checks completed on **October 19, 2026** and names 
 | Semantic live evaluation | JSON report from `scripts/evaluate.ts` | **Pending:** requires live Atlas and the integrated application |
 | Atlas durability | Command ID, scene ID, accepted revision, read after reload | **Pending:** organization AI-client access must be enabled before connector provisioning; no actual persistence proof |
 | Live voice | Permission/start, edit, acknowledgement, interruption, stop/release | **Pending** |
-| Public access | Public URL from a fresh unauthenticated browser | **Pending:** no deployment URL |
-| Repository publication | Accessible public URL and preserved commits | **Pending:** automatic approval review rejected public repository creation; explicit source-publication consent required |
+| Hosted sample | [Production URL](https://voxbuild-nu.vercel.app) | **Deployed:** browser showed Local sample without a Vercel login screen; cloud persistence and live audio remain pending |
+| Anonymous public access | Anonymous page/session requests; hosted browser edit | **Passed:** page and sample capabilities returned 200; local edit reached revision 1 with no console errors. Cross-origin session POST returned 403; unauthenticated scene GET returned 401 |
+| Repository publication | [Public repository](https://github.com/kyuhunlee/voxbuild), initial commits `dd96e77`, `3535ecd`, `f712dc4` | **Published:** GitHub reports PUBLIC visibility and main as the default branch; incremental history preserved |
+
+The initial Vercel deployment automatically targeted Production. This is evidence of a hosted sample, not an exercised Preview-to-Production promotion, canary rollout, or completed customer integration. The project pins Node.js 24.x. `.vercelignore` excludes local diagnostic directories, secrets, build/dependency directories, and test reports from uploads while retaining `.env.example`.
 
 The Gateway routing test proved that a request excluded from the primary provider could execute on the configured fallback. It did not create a provider outage. The executed model is taken from `providerMetadata.gateway.routing.canonicalSlug`; `response.modelId` remained the requested primary and must not be presented as the executed-model result. These isolated real model requests do not establish Atlas commit behavior or the 14-case semantic success rate.
 
@@ -64,4 +67,4 @@ Preserve real incremental commits for the domain/persistence foundation, UI/inte
 
 ## Before submission
 
-Publish and verify the public demo and public repository, fill the evidence ledger, and include the two links in the recruiter-facing artifact. Provide no test password when the public anonymous-session path is available. Confirm the interview deadline with the recruiting team: the supplied assessment contains both two- and three-business-day submission language, so plan around the earlier three-business-day deadline until clarified. No email submission or publication is performed by this document.
+Complete Atlas and live voice integration checks, fill the remaining evidence ledger, and include the existing demo/repository links in the recruiter-facing artifact. Do not present sample mode as the completed live-boundary requirement. Provide no test password when the public anonymous-session path is available. Confirm the interview deadline with the recruiting team: the supplied assessment contains both two- and three-business-day submission language, so plan around the earlier three-business-day deadline until clarified. No email submission is performed by this document.

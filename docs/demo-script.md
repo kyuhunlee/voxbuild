@@ -2,7 +2,7 @@
 
 Use a verified public Vercel deployment in a browser that supports WebGL. Allow five minutes for the demo within a 10–15 minute customer presentation. Start with a fresh visitor session if you want a reproducible room.
 
-**Current readiness, October 19, 2026:** desktop/mobile sample rendering and real Gateway primary/policy-fallback requests have been checked. Atlas persistence, live audio, and a public deployment remain pending. The sequence below is a presentation runbook to rehearse after those dependencies are verified; it is not a record of a completed end-to-end demo.
+**Current readiness, October 19, 2026:** [the hosted app](https://voxbuild-nu.vercel.app) runs in **Local sample** mode, and [the source repository](https://github.com/kyuhunlee/voxbuild) is public. Desktop/mobile sample rendering, anonymous hosted access, and real Gateway primary/policy-fallback requests have been checked. Atlas persistence and live audio remain pending. The sequence below is a presentation runbook to rehearse after those dependencies are verified; it is not a record of a completed end-to-end demo.
 
 ## Before presenting
 
