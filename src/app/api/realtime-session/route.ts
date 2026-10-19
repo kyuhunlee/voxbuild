@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import { CATALOG } from "@/lib/catalog-data";
+import { ENVIRONMENTS } from "@/lib/environments";
 import { SceneSchema, type Scene } from "@/lib/schema";
 import { ModelToolSchema } from "@/lib/model-schema";
 import { errorResponse, HttpError } from "@/lib/server/errors";
@@ -57,7 +58,9 @@ function instructions(scene: Scene) {
     "Coordinates are meters. The room center is [0,0,0], X is left/right, Y is up, and Z is front/back. Negative X is left, positive X right, negative Z back. Object position is the center of its floor base; keep Y=0.",
     "Dimensions are [width,height,depth], and rotation is yaw in radians. Keep the complete furniture footprint within the room. Use existing object IDs for move, recolor, rotate, and remove. Only use add for a new item; the server assigns its ID.",
     "Use catalog colors exactly. Recoloring a plant changes its pot. If no color is requested use the item's defaultColor. Keep existing objects unless the user requests their removal.",
+    "For a room style, wall/floor palette, or lighting change use only set_environment with a supplied environmentId. This preserves room dimensions and all furniture. Never invent wall/floor object IDs or use recolor for the room. If the requested style is unsupported or ambiguous, ask a short clarification.",
     `Catalog fixture data: ${JSON.stringify(CATALOG)}`,
+    `Available room environments: ${JSON.stringify(ENVIRONMENTS)}`,
     `Current authoritative scene data: ${JSON.stringify(scene)}`,
   ].join("\n");
 }

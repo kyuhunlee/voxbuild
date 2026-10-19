@@ -1,0 +1,122 @@
+{
+  "date": "2026-10-19T09:01:29.967Z",
+  "baseUrl": "http://127.0.0.1:3000",
+  "capabilities": {
+    "database": true,
+    "gateway": true,
+    "voice": true
+  },
+  "checks": [
+    {
+      "name": "catalog-haven-bed",
+      "status": "passed",
+      "fixtureSceneId": "8a8bc50a-75c6-45e0-a89a-e015022e601b",
+      "revision": 1
+    },
+    {
+      "name": "catalog-stack-bookcase",
+      "status": "passed",
+      "fixtureSceneId": "f4a8834c-404b-411d-acf6-196e8302412a",
+      "revision": 1
+    },
+    {
+      "name": "catalog-low-sideboard",
+      "status": "passed",
+      "fixtureSceneId": "3d3e164a-e22e-445e-bb11-bd0e42b4458c",
+      "revision": 1
+    },
+    {
+      "name": "catalog-gather-table",
+      "status": "passed",
+      "fixtureSceneId": "0027fbbc-679c-4500-bd00-92340ff61080",
+      "revision": 1
+    },
+    {
+      "name": "catalog-pebble-side-table",
+      "status": "passed",
+      "fixtureSceneId": "13321038-86fd-4e1e-8c96-27e474dc46d5",
+      "revision": 1
+    },
+    {
+      "name": "catalog-cloud-ottoman",
+      "status": "passed",
+      "fixtureSceneId": "b2608a8a-8647-4aae-bb6a-2053820d37f6",
+      "revision": 1
+    },
+    {
+      "name": "catalog-reed-dining-chair",
+      "status": "passed",
+      "fixtureSceneId": "a0ee5a4e-3b2d-480c-9b24-4a08a5671fed",
+      "revision": 1
+    },
+    {
+      "name": "preset-bedroom",
+      "status": "passed",
+      "fixtureSceneId": "69dfa30f-c0bf-4572-ac00-a3ed0c957b1c",
+      "revision": 0
+    },
+    {
+      "name": "preset-dining",
+      "status": "passed",
+      "fixtureSceneId": "49efad67-a309-49e8-b932-f178139fa9dd",
+      "revision": 0
+    },
+    {
+      "name": "preset-lounge",
+      "status": "passed",
+      "fixtureSceneId": "3430370c-f7c6-48c9-8945-c21a5ccd86b0",
+      "revision": 0
+    },
+    {
+      "name": "environment-sunlit",
+      "status": "passed",
+      "fixtureSceneId": "eab81fcb-b04a-4057-a02e-d613c4777251",
+      "revision": 1
+    },
+    {
+      "name": "environment-gallery",
+      "status": "passed",
+      "fixtureSceneId": "eab81fcb-b04a-4057-a02e-d613c4777251",
+      "revision": 2
+    },
+    {
+      "name": "environment-forest",
+      "status": "passed",
+      "fixtureSceneId": "eab81fcb-b04a-4057-a02e-d613c4777251",
+      "revision": 3
+    },
+    {
+      "name": "environment-desert",
+      "status": "passed",
+      "fixtureSceneId": "eab81fcb-b04a-4057-a02e-d613c4777251",
+      "revision": 4
+    },
+    {
+      "name": "environment-coastal",
+      "status": "passed",
+      "fixtureSceneId": "eab81fcb-b04a-4057-a02e-d613c4777251",
+      "revision": 5
+    },
+    {
+      "name": "environment-midnight",
+      "status": "passed",
+      "fixtureSceneId": "eab81fcb-b04a-4057-a02e-d613c4777251",
+      "revision": 6
+    },
+    {
+      "name": "model-environment",
+      "status": "passed",
+      "fixtureSceneId": "dd574a4c-10a9-49b9-b560-d216d23f9725",
+      "revision": 1,
+      "model": "openai/gpt-4.1-mini"
+    },
+    {
+      "name": "model-new-furniture",
+      "status": "passed",
+      "fixtureSceneId": "93c98952-106c-421a-bf16-2a08053b19f1",
+      "revision": 1,
+      "model": "openai/gpt-4.1-mini"
+    }
+  ],
+  "passed": 18
+}

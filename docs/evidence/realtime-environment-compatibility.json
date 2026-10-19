@@ -1,0 +1,152 @@
+{
+  "checkedAt": "2026-10-19T09:02:05.485Z",
+  "transport": "server WebSocket",
+  "input": "synthetic text: Switch the room environment to Midnight. Keep all furniture unchanged.",
+  "atlasWrites": 0,
+  "microphoneAccess": false,
+  "browserWebRtcVerified": false,
+  "maximumSessionMs": 30000,
+  "responseLimit": 2,
+  "eventCounts": {
+    "session.created": 1,
+    "session.updated": 1,
+    "conversation.item.added": 6,
+    "conversation.item.done": 6,
+    "response.created": 2,
+    "response.output_item.added": 3,
+    "response.content_part.added": 2,
+    "response.output_text.delta": 18,
+    "response.function_call_arguments.delta": 16,
+    "response.output_text.done": 1,
+    "response.content_part.done": 2,
+    "response.output_item.done": 3,
+    "response.function_call_arguments.done": 1,
+    "response.done": 2,
+    "rate_limits.updated": 1,
+    "response.output_audio_transcript.delta": 51,
+    "response.output_audio.delta": 36,
+    "response.output_audio.done": 1,
+    "response.output_audio_transcript.done": 1
+  },
+  "responses": [
+    {
+      "phase": "planning",
+      "status": "completed",
+      "metadata": null,
+      "outputTypes": [
+        {
+          "type": "message",
+          "status": "completed"
+        },
+        {
+          "type": "function_call",
+          "status": "completed"
+        }
+      ],
+      "durationMs": 782,
+      "usage": {
+        "total_tokens": 2980,
+        "input_tokens": 2925,
+        "output_tokens": 55,
+        "input_token_details": {
+          "text_tokens": 2925,
+          "audio_tokens": 0,
+          "image_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_token_details": {
+          "text_tokens": 55,
+          "audio_tokens": 0
+        }
+      }
+    },
+    {
+      "phase": "speech",
+      "status": "completed",
+      "metadata": {
+        "phase": "speech"
+      },
+      "outputTypes": [
+        {
+          "type": "message",
+          "status": "completed"
+        }
+      ],
+      "durationMs": 3245,
+      "usage": {
+        "total_tokens": 3081,
+        "input_tokens": 2725,
+        "output_tokens": 356,
+        "input_token_details": {
+          "text_tokens": 2521,
+          "audio_tokens": 204,
+          "image_tokens": 0,
+          "cached_tokens": 1024
+        },
+        "output_token_details": {
+          "text_tokens": 75,
+          "audio_tokens": 281
+        }
+      }
+    }
+  ],
+  "model": "gpt-realtime-2.1",
+  "configuration": {
+    "extractedFromCurrentRoute": true,
+    "sha256": "2a25e878b7c7b0ed93fe882886cca42e237a73acb634b3166c2ec5403c1f8555",
+    "outputModalities": [
+      "text"
+    ],
+    "maxOutputTokens": 1600,
+    "voice": "marin",
+    "transcriptionModel": "gpt-4o-mini-transcribe",
+    "turnDetection": {
+      "type": "server_vad",
+      "create_response": true,
+      "interrupt_response": true,
+      "silence_duration_ms": 500
+    },
+    "toolName": "apply_scene_operations",
+    "toolSchemaUsesAnyOf": true
+  },
+  "connectedMs": 853,
+  "sessionAccepted": true,
+  "resolvedSession": {
+    "model": "gpt-realtime-2.1",
+    "outputModalities": [
+      "text"
+    ],
+    "voice": "marin",
+    "toolCount": 1,
+    "inputFormat": {
+      "type": "audio/pcm",
+      "rate": 24000
+    }
+  },
+  "toolValidation": {
+    "completeCall": true,
+    "strictDomainSchema": true,
+    "sceneEngine": true,
+    "semanticPass": true,
+    "operations": [
+      {
+        "type": "set_environment",
+        "environmentId": "midnight"
+      }
+    ]
+  },
+  "audioContinuation": {
+    "audioBytes": 674400,
+    "transcript": "The environment was switched to Midnight for the compatibility fixture, and the furniture stayed unchanged, but the change wasn’t saved because this was only an in-memory validation. If you want it persisted, you’ll need to apply it in a setup that supports saving.",
+    "toolCallCount": 0,
+    "persistenceResultSent": "ok:true; synthetic in-memory fixture only; persistence:none",
+    "sentEventOrder": [
+      "conversation.item.create system scene",
+      "conversation.item.create function_call_output",
+      "response.create audio tool_choice none metadata.phase speech"
+    ]
+  },
+  "websocketSessionMs": 4963,
+  "outcome": "passed_synthetic_text_tool_audio_compatibility",
+  "elapsedMs": 4973
+}

@@ -6,7 +6,7 @@ Prospective tenants can explore a sample apartment, add catalog furniture, and r
 
 **Submission links:** [hosted app](https://voxbuild-nu.vercel.app) · [public source repository](https://github.com/kyuhunlee/voxbuild). Production passed **10/10 Atlas storage checks** and **14/14 semantic text-command checks**, plus primary-model and policy-fallback smoke tests. The user confirmed deployed voice edits, spoken feedback, interruption, and microphone release on Stop.
 
-**Verified on October 19, 2026:** **39 unit tests**, TypeScript checking, the production build, desktop/mobile sample rendering, **10/10 production storage checks**, and **14/14 production semantic checks with real Gateway and Atlas** passed. The [production evaluation](docs/evidence/semantic-production.json) measured p50 **1,192 ms**, p95 **2,049 ms**, and **$0.0095565** in returned Gateway cost across 14 requests. These are a small recorded API regression run, not a performance guarantee or browser voice latency. Hosted primary and policy-fallback requests also passed. Deployed microphone edits, spoken acknowledgement, interruption, and Stop releasing the microphone were user-confirmed, not agent-instrumented. A separate agent browser check reloaded the final voice-edited room and retained the blue sofa and cloud-saved revision 6. See the [evidence ledger](docs/assessment.md#verification-record) for scope and remaining checks.
+**Verified on October 19, 2026:** **45 unit tests**, TypeScript checking, the production build, desktop/mobile sample rendering, **10/10 production storage checks**, and **14/14 production semantic checks with real Gateway and Atlas** passed. The [production evaluation](docs/evidence/semantic-production.json) measured p50 **1,192 ms**, p95 **2,049 ms**, and **$0.0095565** in returned Gateway cost across 14 requests. These are a small recorded API regression run, not a performance guarantee or browser voice latency. Hosted primary and policy-fallback requests also passed. Deployed microphone edits, spoken acknowledgement, interruption, and Stop releasing the microphone were user-confirmed, not agent-instrumented. A separate agent browser check reloaded the final voice-edited room and retained the blue sofa and cloud-saved revision 6. See the [evidence ledger](docs/assessment.md#verification-record) for scope and remaining checks.
 
 - [Customer brief and assessment map](docs/assessment.md)
 - [Architecture and operating decisions](docs/architecture.md)
@@ -15,7 +15,8 @@ Prospective tenants can explore a sample apartment, add catalog furniture, and r
 ## What is implemented
 
 - A client-rendered React Three Fiber apartment with procedural furniture, orbit/top views, dimensions, selection, and manual controls.
-- Three furnished presets and an empty room; seven supported furniture SKUs.
+- Six furnished presets and an empty room; fourteen supported furniture SKUs, including bedroom, dining, and storage pieces.
+- Six saved environment styles change wall/floor finishes and lighting together, with furniture preserved. Style changes work through manual controls, text, and voice.
 - Canned prompts and typed commands through AI SDK structured output and Vercel AI Gateway when configured.
 - Direct OpenAI WebRTC voice, started only by a microphone click. Completed tool calls use the same server command path as manual edits.
 - Signed anonymous visitor sessions, owner-scoped scenes, revision checks, and atomic command receipts in Atlas.
@@ -78,7 +79,7 @@ npx tsx scripts/evaluate.ts --list
 npx tsx scripts/verify-storage.ts --help
 ```
 
-On October 19, 2026, all **39 unit tests** and the type check passed, including five regressions for Gateway runtime OIDC detection. The authentication-fix production build passed and deployment reached Ready. Tests also exercise domain bounds and colors, atomic batch rejection, owner isolation, revision races, duplicate receipts, provider-schema compatibility, and voice ordering/interruption. They do not replace the separately recorded live Atlas or user microphone checks.
+On October 19, 2026, all **45 unit tests** and the type check passed, including five regressions for Gateway runtime OIDC detection. The authentication-fix production build passed and deployment reached Ready. Tests also exercise domain bounds and colors, atomic batch rejection, owner isolation, revision races, duplicate receipts, provider-schema compatibility, and voice ordering/interruption. They do not replace the separately recorded live Atlas or user microphone checks.
 
 Before model evaluation, run `npx tsx scripts/verify-storage.ts` with `BASE_URL` set to the deployment. This makes no AI calls. Ten live HTTP checks use two fresh visitor sessions and one new studio to verify ownership, atomic rejection, duplicate receipts, competing writes, and canonical rereads. Reports go to ignored `.local/evidence/`; sample mode exits 2 as blocked without creating a fixture. The [October 19 production run](docs/evidence/storage-production.json) passed **10/10**, including one atomic commit for identical concurrent requests, a single winner for conflicting writes, and the final canonical revision 2. It did not test model calls or browser voice.
 

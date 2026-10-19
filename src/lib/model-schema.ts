@@ -36,9 +36,13 @@ export const ModelOperationSchema = z.union([
     type: z.literal("remove"),
     objectId: ModelObjectIdSchema,
   }).strict(),
+  z.object({
+    type: z.literal("set_environment"),
+    environmentId: z.string().describe("An exact environment ID from the supplied environments: sunlit, gallery, forest, desert, coastal, or midnight. Changes the room palette and lighting without moving or replacing furniture."),
+  }).strict(),
 ]);
 
-const ModelOperationsSchema = z.array(ModelOperationSchema).describe("One to twelve furniture operations, executed atomically after server validation. Use only supplied catalog items and existing object IDs.");
+const ModelOperationsSchema = z.array(ModelOperationSchema).describe("One to twelve furniture or environment operations, executed atomically after server validation. Use only supplied catalog items, existing object IDs, and environment IDs.");
 
 export const ModelPlanSchema = z.object({
   message: z.string().describe("A brief user-facing description of the proposed edit. Do not claim it has been saved before the server accepts it."),

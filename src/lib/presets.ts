@@ -1,8 +1,17 @@
 import { getCatalogItem } from "./catalog-data";
+import { z } from "zod";
+import { ENVIRONMENTS, type EnvironmentId } from "./environments";
 import { SceneSchema, type Room, type Scene, type SceneObject } from "./schema";
 
-export type PresetId = "studio" | "loft" | "office" | "empty";
+export const PRESET_IDS = ["studio", "loft", "office", "bedroom", "dining", "lounge", "empty"] as const;
+export const PresetIdSchema = z.enum(PRESET_IDS);
+export type PresetId = z.infer<typeof PresetIdSchema>;
 export type ScenePreset = { id: PresetId; name: string; description: string; room: Room; objects: SceneObject[] };
+
+function room(width: number, depth: number, height: number, environmentId: EnvironmentId): Room {
+  const { wallColor, floorColor } = ENVIRONMENTS.find((entry) => entry.id === environmentId)!;
+  return { width, depth, height, wallColor, floorColor };
+}
 
 function object(id: string, sku: string, x: number, z: number, rotation = 0, color?: string): SceneObject {
   const item = getCatalogItem(sku);
@@ -45,6 +54,48 @@ export const PRESETS: ScenePreset[] = [
       object("office-desk", "line-desk", 1.6, -1.9),
       object("office-chair", "arc-chair", 1.6, -0.95, Math.PI),
       object("office-plant", "olive-plant", -2.05, 1.65),
+    ],
+  },
+  {
+    id: "bedroom", name: "Quiet bedroom", description: "A restful 28 m² bedroom with soft textures and bedside storage.",
+    room: room(5.6, 5, 2.8, "coastal"),
+    objects: [
+      object("bedroom-rug", "woven-rug", -0.4, 0.25, Math.PI / 2, "#69828c"),
+      object("bedroom-bed", "haven-bed", -0.4, -0.65),
+      object("bedroom-table-left", "pebble-side-table", -1.65, -1.3),
+      object("bedroom-table-right", "pebble-side-table", 0.85, -1.3),
+      object("bedroom-bookcase", "stack-bookcase", 2.05, -1.95),
+      object("bedroom-sideboard", "low-sideboard", -0.4, 1.95, Math.PI),
+      object("bedroom-plant", "olive-plant", 2.05, 1.8, 0, "#e7dfce"),
+    ],
+  },
+  {
+    id: "dining", name: "Gathering room", description: "A welcoming 35 m² dining room with six seats and warm evening light.",
+    room: room(6.4, 5.4, 2.9, "desert"),
+    objects: [
+      object("dining-table", "gather-table", 0, 0),
+      object("dining-chair-left", "reed-dining-chair", -1.2, 0, Math.PI / 2),
+      object("dining-chair-right", "reed-dining-chair", 1.2, 0, -Math.PI / 2),
+      object("dining-chair-back-left", "reed-dining-chair", -0.45, -0.95),
+      object("dining-chair-back-right", "reed-dining-chair", 0.45, -0.95),
+      object("dining-chair-front-left", "reed-dining-chair", -0.45, 0.95, Math.PI),
+      object("dining-chair-front-right", "reed-dining-chair", 0.45, 0.95, Math.PI),
+      object("dining-sideboard", "low-sideboard", -1.6, -2.1),
+      object("dining-plant", "olive-plant", 2.55, -2.05),
+    ],
+  },
+  {
+    id: "lounge", name: "Evening lounge", description: "A cozy 34 m² lounge for conversation, reading, and winding down.",
+    room: room(6.2, 5.5, 2.8, "midnight"),
+    objects: [
+      object("lounge-rug", "woven-rug", -0.6, -0.5, 0, "#69828c"),
+      object("lounge-sofa", "nook-sofa", -0.7, -1.85, 0, "#e7dfce"),
+      object("lounge-table", "orbit-table", -0.6, -0.55, 0, "#584336"),
+      object("lounge-ottoman", "cloud-ottoman", -0.65, 0.5, 0, "#cc7656"),
+      object("lounge-chair", "arc-chair", 1.35, -0.45, -0.5, "#446a87"),
+      object("lounge-side-table", "pebble-side-table", 1.65, 0.6, 0, "#d8bc91"),
+      object("lounge-bookcase", "stack-bookcase", 2.2, -2.25, 0, "#584336"),
+      object("lounge-lamp", "stem-lamp", -2.2, -1.85, 0, "#c4a267"),
     ],
   },
   {

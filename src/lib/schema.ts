@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { EnvironmentIdSchema } from "./environments";
 
 /** All lengths are meters. Object positions identify the floor-centered base. */
 export const IdSchema = z.string().min(1).max(80).regex(/^[a-zA-Z0-9][a-zA-Z0-9_-]*$/, "Use letters, digits, underscores, and hyphens for IDs.");
@@ -46,6 +47,7 @@ export const OperationSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("recolor"), objectId: IdSchema, color: ColorSchema }).strict(),
   z.object({ type: z.literal("rotate"), objectId: IdSchema, rotation: RotationSchema }).strict(),
   z.object({ type: z.literal("remove"), objectId: IdSchema }).strict(),
+  z.object({ type: z.literal("set_environment"), environmentId: EnvironmentIdSchema }).strict(),
 ]);
 
 export const OperationsSchema = z.array(OperationSchema).min(1).max(12);
@@ -64,7 +66,7 @@ export type CommandBatch = z.infer<typeof CommandBatchSchema>;
 export type CatalogItem = {
   sku: string;
   name: string;
-  category: "sofa" | "table" | "chair" | "lamp" | "plant" | "rug" | "desk";
+  category: "sofa" | "table" | "chair" | "lamp" | "plant" | "rug" | "desk" | "bed" | "storage" | "ottoman";
   dimensions: [number, number, number];
   price: number;
   defaultColor: string;

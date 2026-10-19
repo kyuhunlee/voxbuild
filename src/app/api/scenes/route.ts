@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { IdSchema } from "@/lib/schema";
+import { PresetIdSchema } from "@/lib/presets";
 import { createStoredScene, getScene, listScenes } from "@/lib/server/store";
 import { enforceSameOrigin, requireSession } from "@/lib/server/session";
 import { errorResponse, HttpError, readJson } from "@/lib/server/errors";
 import { enforceRateLimit } from "@/lib/server/rate-limit";
 export const runtime = "nodejs";
 export const maxDuration = 30;
-const CreateSchema = z.object({ preset: z.enum(["studio", "loft", "office", "empty"]).default("studio") }).strict();
+const CreateSchema = z.object({ preset: PresetIdSchema.default("studio") }).strict();
 
 export async function GET(request: Request) {
   try {

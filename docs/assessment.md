@@ -31,7 +31,7 @@ This evidence ledger records checks completed on **October 19, 2026** and names 
 
 | Check | Evidence to attach | Result |
 | --- | --- | --- |
-| Deterministic domain/store/voice tests | `npm test` | **Passed: 39 tests.** Includes five runtime OIDC regressions, provider-schema and strict validation checks; separate live reports establish Atlas access |
+| Deterministic domain/store/voice tests | `npm test` | **Passed: 45 tests.** Includes five runtime OIDC regressions, provider-schema and strict validation checks; separate live reports establish Atlas access |
 | Type check | `npm run typecheck` | **Passed** |
 | Production build | `npm run build`; Ready deployment of `f58708f` | **Passed** |
 | Browser desktop/mobile | Local sample UI and manual bounds validation | **Passed:** no horizontal overflow or console errors observed. Cloud save/reload and live audio were not exercised in this earlier sample UI check |

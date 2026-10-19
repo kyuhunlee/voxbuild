@@ -53,6 +53,7 @@ test("domain validation rejects loose wire coordinates, IDs, colors, rotations, 
     [{ ...addChair, rotation: 90 }],
     [{ ...addChair, color: "blue" }],
     [{ type: "remove", objectId: "../invalid-id" }],
+    [{ type: "set_environment", environmentId: "invented-style" }],
     [],
     Array.from({ length: 13 }, () => addChair),
   ];
@@ -60,6 +61,15 @@ test("domain validation rejects loose wire coordinates, IDs, colors, rotations, 
     const tool = ModelToolSchema.parse({ operations });
     assert.equal(OperationsSchema.safeParse(tool.operations).success, false);
   }
+});
+
+test("provider style operations pass domain validation without introducing new scene fields", () => {
+  const plan = ModelPlanSchema.parse({ message: "Use the midnight room style.", operations: [{ type: "set_environment", environmentId: "midnight" }] });
+  const before = createScene("model-style-test");
+  const after = applyOperations(before, OperationsSchema.parse(plan.operations));
+  assert.equal(after.room.wallColor, "#323c50");
+  assert.deepEqual(after.objects, before.objects);
+  assert.deepEqual(Object.keys(after.room), Object.keys(before.room));
 });
 
 test("catalog and room semantics remain enforced after provider and domain parsing", () => {

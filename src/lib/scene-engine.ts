@@ -1,4 +1,5 @@
 import { getCatalogItem } from "./catalog-data";
+import { ENVIRONMENTS } from "./environments";
 import { IdSchema, OperationsSchema, SceneSchema, type Operation, type Scene, type SceneObject } from "./schema";
 
 export class DomainError extends Error {
@@ -43,6 +44,12 @@ export function applyOperations(scene: Scene, operations: Operation[], options: 
   const now = options.now ?? (() => new Date());
 
   for (const operation of parsedOperations.data) {
+    if (operation.type === "set_environment") {
+      const environment = ENVIRONMENTS.find((entry) => entry.id === operation.environmentId)!;
+      result.room.wallColor = environment.wallColor;
+      result.room.floorColor = environment.floorColor;
+      continue;
+    }
     if (operation.type === "add") {
       if (result.objects.length >= 60) throw new DomainError("OBJECT_LIMIT", "This room supports at most 60 furniture objects.");
       const id = idFactory();

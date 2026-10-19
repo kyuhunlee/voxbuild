@@ -3,6 +3,7 @@ import test from "node:test";
 import { createScene } from "../src/lib/presets";
 import type { Operation, Scene } from "../src/lib/schema";
 import { RealtimeCommandQueue, type RealtimeResponse } from "../src/lib/voice-protocol";
+import { applyOperations } from "../src/lib/scene-engine";
 
 const move: Operation = { type: "move", objectId: "studio-sofa", position: [-0.4, 0, -1.75] };
 const scene = createScene("voice-test");
@@ -130,4 +131,18 @@ test("successive completed calls execute serially", async () => {
   acknowledge(saved);
   await Promise.all([first, second]);
   assert.equal(events.filter((event) => event.kind === "execute").length, 2);
+});
+
+test("a spoken environment change uses the same validated queue and acknowledged result", async () => {
+  const operations: Operation[] = [{ type: "set_environment", environmentId: "coastal" }];
+  const { queue, events } = harness(async (submitted) => ({ scene: applyOperations(scene, submitted), message: "Saved the coastal room style." }));
+  const completed = response("style-response", "style-call");
+  completed.output![0].arguments = JSON.stringify({ operations });
+  await queue.accept(completed);
+  assert.deepEqual(events.map((event) => event.kind), ["busy", "execute", "scene", "result", "speak"]);
+  assert.deepEqual((events.find((event) => event.kind === "execute")?.data as { operations: Operation[] }).operations, operations);
+  const acknowledged = (events.find((event) => event.kind === "result")?.data as { ok: boolean; scene: Scene });
+  assert.equal(acknowledged.ok, true);
+  assert.equal(acknowledged.scene.room.wallColor, "#e5eff0");
+  assert.deepEqual(acknowledged.scene.objects, scene.objects);
 });

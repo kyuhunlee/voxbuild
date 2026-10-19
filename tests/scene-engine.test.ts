@@ -2,9 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { z } from "zod";
 import { CATALOG } from "../src/lib/catalog-data";
-import { createScene, PRESETS } from "../src/lib/presets";
+import { createScene, PRESETS, PRESET_IDS, PresetIdSchema } from "../src/lib/presets";
+import { ENVIRONMENTS, getEnvironmentForRoom } from "../src/lib/environments";
 import { applyOperations, DomainError } from "../src/lib/scene-engine";
-import { CommandBatchSchema, OperationsSchema, type Operation } from "../src/lib/schema";
+import { CommandBatchSchema, OperationsSchema, SceneSchema, type Operation } from "../src/lib/schema";
 
 const fixedNow = () => new Date("2026-10-19T12:00:00.000Z");
 const addChair: Operation = { type: "add", sku: "arc-chair", position: [0, 0, 0], rotation: 0, color: "#687761" };
@@ -109,4 +110,80 @@ test("all furnished presets fit their rooms and new scenes do not share mutable 
   assert.equal(second.room.width, 6);
   assert.notEqual(second.objects[0].position[0], 99);
   assert.equal(CATALOG.every((item) => item.colors.includes(item.defaultColor)), true);
+});
+
+test("all seven new furniture shapes obey their catalog footprint and height", () => {
+  const skus = ["haven-bed", "stack-bookcase", "low-sideboard", "gather-table", "pebble-side-table", "cloud-ottoman", "reed-dining-chair"];
+  assert.equal(CATALOG.length, 14);
+  assert.equal(new Set(CATALOG.map((item) => item.sku)).size, 14);
+  for (const sku of skus) {
+    const item = CATALOG.find((entry) => entry.sku === sku)!;
+    const scene = createScene(`bounds-${sku}`, "empty");
+    const operation: Operation = { type: "add", sku, position: [scene.room.width / 2 - item.dimensions[2] / 2, 0, 0], rotation: Math.PI / 2, color: item.defaultColor };
+    const accepted = applyOperations(scene, [operation], { idFactory: () => "new-item" });
+    assert.equal(accepted.objects[0].sku, sku);
+    assert.throws(() => applyOperations(scene, [{ ...operation, position: [operation.position[0] + 0.01, 0, 0] }]), hasCode("OUT_OF_BOUNDS"));
+    assert.throws(() => applyOperations(scene, [{ ...operation, position: [0, scene.room.height - item.dimensions[1] + 0.01, 0] }]), hasCode("OUT_OF_BOUNDS"));
+  }
+});
+
+test("new furnished presets have unique room dimensions and separated furniture", () => {
+  assert.deepEqual(PRESETS.map((preset) => preset.id), [...PRESET_IDS]);
+  const furnished = PRESETS.filter((preset) => preset.id !== "empty");
+  assert.equal(new Set(furnished.map(({ room }) => `${room.width}:${room.depth}:${room.height}`)).size, furnished.length);
+  for (const id of ["bedroom", "dining", "lounge"] as const) {
+    assert.equal(PresetIdSchema.parse(id), id);
+    const scene = createScene(`preset-${id}`, id);
+    const bounds = scene.objects.filter((object) => object.sku !== "woven-rug").map((object) => {
+      const [width, , depth] = CATALOG.find((item) => item.sku === object.sku)!.dimensions;
+      const halfWidth = (width * Math.abs(Math.cos(object.rotation)) + depth * Math.abs(Math.sin(object.rotation))) / 2;
+      const halfDepth = (width * Math.abs(Math.sin(object.rotation)) + depth * Math.abs(Math.cos(object.rotation))) / 2;
+      return { id: object.id, x: object.position[0], z: object.position[2], halfWidth, halfDepth };
+    });
+    for (let i = 0; i < bounds.length; i++) for (let j = i + 1; j < bounds.length; j++) {
+      const a = bounds[i]; const b = bounds[j];
+      assert.ok(Math.abs(a.x - b.x) >= a.halfWidth + b.halfWidth || Math.abs(a.z - b.z) >= a.halfDepth + b.halfDepth, `${a.id} overlaps ${b.id}`);
+    }
+  }
+});
+
+test("each environment changes only the palette while preserving old scene shape and furniture", () => {
+  const before = createScene("legacy-scene");
+  const original = structuredClone(before);
+  for (const environment of ENVIRONMENTS) {
+    const after = applyOperations(before, [{ type: "set_environment", environmentId: environment.id }], { now: fixedNow });
+    assert.deepEqual(after.room, { ...before.room, wallColor: environment.wallColor, floorColor: environment.floorColor });
+    assert.deepEqual(after.objects, before.objects);
+    assert.equal(after.schemaVersion, 1);
+    assert.equal(after.revision, before.revision + 1);
+    assert.equal(after.updatedAt, fixedNow().toISOString());
+    assert.equal(getEnvironmentForRoom(after.room).id, environment.id);
+    assert.deepEqual(SceneSchema.parse(JSON.parse(JSON.stringify(after))), after);
+  }
+  assert.deepEqual(before, original);
+  for (const [preset, environment] of [["studio", "sunlit"], ["loft", "gallery"], ["office", "forest"]] as const) {
+    assert.equal(getEnvironmentForRoom(createScene(`legacy-${preset}`, preset).room).id, environment);
+  }
+  assert.equal(getEnvironmentForRoom({ wallColor: "#123456", floorColor: "#654321" }).id, "sunlit");
+});
+
+test("environment and furniture edits share one atomic batch and reject invalid style IDs", () => {
+  const before = createScene("scene-test");
+  const original = structuredClone(before);
+  const after = applyOperations(before, [
+    { type: "set_environment", environmentId: "midnight" },
+    { type: "recolor", objectId: "studio-sofa", color: "#446a87" },
+  ]);
+  assert.equal(after.revision, 1);
+  assert.equal(getEnvironmentForRoom(after.room).id, "midnight");
+  assert.equal(after.objects.find((item) => item.id === "studio-sofa")?.color, "#446a87");
+  assert.throws(() => applyOperations(before, [
+    { type: "set_environment", environmentId: "desert" },
+    { type: "move", objectId: "studio-sofa", position: [30, 0, 0] },
+  ]), hasCode("OUT_OF_BOUNDS"));
+  for (const invalid of [{ type: "set_environment", environmentId: "invented" }, { type: "set_environment", environmentId: "forest", wallColor: "#123456" }]) {
+    assert.equal(OperationsSchema.safeParse([invalid]).success, false);
+    assert.throws(() => applyOperations(before, [invalid] as Operation[]), hasCode("INVALID_COMMAND"));
+  }
+  assert.deepEqual(before, original);
 });

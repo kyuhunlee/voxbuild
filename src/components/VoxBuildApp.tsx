@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { Component, useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Activity, AlertCircle, ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Box, Check, ChevronDown, ChevronRight, Cloud, Code2, Database, Grid2X2, Layers, LoaderCircle, Maximize2, Mic, MicOff, MousePointer2, PanelLeft, Plus, RefreshCw, RotateCcw, RotateCw, Ruler, Search, Send, SlidersHorizontal, Sparkles, Trash2, X } from "lucide-react";
 import { CATALOG, getCatalogItem } from "@/lib/catalog-data";
+import { ENVIRONMENTS, getEnvironmentForRoom } from "@/lib/environments";
 import { createScene, PRESETS, type PresetId } from "@/lib/presets";
 import { applyOperations } from "@/lib/scene-engine";
 import { SceneSchema, type CatalogItem, type Operation, type Scene, type SceneObject } from "@/lib/schema";
@@ -18,7 +19,9 @@ type ActivityEntry = { id: string; time: string; title: string; source: string; 
 type CommandResult = { scene: Scene; message?: string; duplicate?: boolean; operations?: Operation[]; telemetry?: unknown };
 
 const EMPTY_CAPABILITIES: Capabilities = { database: false, gateway: false, voice: false };
-const PROMPTS = ["Make the sofa sage", "Add a floor lamp", "Move the sofa left"];
+const PROMPTS = ["Make the sofa sage", "Add an ottoman", "Try the forest style"];
+const CATEGORY_LABELS: Record<string, string> = { sofa: "Sofas", chair: "Chairs", table: "Tables", bed: "Beds", storage: "Storage", ottoman: "Ottomans", desk: "Desks", lamp: "Lighting", plant: "Plants", rug: "Rugs" };
+const CATALOG_CATEGORIES = [...new Set(CATALOG.map((item) => item.category))];
 const COLOR_NAMES: Record<string, string> = {
   "#cc7656": "Terracotta", "#e7dfce": "Cream", "#687761": "Sage", "#446a87": "Blue", "#404448": "Charcoal", "#aa7953": "Oak", "#d8bc91": "Light oak", "#584336": "Walnut", "#c4a267": "Brass", "#b87858": "Terracotta", "#e5d6ba": "Natural", "#929b82": "Sage", "#b97861": "Clay", "#69828c": "Blue",
 };
@@ -60,7 +63,7 @@ function findPlacement(scene: Scene, item: CatalogItem): [number, number, number
   return free;
 }
 
-function FurnitureIllustration({ category, color }: Pick<CatalogItem, "category"> & { color: string }) {
+function FurnitureIllustration({ category, sku, color }: Pick<CatalogItem, "category" | "sku"> & { color: string }) {
   return <svg viewBox="0 0 110 72" fill="none" aria-hidden="true" className="furniture-illustration">
     <ellipse cx="55" cy="60" rx={category === "lamp" || category === "plant" ? 20 : 39} ry="5" fill="black" opacity=".18" />
     {category === "sofa" && <>
@@ -71,10 +74,14 @@ function FurnitureIllustration({ category, color }: Pick<CatalogItem, "category"
       <rect x="15" y="32" width="12" height="23" rx="4" fill={color} /><rect x="83" y="32" width="12" height="23" rx="4" fill={color} />
       <rect x="30" y="28" width="13" height="15" rx="3" transform="rotate(-10 30 28)" fill="#e2d7c3" />
     </>}
-    {category === "table" && <>
+    {category === "table" && sku !== "pebble-side-table" && <>
       <path d="M27 36L29 60M82 36L80 60M39 31L39 51M72 31L72 51" stroke="#7b583e" strokeWidth="5" />
       <path d="M18 31C18 24 34 20 55 20C76 20 92 24 92 31V36C92 43 18 43 18 36V31Z" fill={color} /><ellipse cx="55" cy="30" rx="37" ry="10" fill="white" fillOpacity=".12" />
       <path d="M40 27L58 26L65 31L46 33Z" fill="#e4dac5" /><path d="M40 30L46 35L65 33" stroke="#82907c" strokeWidth="3" />
+    </>}
+    {category === "table" && sku === "pebble-side-table" && <>
+      <path d="M40 29L36 60M70 29L74 60M55 30V56" stroke={color} strokeWidth="5" />
+      <ellipse cx="55" cy="28" rx="25" ry="10" fill={color} /><ellipse cx="55" cy="26" rx="25" ry="8" fill="white" fillOpacity=".12" />
     </>}
     {category === "chair" && <>
       <path d="M34 40L29 61M77 40L82 61M40 33L39 54M70 33L71 54" stroke="#926f4f" strokeWidth="4" />
@@ -96,6 +103,24 @@ function FurnitureIllustration({ category, color }: Pick<CatalogItem, "category"
     {category === "desk" && <>
       <path d="M22 33V62M86 33V62M31 27V51M77 27V51" stroke="#77766c" strokeWidth="3" /><path d="M17 31L76 22L94 32L35 42L17 35V31Z" fill={color} /><path d="M17 31L76 22L94 32L35 38L17 31Z" fill="white" fillOpacity=".15" />
       <path d="M37 27L56 25L60 33L41 35L37 27Z" fill="#a9adab" /><path d="M36 11L56 9L58 27L38 29L36 11Z" fill="#464d4a" /><path d="M39 13L54 12L55 24L40 26L39 13Z" fill="#9cafaa" />
+    </>}
+    {category === "bed" && <>
+      <rect x="23" y="12" width="64" height="31" rx="5" fill={color} /><path d="M24 30H86L96 56H14L24 30Z" fill="#e7dfce" />
+      <rect x="29" y="26" width="23" height="10" rx="3" fill="#faf5e9" /><rect x="57" y="26" width="23" height="10" rx="3" fill="#faf5e9" />
+      <path d="M20 40H90L96 56H14L20 40Z" fill={color} /><path d="M15 56H95V62H15Z" fill="#80644c" /><path d="M21 61V66M89 61V66" stroke="#80644c" strokeWidth="4" /><path d="M24 43H86" stroke="white" strokeOpacity=".2" />
+    </>}
+    {category === "storage" && sku === "stack-bookcase" && <>
+      <rect x="29" y="6" width="52" height="58" rx="2" fill={color} /><path d="M33 10H77V59H33Z" fill="black" fillOpacity=".2" />
+      <path d="M32 25H78M32 42H78M54 9V60" stroke={color} strokeWidth="4" />
+      <path d="M38 13V23M44 12V23M61 29V40M68 31V40M39 47V58M46 46V58" stroke="#ded5bf" strokeWidth="5" /><rect x="60" y="49" width="13" height="9" rx="1" fill="#879479" />
+    </>}
+    {category === "storage" && sku !== "stack-bookcase" && <>
+      <path d="M25 49V62M85 49V62" stroke="#80644c" strokeWidth="4" /><rect x="17" y="25" width="76" height="29" rx="3" fill={color} />
+      <path d="M43 27V52M68 27V52" stroke="black" strokeOpacity=".2" /><path d="M37 38V42M62 38V42M74 38V42" stroke="#d2c2a3" strokeWidth="2" /><rect x="28" y="20" width="18" height="5" fill="#e3d9c4" />
+    </>}
+    {category === "ottoman" && <>
+      <path d="M31 49V61M79 49V61" stroke="#80644c" strokeWidth="4" /><rect x="24" y="31" width="62" height="25" rx="11" fill={color} />
+      <ellipse cx="55" cy="32" rx="31" ry="11" fill={color} /><ellipse cx="55" cy="30" rx="29" ry="9" fill="white" fillOpacity=".12" /><path d="M28 38C43 44 67 44 82 38" stroke="black" strokeOpacity=".1" />
     </>}
   </svg>;
 }
@@ -125,6 +150,7 @@ export default function VoxBuildApp() {
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [inspectorOpen, setInspectorOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [category, setCategory] = useState<CatalogItem["category"] | "all">("all");
   const [prompt, setPrompt] = useState("");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<Notice | null>(null);
@@ -232,7 +258,7 @@ export default function VoxBuildApp() {
       const position = findPlacement(current, item);
       void executeOperations([{ type: "add", sku: item.sku, position, rotation: 0, color: item.defaultColor }]).then((result) => {
         const added = result.scene.objects.find((object) => !current.objects.some((previous) => previous.id === object.id));
-        if (added) { setSelectedId(added.id); setInspectorOpen(true); }
+        if (added) { setSelectedId(added.id); setCatalogOpen(false); setInspectorOpen(true); }
         notify(`${item.name} added${modeRef.current === "sample" ? " to the preview" : " and saved"}.`, "success");
       }).catch((error: unknown) => notify(error instanceof Error ? error.message : "Furniture could not be added.", "error"));
     } catch (error) { notify(error instanceof Error ? error.message : "Furniture could not be added.", "error"); }
@@ -267,13 +293,14 @@ export default function VoxBuildApp() {
   function samplePrompt(text: string): Operation[] {
     const current = sceneRef.current;
     const sofa = current.objects.find((object) => getCatalogItem(object.sku)?.category === "sofa");
+    if (text === PROMPTS[2]) return [{ type: "set_environment", environmentId: "forest" }];
     if (text === PROMPTS[1]) {
-      const lamp = getCatalogItem("stem-lamp")!;
-      return [{ type: "add", sku: lamp.sku, position: findPlacement(current, lamp), rotation: 0, color: lamp.defaultColor }];
+      const ottoman = getCatalogItem("cloud-ottoman")!;
+      return [{ type: "add", sku: ottoman.sku, position: findPlacement(current, ottoman), rotation: 0, color: ottoman.defaultColor }];
     }
     if (!sofa) throw new Error("Add a sofa from the catalog to try this preview.");
     if (text === PROMPTS[0]) return [{ type: "recolor", objectId: sofa.id, color: "#687761" }];
-    return [{ type: "move", objectId: sofa.id, position: [sofa.position[0] - 0.25, sofa.position[1], sofa.position[2]] }];
+    throw new Error("Choose an available preview or use the furniture controls.");
   }
 
   async function submitPrompt(text: string, canned = false) {
@@ -307,7 +334,9 @@ export default function VoxBuildApp() {
   const selectObject = useCallback((id: string | null) => { setSelectedId(id); if (id) setInspectorOpen(true); }, []);
   const selected = scene.objects.find((object) => object.id === selectedId);
   const selectedItem = selected ? getCatalogItem(selected.sku) : undefined;
-  const catalog = useMemo(() => CATALOG.filter((item) => `${item.name} ${item.category}`.toLowerCase().includes(search.toLowerCase())), [search]);
+  const catalog = useMemo(() => CATALOG.filter((item) => (category === "all" || item.category === category) && `${item.name} ${item.category}`.toLowerCase().includes(search.trim().toLowerCase())), [search, category]);
+  const roomEnvironment = getEnvironmentForRoom(scene.room);
+  const environment = roomEnvironment.wallColor === scene.room.wallColor && roomEnvironment.floorColor === scene.room.floorColor ? roomEnvironment : undefined;
   const locked = busy || mode === "loading" || mode === "error";
   const total = scene.objects.reduce((sum, object) => sum + (getCatalogItem(object.sku)?.price ?? 0), 0);
   const area = scene.room.width * scene.room.depth;
@@ -334,15 +363,15 @@ export default function VoxBuildApp() {
 
     <div className="workspace">
       <aside className={`catalog-panel ${catalogOpen ? "mobile-open" : ""}`} aria-label="Furniture catalog">
-        <div className="panel-heading"><div><h2>Furniture</h2><p>A few good pieces.</p></div><button className="icon-button mobile-close" onClick={() => setCatalogOpen(false)} aria-label="Close furniture catalog"><X size={17} /></button><span className="count-badge">{CATALOG.length}</span></div>
+        <div className="panel-heading"><div><h2>Furniture</h2><p>Find your next good piece.</p></div><button className="icon-button mobile-close" onClick={() => setCatalogOpen(false)} aria-label="Close furniture catalog"><X size={17} /></button><span className="count-badge">{CATALOG.length}</span></div>
         <label className="catalog-search"><Search size={14} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Find a piece…" aria-label="Search furniture" /><span>⌕</span></label>
-        <div className="catalog-filter"><span>All furniture</span><span>Curated collection</span></div>
+        <div className="catalog-filter"><div className="catalog-category-select"><select aria-label="Furniture category" value={category} onChange={(event) => setCategory(event.target.value as CatalogItem["category"] | "all")}><option value="all">All furniture</option>{CATALOG_CATEGORIES.map((value) => <option key={value} value={value}>{CATEGORY_LABELS[value] ?? value}</option>)}</select><ChevronDown size={12} /></div><span aria-live="polite">{catalog.length} {catalog.length === 1 ? "piece" : "pieces"}</span></div>
         <div className="catalog-grid">
           {catalog.map((item) => <button key={item.sku} className="catalog-card" disabled={locked} onClick={() => addFurniture(item)} aria-label={`Add ${item.name}`}>
-            <div className="catalog-preview"><FurnitureIllustration category={item.category} color={item.defaultColor} /><span className="add-piece"><Plus size={12} /></span></div>
+            <div className="catalog-preview"><FurnitureIllustration sku={item.sku} category={item.category} color={item.defaultColor} /><span className="add-piece"><Plus size={12} /></span></div>
             <span className="catalog-item-name">{item.name}</span><span className="catalog-item-price">${item.price.toLocaleString()}</span>
           </button>)}
-          {!catalog.length && <p className="empty-search">No pieces match “{search}”.</p>}
+          {!catalog.length && <div className="empty-search"><p>No pieces match these filters.</p><button onClick={() => { setSearch(""); setCategory("all"); }}>Show all furniture</button></div>}
         </div>
         <div className="catalog-note"><MousePointer2 size={15} /><p>Click a piece to add it.<br /><span>Select it in your room to make it yours.</span></p></div>
         <div className="catalog-footer"><span className="catalog-source-dot" />Demo furnishing catalog<small>Dimensions and finishes included</small></div>
@@ -358,7 +387,7 @@ export default function VoxBuildApp() {
           <div className="canvas-wrap"><CanvasBoundary><RoomCanvas key={cameraKey} scene={scene} selectedId={selectedId} onSelect={selectObject} view={view} showDimensions={showDimensions} /></CanvasBoundary></div>
           <div className="stage-side-controls"><button className={showDimensions ? "active" : ""} onClick={() => setShowDimensions((show) => !show)} aria-label="Toggle room dimensions" title="Room dimensions" aria-pressed={showDimensions}><Ruler size={16} /></button><button onClick={() => { setView("perspective"); setCameraKey((key) => key + 1); }} aria-label="Reset camera" title="Reset camera"><Maximize2 size={15} /></button></div>
           <div className="stage-navigation"><MousePointer2 size={12} /><span>Drag to orbit</span><span className="navigation-dot" /> <span>Scroll to zoom</span></div>
-          <div className="mobile-panel-buttons"><button onClick={() => setCatalogOpen(true)}><PanelLeft size={14} />Furniture</button><button onClick={() => setInspectorOpen(true)}><SlidersHorizontal size={14} />{selected ? "Edit piece" : "Room details"}</button></div>
+          <div className="mobile-panel-buttons"><button onClick={() => { setInspectorOpen(false); setCatalogOpen(true); }}><PanelLeft size={14} />Furniture</button><button onClick={() => { setCatalogOpen(false); setSelectedId(null); setInspectorOpen(true); }}><SlidersHorizontal size={14} />Room style</button>{selected && <button onClick={() => { setCatalogOpen(false); setInspectorOpen(true); }}><MousePointer2 size={14} />Edit piece</button>}</div>
 
           {(mode === "loading" || mode === "error") && <div className="workspace-connection"><span>{mode === "loading" ? <LoaderCircle size={15} className="spin" /> : <AlertCircle size={15} />}{mode === "loading" ? "Connecting your workspace…" : "Your workspace is unavailable."}</span>{mode === "error" && <button onClick={() => void initialize()}>Try again</button>}</div>}
 
@@ -372,7 +401,7 @@ export default function VoxBuildApp() {
                   else if (mode !== "live" || !capabilities.voice) notify("Live voice isn’t connected in this workspace. Try a sample prompt or edit a piece with the controls.");
                   else void voice.start();
                 }}>{voice.status === "connecting" ? <LoaderCircle size={18} className="spin" /> : voiceActive ? <MicOff size={18} /> : <Mic size={18} />}</button>
-                <input value={prompt} onChange={(event) => setPrompt(event.target.value)} placeholder="“Make the sofa sage and add a reading lamp”" aria-label="Describe a change to your room" disabled={locked} maxLength={1000} autoComplete="off" />
+                <input value={prompt} onChange={(event) => setPrompt(event.target.value)} placeholder="“Add a bookcase and try the coastal style”" aria-label="Describe a change to your room" disabled={locked} maxLength={1000} autoComplete="off" />
                 {voiceActive && <div className="voice-level" aria-hidden="true">{[0.5, 0.85, 1, 0.65, 0.4].map((factor, index) => <span key={index} style={{ height: 3 + voice.level * factor * 20 }} />)}</div>}
                 <button className="send-button" type="submit" disabled={locked || !prompt.trim()} aria-label="Apply room prompt">{busy ? <LoaderCircle size={16} className="spin" /> : <ArrowUp size={17} />}</button>
               </form>
@@ -385,8 +414,9 @@ export default function VoxBuildApp() {
 
       <aside className={`inspector-panel ${inspectorOpen ? "mobile-open" : ""}`} aria-label={selected ? "Selected furniture inspector" : "Room details"}>
         <div className="inspector-heading"><h2>{selected ? "Make it yours" : "Room details"}</h2><button className="icon-button" onClick={() => { if (selected) setSelectedId(null); setInspectorOpen(false); }} aria-label={selected ? "Deselect furniture and close inspector" : "Close room details"}>{selected || inspectorOpen ? <X size={15} /> : <SlidersHorizontal size={15} />}</button></div>
+        <section className="room-style-section" aria-labelledby="room-style-heading"><div className="section-label"><h4 id="room-style-heading">Room style</h4><span>{environment?.name ?? "Custom palette"}</span></div><div className="environment-options">{ENVIRONMENTS.map((style) => <button key={style.id} className={`environment-option ${style.id === environment?.id ? "selected" : ""}`} aria-label={`Apply ${style.name} room style`} aria-pressed={style.id === environment?.id} title={style.description} disabled={locked || style.id === environment?.id} onClick={() => void handle(executeOperations([{ type: "set_environment", environmentId: style.id }]))}><span className="environment-swatch" aria-hidden="true" style={{ backgroundColor: style.wallColor }}><span style={{ backgroundColor: style.floorColor }} />{style.id === environment?.id && <Check size={12} />}</span><span>{style.name}</span></button>)}</div><p>Walls, flooring, and light. Your furniture stays.</p></section>
         {selected && selectedItem ? <>
-          <div className="inspector-preview"><FurnitureIllustration category={selectedItem.category} color={selected.color} /><span>Selected piece</span></div>
+          <div className="inspector-preview"><FurnitureIllustration sku={selectedItem.sku} category={selectedItem.category} color={selected.color} /><span>Selected piece</span></div>
           <div className="selected-title"><h3>{selectedItem.name}</h3><span>${selectedItem.price.toLocaleString()}</span><p>{selectedItem.dimensions[0]} × {selectedItem.dimensions[2]} × {selectedItem.dimensions[1]} m <span>W × D × H</span></p></div>
           <section className="inspector-section"><div className="section-label"><h4>Finish</h4><span>{COLOR_NAMES[selected.color] ?? selected.color}</span></div><div className="color-swatches">{selectedItem.colors.map((color) => <button key={color} style={{ backgroundColor: color }} className={color === selected.color ? "selected" : ""} aria-label={`Set ${selectedItem.name} to ${COLOR_NAMES[color] ?? color}`} title={COLOR_NAMES[color] ?? color} aria-pressed={color === selected.color} disabled={locked} onClick={() => void handle(executeOperations([{ type: "recolor", objectId: selected.id, color }]))}>{color === selected.color && <Check size={12} color={color === "#404448" || color === "#584336" || color === "#446a87" ? "white" : "#34342e"} />}</button>)}</div></section>
           <section className="inspector-section"><div className="section-label"><h4>Position</h4><span>0.25 m steps</span></div><div className="position-values"><span><small>X</small>{selected.position[0].toFixed(2)}<small>m</small></span><span><small>Z</small>{selected.position[2].toFixed(2)}<small>m</small></span></div><div className="nudge-controls"><button disabled={locked} onClick={() => nudge(-0.25, 0)} aria-label="Move selected furniture left"><ArrowLeft size={16} /></button><button disabled={locked} onClick={() => nudge(0, -0.25)} aria-label="Move selected furniture toward back wall"><ArrowUp size={16} /></button><button disabled={locked} onClick={() => nudge(0, 0.25)} aria-label="Move selected furniture toward front"><ArrowDown size={16} /></button><button disabled={locked} onClick={() => nudge(0.25, 0)} aria-label="Move selected furniture right"><ArrowRight size={16} /></button></div></section>
@@ -411,7 +441,7 @@ export default function VoxBuildApp() {
             <div><span className="integration-icon"><Mic size={15} /></span><span><strong>OpenAI direct</strong><small>WebRTC voice · shared command executor</small></span><span className={`integration-dot ${voiceActive ? "connected" : ""}`} title={voiceActive ? "Voice connected" : capabilities.voice ? "Ready to connect" : "Not configured"} /></div>
             <div><span className="integration-icon"><Database size={15} /></span><span><strong>MongoDB Atlas</strong><small>{mode === "live" ? "Owned scenes · atomic revisions + receipts" : "Not connected · sample stays in this tab"}</small></span><span className={`integration-dot ${mode === "live" ? "connected" : ""}`} /></div>
           </div>
-          <div className="architecture-catalog"><Box size={14} /><span>Catalog: explicit local fixture</span><span>7 SKUs</span></div>
+          <div className="architecture-catalog"><Box size={14} /><span>Catalog: explicit local fixture</span><span>{CATALOG.length} SKUs</span></div>
           <label className="fallback-test"><span><strong>Test Gateway fallback</strong><small>Excludes the primary provider by policy on the next text request. This is a routing test, not a provider outage.</small></span><input type="checkbox" checked={testFallback} disabled={!capabilities.gateway || mode !== "live" || busy} onChange={(event) => setTestFallback(event.target.checked)} /><span className="toggle-track" aria-hidden="true" /></label>
           <div className="activity-heading"><h3><Activity size={14} />Observed activity</h3><span>{activity.length} events</span></div>
           <p className="activity-note">Real events from this tab. Timings are measured browser round trips. Expand an event for returned metadata.</p>
