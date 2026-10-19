@@ -1,0 +1,162 @@
+{
+  "date": "2026-10-19T08:53:46.066Z",
+  "baseUrl": "https://voxbuild-nu.vercel.app",
+  "capabilities": {
+    "database": true,
+    "gateway": true,
+    "voice": true
+  },
+  "checks": [
+    {
+      "name": "primary",
+      "status": "passed",
+      "fixtureSceneId": "a0c6eb19-f51e-40eb-9c4a-10fc89f0232a",
+      "revision": 1,
+      "telemetry": {
+        "requestId": "73255054-521f-4965-bf64-30cd342ad0d4",
+        "commandId": "a3fb3278-cc9e-4d96-b9ac-7687057866ed",
+        "source": "AI Gateway",
+        "requestedModel": "openai/gpt-4.1-mini",
+        "model": "openai/gpt-4.1-mini",
+        "sdkReportedModel": "openai/gpt-4.1-mini",
+        "usage": {
+          "inputTokens": 1714,
+          "inputTokenDetails": {
+            "noCacheTokens": 1714,
+            "cacheReadTokens": 0,
+            "cacheWriteTokens": 0
+          },
+          "outputTokens": 35,
+          "outputTokenDetails": {
+            "textTokens": 35,
+            "reasoningTokens": 0
+          },
+          "totalTokens": 1749
+        },
+        "routingTest": null,
+        "gateway": {
+          "cost": "0.0007416",
+          "routing": {
+            "originalModelId": "openai/gpt-4.1-mini",
+            "resolvedProvider": "openai",
+            "fallbacksAvailable": [
+              "azure"
+            ],
+            "canonicalSlug": "openai/gpt-4.1-mini",
+            "finalProvider": "openai",
+            "modelAttemptCount": 1,
+            "modelAttempts": [
+              {
+                "canonicalSlug": "openai/gpt-4.1-mini",
+                "success": true,
+                "providerAttemptCount": 1,
+                "providerAttempts": [
+                  {
+                    "provider": "openai",
+                    "success": true,
+                    "startTime": 1792400027404,
+                    "endTime": 1792400028154,
+                    "statusCode": 200
+                  }
+                ]
+              }
+            ],
+            "totalProviderAttemptCount": 1
+          }
+        },
+        "catalogSource": "fixture",
+        "catalogMs": 0,
+        "modelMs": 956,
+        "databaseMs": 18,
+        "totalMs": 1243,
+        "revision": 1,
+        "operations": [
+          {
+            "type": "recolor",
+            "objectId": "studio-sofa",
+            "color": "#687761"
+          }
+        ],
+        "duplicate": false
+      }
+    },
+    {
+      "name": "provider-policy-fallback",
+      "status": "passed",
+      "fixtureSceneId": "019ec2f8-5d37-4a92-9e33-fa5e2cc86960",
+      "revision": 1,
+      "telemetry": {
+        "requestId": "33577b6c-6082-4b4e-8d4e-18f0290d533f",
+        "commandId": "10ed3c61-212d-4f8e-bdb9-29bc63b5a46b",
+        "source": "AI Gateway",
+        "requestedModel": "openai/gpt-4.1-mini",
+        "model": "google/gemini-2.5-flash",
+        "sdkReportedModel": "openai/gpt-4.1-mini",
+        "usage": {
+          "inputTokens": 1333,
+          "inputTokenDetails": {
+            "noCacheTokens": 1333,
+            "cacheReadTokens": 0
+          },
+          "outputTokens": 142,
+          "outputTokenDetails": {
+            "textTokens": 41,
+            "reasoningTokens": 101
+          },
+          "totalTokens": 1475
+        },
+        "routingTest": "primary-excluded-by-provider-policy",
+        "gateway": {
+          "cost": "0.0007549",
+          "routing": {
+            "originalModelId": "google/gemini-2.5-flash",
+            "resolvedProvider": "google",
+            "fallbacksAvailable": [],
+            "canonicalSlug": "google/gemini-2.5-flash",
+            "finalProvider": "google",
+            "modelAttemptCount": 2,
+            "modelAttempts": [
+              {
+                "canonicalSlug": "openai/gpt-4.1-mini",
+                "success": false,
+                "providerAttemptCount": 0,
+                "providerAttempts": []
+              },
+              {
+                "canonicalSlug": "google/gemini-2.5-flash",
+                "success": true,
+                "providerAttemptCount": 1,
+                "providerAttempts": [
+                  {
+                    "provider": "google",
+                    "success": true,
+                    "startTime": 1792400028583,
+                    "endTime": 1792400029767,
+                    "statusCode": 200
+                  }
+                ]
+              }
+            ],
+            "totalProviderAttemptCount": 1
+          }
+        },
+        "catalogSource": "fixture",
+        "catalogMs": 0,
+        "modelMs": 1241,
+        "databaseMs": 9,
+        "totalMs": 1271,
+        "revision": 1,
+        "operations": [
+          {
+            "type": "recolor",
+            "objectId": "studio-sofa",
+            "color": "#687761"
+          }
+        ],
+        "duplicate": false
+      }
+    }
+  ],
+  "evidenceScope": "Production HTTP primary and policy-selected fallback requests; both accepted edits persisted at revision 1.",
+  "sanitization": "Omitted client-session identifiers, provider request/response identifiers, generation identifiers, credential labels, affinity/planning metadata, and raw usage. Retained synthetic fixture IDs, semantic results, normalized usage, returned cost, and routing outcomes."
+}

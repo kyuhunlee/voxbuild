@@ -1,0 +1,158 @@
+{
+  "runId": "storage-2026-10-19T08-49-37-055Z-ee0ccf5f",
+  "baseUrl": "https://voxbuild-nu.vercel.app",
+  "status": "passed",
+  "reason": null,
+  "capabilities": {
+    "database": true,
+    "gateway": false,
+    "voice": true
+  },
+  "fixtureSceneId": "b083cd0e-a786-4431-889b-2dd420bf8fb2",
+  "checksPlanned": 10,
+  "checksRun": 10,
+  "passed": 10,
+  "failed": 0,
+  "blocked": 0,
+  "checksNotRun": [],
+  "notes": [
+    "Uses two fresh, independent anonymous sessions and one studio created specifically by this run. No preexisting scene is modified.",
+    "No AI/model endpoint is called. This verifies live HTTP/database semantics, not voice, model quality, rendering, or physical fit.",
+    "Canonical reads verify saved state; concurrent requests have identical or deliberately competing revisions as specified per check.",
+    "The fixture is intentionally retained for inspection; there is no delete API. Cookies are not written to this report, so the runner's ownership session cannot be resumed from the evidence file.",
+    "No automatic retries are made. A timed-out write may have committed; inspect the fixture scene ID before rerunning."
+  ],
+  "results": [
+    {
+      "id": "owned-read",
+      "outcome": "passed",
+      "durationMs": 167,
+      "issues": [],
+      "evidence": {
+        "revision": 0,
+        "objects": 6
+      }
+    },
+    {
+      "id": "owned-list",
+      "outcome": "passed",
+      "durationMs": 80,
+      "issues": [],
+      "evidence": {
+        "httpStatus": 200,
+        "fixtureMatches": 1
+      }
+    },
+    {
+      "id": "foreign-read",
+      "outcome": "passed",
+      "durationMs": 106,
+      "issues": [],
+      "evidence": {
+        "foreignReadStatus": 404,
+        "foreignListStatus": 200,
+        "fixtureDisclosed": false
+      }
+    },
+    {
+      "id": "foreign-command",
+      "outcome": "passed",
+      "durationMs": 151,
+      "issues": [],
+      "evidence": {
+        "httpStatus": 404,
+        "revision": 0,
+        "unchanged": true
+      }
+    },
+    {
+      "id": "invalid-schema",
+      "outcome": "passed",
+      "durationMs": 124,
+      "issues": [],
+      "evidence": {
+        "httpStatus": 400,
+        "errorCode": "INVALID_REQUEST",
+        "unchanged": true
+      }
+    },
+    {
+      "id": "out-of-bounds",
+      "outcome": "passed",
+      "durationMs": 107,
+      "issues": [],
+      "evidence": {
+        "httpStatus": 422,
+        "errorCode": "OUT_OF_BOUNDS",
+        "unchanged": true
+      }
+    },
+    {
+      "id": "concurrent-duplicate",
+      "outcome": "passed",
+      "durationMs": 194,
+      "issues": [],
+      "evidence": {
+        "commandId": "c92f08ac-96bd-45cd-9b66-cc319c95d01c",
+        "statuses": [
+          200,
+          200
+        ],
+        "duplicateFlags": [
+          true,
+          false
+        ],
+        "revisionBefore": 0,
+        "revisionAfter": 1,
+        "targetColor": "#687761"
+      }
+    },
+    {
+      "id": "reused-command-id",
+      "outcome": "passed",
+      "durationMs": 128,
+      "issues": [],
+      "evidence": {
+        "commandId": "c92f08ac-96bd-45cd-9b66-cc319c95d01c",
+        "httpStatus": 409,
+        "errorCode": "COMMAND_ID_REUSED",
+        "revision": 1,
+        "unchanged": true
+      }
+    },
+    {
+      "id": "concurrent-conflict",
+      "outcome": "passed",
+      "durationMs": 891,
+      "issues": [],
+      "evidence": {
+        "commandIds": [
+          "b2eaa817-d567-4344-bd23-807a302a51f1",
+          "7071f78f-c2f1-43eb-82fb-db2c413e81ab"
+        ],
+        "statuses": [
+          200,
+          409
+        ],
+        "expectedRevision": 1,
+        "winnerCommandId": "b2eaa817-d567-4344-bd23-807a302a51f1"
+      }
+    },
+    {
+      "id": "canonical-winner",
+      "outcome": "passed",
+      "durationMs": 108,
+      "issues": [],
+      "evidence": {
+        "winningCommandId": "b2eaa817-d567-4344-bd23-807a302a51f1",
+        "winningColor": "#446a87",
+        "finalRevision": 2,
+        "preservedObjects": 5,
+        "preservedRoom": true,
+        "matchesWinningResponse": true
+      }
+    }
+  ],
+  "evidenceScope": "Production HTTP endpoints and MongoDB Atlas; no model or browser voice calls.",
+  "sanitization": "Inspected before publication. Only fixture IDs, command IDs, HTTP results, revision assertions and measurements are present; no cookies, session credentials, database connection strings or secret values are included."
+}

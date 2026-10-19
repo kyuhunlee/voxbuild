@@ -2,11 +2,11 @@
 
 Use a verified public Vercel deployment in a browser that supports WebGL. Allow five minutes for the demo within a 10–15 minute customer presentation. Start with a fresh visitor session if you want a reproducible room.
 
-**Current readiness, October 19, 2026:** [the hosted app](https://voxbuild-nu.vercel.app) runs in **Local sample** mode, and [the source repository](https://github.com/kyuhunlee/voxbuild) is public. Desktop/mobile sample rendering, anonymous hosted access, real Gateway primary/policy-fallback requests, and synthetic Realtime text/audio checks over server WebSocket have passed. Atlas persistence and browser microphone/WebRTC/playback/interruption remain pending. The sequence below is a presentation runbook to rehearse after those dependencies are verified; it is not a record of a completed end-to-end demo.
+**Current readiness, October 19, 2026:** [the hosted app](https://voxbuild-nu.vercel.app) passed **10/10 storage checks**, **14/14 semantic text-command checks**, and hosted primary/policy-fallback checks with Atlas rereads. [The source repository](https://github.com/kyuhunlee/voxbuild) is public. The user confirmed actual deployed microphone edits, spoken feedback, interruption with a new spoken edit, and Stop releasing the microphone. Those voice observations are manual, not instrumented. A separate agent browser check fully reloaded the voice-edited room and retained the blue sofa with Cloud saved revision 6. The sequence below is the presentation runbook, not a claim that this complete timed presentation has been rehearsed.
 
 ## Before presenting
 
-Confirm the deployment actually reports live storage and Gateway capabilities. Test one text edit and reload, then microphone connection. Keep a second browser tab with the architecture document and the actual evaluation report. Check the provider budget. Do not begin by asserting that a catalog fixture is an AWS integration or that sample mode proves cloud persistence.
+Confirm the deployment actually reports live storage and Gateway capabilities. Test one text edit and reload, then microphone connection. Keep a second browser tab with the architecture document and the [production evaluation report](evidence/semantic-production.json). It records 14/14 semantic success, p50 1,192 ms, p95 2,049 ms, and $0.0095565 returned Gateway cost; these are API observations, not voice latency or a production guarantee. Check the provider budget. Do not begin by asserting that a catalog fixture is an AWS integration or that sample mode proves cloud persistence.
 
 ## Five-minute path
 
@@ -27,6 +27,7 @@ Confirm the deployment actually reports live storage and Gateway capabilities. T
 ## If a live dependency fails
 
 - **Microphone blocked:** continue with the identical text command, acknowledge that voice was not verified in this session, and inspect browser permissions after the presentation.
+- **Showing storage/text evidence:** the [storage report](evidence/storage-production.json) verifies ten production invariants; the [semantic report](evidence/semantic-production.json) verifies 14 real model edits or safe refusals with persisted rereads. Keep these separate from user-confirmed voice behavior.
 - **Showing existing Realtime evidence:** use the [text](evidence/realtime-text-compatibility.json) and [synthetic audio](evidence/realtime-audio-compatibility.json) reports to explain accepted configuration, completed tool calls, and audio continuation. State that these used server WebSocket and an in-memory fixture with zero Atlas writes. The 670 ms speech-stop-to-tool observation is one sample; it is not a browser latency or p95 result.
 - **Gateway unavailable:** demonstrate manual validated controls and the last real report. Do not present canned local previews as live model responses.
 - **Atlas unavailable:** show the recoverable error and the last accepted state. Sample mode is a separately labeled local walkthrough, not a persistence fallback.
@@ -40,4 +41,4 @@ Confirm the deployment actually reports live storage and Gateway capabilities. T
 - **“Can this prove that my furniture fits?”** It can show catalog dimensions in a known sample room. Real fit needs trusted room measurements, exact assets, collision and circulation validation, and clear product language.
 - **“Why no Workflow?”** The core edit is short and atomically committed. Long-running photo reconstruction or human approval would change the durability requirements and justify a workflow.
 
-End by showing evidence and limitations, not an unverified claim about adoption or production readiness.
+End by showing evidence and limitations, not an unverified claim about adoption or production readiness. After the demo, explicitly remove the approved Atlas `0.0.0.0/0` access-list rule; it has no automatic expiry.
