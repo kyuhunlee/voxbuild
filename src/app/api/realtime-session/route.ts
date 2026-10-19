@@ -1,7 +1,8 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import { CATALOG } from "@/lib/catalog-data";
-import { OperationsSchema, SceneSchema, type Scene } from "@/lib/schema";
+import { SceneSchema, type Scene } from "@/lib/schema";
+import { ModelToolSchema } from "@/lib/model-schema";
 import { errorResponse, HttpError } from "@/lib/server/errors";
 import { enforceRateLimit } from "@/lib/server/rate-limit";
 import { enforceSameOrigin, requireSession } from "@/lib/server/session";
@@ -14,7 +15,6 @@ const RequestSchema = z.object({
   sdp: z.string().min(20).max(24_000).startsWith("v=0"),
   scene: SceneSchema,
 }).strict();
-const VoiceToolSchema = z.object({ operations: OperationsSchema }).strict();
 const MAX_REQUEST_BYTES = 64_000;
 
 async function readBoundedJson(request: Request): Promise<unknown> {
@@ -76,6 +76,7 @@ export async function POST(request: Request) {
     const scene = await getScene(owner.id, parsed.data.scene.id);
     if (!scene) throw new HttpError(404, "This scene is no longer available. Reload the room before starting voice.", "SCENE_NOT_FOUND");
     await enforceRateLimit(owner.id, "voice-session", 5, 60 * 60 * 1000);
+    await enforceRateLimit("global", "voice-session", 20, 24 * 60 * 60 * 1000);
 
     const session = {
       type: "realtime",
@@ -94,7 +95,7 @@ export async function POST(request: Request) {
         type: "function",
         name: "apply_scene_operations",
         description: "Submit one batch of room edits for validation and persistence. Wait for the returned result before claiming any change succeeded.",
-        parameters: z.toJSONSchema(VoiceToolSchema, { io: "input" }),
+        parameters: z.toJSONSchema(ModelToolSchema, { io: "input" }),
       }],
       tool_choice: "auto",
     };

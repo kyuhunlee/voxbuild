@@ -37,7 +37,10 @@ export async function ensureSession() {
 
 export function enforceSameOrigin(request: Request) {
   const origin = request.headers.get("origin");
-  if (!origin || origin !== new URL(request.url).origin || request.headers.get("sec-fetch-site") === "cross-site") {
+  const requestUrl = new URL(request.url);
+  // Next's development adapter may normalize request.url to localhost; Host retains the browser's actual target.
+  const targetOrigin = `${requestUrl.protocol}//${request.headers.get("host") || requestUrl.host}`;
+  if (!origin || origin !== targetOrigin || request.headers.get("sec-fetch-site") === "cross-site") {
     throw new HttpError(403, "This request must originate from VoxBuild.", "ORIGIN_REJECTED");
   }
 }
