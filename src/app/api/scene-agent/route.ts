@@ -9,6 +9,7 @@ import { applyCommand, getScene } from "@/lib/server/store";
 import { enforceSameOrigin, requireSession } from "@/lib/server/session";
 import { errorResponse, HttpError, readJson } from "@/lib/server/errors";
 import { enforceRateLimit } from "@/lib/server/rate-limit";
+import { hasGatewayCredentials } from "@/lib/server/gateway-auth";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -22,7 +23,7 @@ export async function POST(request: Request) {
     enforceSameOrigin(request); const owner = await requireSession();
     const input = InputSchema.parse(await readJson(request));
     const model = process.env.AI_GATEWAY_MODEL;
-    if (!model || (!process.env.AI_GATEWAY_API_KEY && !process.env.VERCEL_OIDC_TOKEN)) throw new HttpError(503, "The AI Gateway is not configured on this deployment.", "AI_NOT_CONFIGURED");
+    if (!model || !hasGatewayCredentials()) throw new HttpError(503, "The AI Gateway is not configured on this deployment.", "AI_NOT_CONFIGURED");
     if (input.testFallback && (model.startsWith("google/") || !process.env.AI_GATEWAY_FALLBACK_MODEL?.startsWith("google/"))) throw new HttpError(400, "This routing test requires a non-Google primary and a Google fallback model.", "ROUTING_TEST_UNAVAILABLE");
     const scene = await getScene(owner.id, input.sceneId);
     if (!scene) throw new HttpError(404, "This room was not found.", "SCENE_NOT_FOUND");

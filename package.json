@@ -17,6 +17,7 @@
     "@ai-sdk/gateway": "^4.0.116",
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.2",
+    "@vercel/oidc": "3.2.0",
     "ai": "^7.0.143",
     "clsx": "^2.1.1",
     "geist": "^1.8.1",

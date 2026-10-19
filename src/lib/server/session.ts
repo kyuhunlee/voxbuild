@@ -1,6 +1,7 @@
 import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { HttpError } from "./errors";
+import { hasGatewayCredentials } from "./gateway-auth";
 
 const COOKIE_NAME = "voxbuild-session";
 const MAX_AGE = 60 * 60 * 24 * 7;
@@ -49,7 +50,7 @@ export function capabilities() {
   const database = Boolean(process.env.MONGODB_URI && process.env.SESSION_SECRET && process.env.SESSION_SECRET.length >= 32);
   return {
     database,
-    gateway: database && Boolean(process.env.AI_GATEWAY_MODEL && (process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN)),
+    gateway: database && Boolean(process.env.AI_GATEWAY_MODEL) && hasGatewayCredentials(),
     voice: database && Boolean(process.env.OPENAI_API_KEY),
   };
 }
