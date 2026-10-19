@@ -8,7 +8,7 @@ The reference scenario assumes existing AWS listing/catalog services and MongoDB
 
 The central contract is simple: **the model proposes operations; the server validates and saves; the browser renders the acknowledged result.**
 
-The expanded experience has **14 furniture SKUs**, **seven presets** (including the new Quiet bedroom, Gathering room, and Evening lounge), and six environment styles: **Sunlit, Gallery, Forest, Desert, Coastal, and Midnight**. Styles preserve furniture while changing room finishes and derived lighting. Category filtering and search help browse the larger catalog; the perspective camera is approximately 18% closer. Expansion commit `d5951a9` is deployed and verified locally and in production.
+The current experience has **14 furniture SKUs**, **six presets**, and six environment styles: **Sunlit, Gallery, Forest, Desert, Coastal, and Midnight**. Presets now have distinct window arrangements, lighting, and artwork; City loft is removed from new-room choices. Five painting designs can move along either visible wall, with placement validation and atomic persistence. Styles preserve furniture and artwork while changing finishes and lighting. Category filtering and search help browse the catalog; the perspective camera is approximately 18% closer. The earlier catalog expansion at `d5951a9` has its own production evidence below.
 
 ## Submission artifacts
 
@@ -33,8 +33,11 @@ This evidence ledger records checks completed on **October 19, 2026** and names 
 
 | Check | Evidence to attach | Result |
 | --- | --- | --- |
-| Deterministic domain/store/voice tests | `npm test` | **Passed: 45 tests.** Includes five runtime OIDC regressions, provider-schema and strict validation checks; separate live reports establish Atlas access |
+| Deterministic domain/store/voice tests | `npm test` | **Passed: 52 tests.** Includes OIDC regressions, provider-schema checks, legacy scene compatibility, artwork bounds/window conflicts, and atomic validation; separate live reports establish Atlas access |
 | Type check | `npm run typecheck` | **Passed** |
+| Room/artwork local API | [14-case report](evidence/decor-local.json) | **Passed: 14/14:** six distinct presets, removed-loft rejection, saved painting edits, window conflicts, atomic rejection, style preservation, and real primary/policy-fallback requests |
+| Room/artwork desktop/mobile | Local live browser at desktop and 390×844 | **Passed:** painting selection, design changes, vertical movement, wall switching, and persisted reload; distinct office, bedroom, dining, and lounge windows/lighting inspected. No console errors after the completed code was reloaded |
+| Realtime artwork compatibility | [Synthetic artwork report](evidence/realtime-artwork-compatibility.json) | **Passed:** completed design-and-move tool call and spoken continuation; server WebSocket, local validation, zero Atlas writes, no browser microphone |
 | Production build | `npm run build` for expansion `d5951a9` | **Passed; hosted deployment Ready:** `dpl_9CGJeKT97ghCwkzcBjeWBe6JNrxh` |
 | Browser desktop/mobile | Local sample UI and manual bounds validation | **Passed:** no horizontal overflow or console errors observed. Cloud save/reload and live audio were not exercised in this earlier sample UI check |
 | Gateway primary request | Real request using `openai/gpt-4.1-mini` | **Passed** |

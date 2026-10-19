@@ -14,6 +14,8 @@ export interface RoomCanvasProps {
   scene: Scene;
   selectedId: string | null;
   onSelect: (id: string | null) => void;
+  selectedArtworkId: string | null;
+  onSelectArtwork: (id: string | null) => void;
   view: "perspective" | "top";
   showDimensions: boolean;
 }
@@ -125,25 +127,30 @@ const LIGHTING: Record<Environment["lighting"], {
   sunPosition: [number, number, number]; fill: string; fillIntensity: number;
 }> = {
   day: { background: "#e2e0d9", ground: "#d5d4cd", ambient: "#e5e6dd", ambientIntensity: 0.55, sky: "#e5eeef", bounce: "#8d7354", hemisphereIntensity: 1.1, sun: "#ffe6bd", sunIntensity: 3.1, sunPosition: [-3, 8, 5], fill: "#c7d9e4", fillIntensity: 1.2 },
+  overcast: { background: "#cdd2d8", ground: "#bcc3ca", ambient: "#e2e8ed", ambientIntensity: 1.05, sky: "#dce5ed", bounce: "#90958f", hemisphereIntensity: 1.25, sun: "#e7edf4", sunIntensity: 1.25, sunPosition: [-1, 9, 4], fill: "#d4dce5", fillIntensity: 0.95 },
+  morning: { background: "#dce0cf", ground: "#c6cbb8", ambient: "#e6e8ce", ambientIntensity: 0.6, sky: "#e8ebd8", bounce: "#8b9672", hemisphereIntensity: 1, sun: "#ffe1a4", sunIntensity: 2.75, sunPosition: [-7, 4.5, 2], fill: "#c4d5c3", fillIntensity: 1.1 },
+  coastal: { background: "#cbdfe3", ground: "#b8d1d5", ambient: "#e0f1f1", ambientIntensity: 0.7, sky: "#c9e9f3", bounce: "#9caa9e", hemisphereIntensity: 1.2, sun: "#fff1d9", sunIntensity: 2.6, sunPosition: [3, 8, -2], fill: "#a8d4e4", fillIntensity: 1.35 },
   sunset: { background: "#cfb7ae", ground: "#bda69a", ambient: "#e8c9b9", ambientIntensity: 0.65, sky: "#efd3cc", bounce: "#8c6250", hemisphereIntensity: 0.95, sun: "#ffbb80", sunIntensity: 3.3, sunPosition: [-6, 4, 3], fill: "#c5bfdc", fillIntensity: 0.9 },
   night: { background: "#303b4e", ground: "#293547", ambient: "#c2cce3", ambientIntensity: 0.6, sky: "#a5bbdd", bounce: "#72695f", hemisphereIntensity: 0.8, sun: "#c0d8ff", sunIntensity: 1.3, sunPosition: [-3, 8, -2], fill: "#f4d4a8", fillIntensity: 1.5 },
 };
 
-function RoomCanvas({ scene, selectedId, onSelect, view, showDimensions }: RoomCanvasProps) {
+function RoomCanvas({ scene, selectedId, onSelect, selectedArtworkId, onSelectArtwork, view, showDimensions }: RoomCanvasProps) {
   const reducedMotion = useReducedMotion();
   const [hovered, setHovered] = useState(false);
   const shadowSize = Math.max(scene.room.width, scene.room.depth) + 1;
   const environment = getEnvironmentForRoom(scene.room);
   const light = LIGHTING[environment.lighting];
+  const selectFurniture = (id: string | null) => { onSelectArtwork(null); onSelect(id); };
+  const selectArtwork = (id: string | null) => { onSelect(null); onSelectArtwork(id); };
 
-  return <div style={{ width: "100%", height: "100%", cursor: hovered ? "pointer" : "grab" }} aria-label="Interactive 3D room. Drag to orbit, scroll to zoom, and click furniture to select it.">
+  return <div style={{ width: "100%", height: "100%", cursor: hovered ? "pointer" : "grab" }} aria-label="Interactive 3D room. Drag to orbit, scroll to zoom, and click furniture or paintings to select them.">
     <Canvas
       shadows
       dpr={[1, 1.5]}
       camera={{ position: [6.4, 5.75, 8.05], fov: 38, near: 0.1, far: 150 }}
       gl={{ antialias: true, alpha: false, powerPreference: "high-performance", toneMapping: ACESFilmicToneMapping }}
       onCreated={({ gl }) => { gl.toneMappingExposure = 1.08; }}
-      onPointerMissed={() => onSelect(null)}
+      onPointerMissed={() => { onSelect(null); onSelectArtwork(null); setHovered(false); }}
     >
       <color attach="background" args={[light.background]} />
       <fog attach="fog" args={[light.background, 28, 65]} />
@@ -170,8 +177,8 @@ function RoomCanvas({ scene, selectedId, onSelect, view, showDimensions }: RoomC
         <planeGeometry args={[200, 200]} />
         <meshStandardMaterial color={light.ground} roughness={1} />
       </mesh>
-      <Architecture room={scene.room} lighting={environment.lighting} />
-      {scene.objects.map((object) => <SceneFurniture key={`${scene.id}:${object.id}`} object={object} selected={selectedId === object.id} onSelect={onSelect} onHover={setHovered} reducedMotion={reducedMotion} />)}
+      <Architecture room={scene.room} lighting={environment.lighting} selectedArtworkId={selectedArtworkId} onSelectArtwork={selectArtwork} onHover={setHovered} />
+      {scene.objects.map((object) => <SceneFurniture key={`${scene.id}:${object.id}`} object={object} selected={selectedId === object.id} onSelect={selectFurniture} onHover={setHovered} reducedMotion={reducedMotion} />)}
       <ContactShadows position={[0, 0.006, 0]} opacity={0.24} scale={shadowSize * 2} blur={2.4} far={3} resolution={256} color="#4c3927" />
       {showDimensions && <Dimensions room={scene.room} lighting={environment.lighting} />}
       <CameraRig view={view} width={scene.room.width} depth={scene.room.depth} reducedMotion={reducedMotion} />

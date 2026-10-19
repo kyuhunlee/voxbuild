@@ -1,0 +1,162 @@
+{
+  "checkedAt": "2026-10-19T09:17:39.949Z",
+  "transport": "server WebSocket",
+  "input": "synthetic text: Change the painting to the botanical design and move it exactly 0.15 meters higher on its current wall. Keep its horizontal position and all furniture unchanged.",
+  "atlasWrites": 0,
+  "microphoneAccess": false,
+  "browserWebRtcVerified": false,
+  "maximumSessionMs": 30000,
+  "responseLimit": 2,
+  "eventCounts": {
+    "session.created": 1,
+    "session.updated": 1,
+    "conversation.item.added": 6,
+    "conversation.item.done": 6,
+    "response.created": 2,
+    "response.output_item.added": 3,
+    "response.content_part.added": 2,
+    "response.output_text.delta": 19,
+    "response.function_call_arguments.delta": 55,
+    "response.output_text.done": 1,
+    "response.content_part.done": 2,
+    "response.output_item.done": 3,
+    "response.function_call_arguments.done": 1,
+    "response.done": 2,
+    "rate_limits.updated": 1,
+    "response.output_audio_transcript.delta": 44,
+    "response.output_audio.delta": 32,
+    "response.output_audio.done": 1,
+    "response.output_audio_transcript.done": 1
+  },
+  "responses": [
+    {
+      "phase": "planning",
+      "status": "completed",
+      "metadata": null,
+      "outputTypes": [
+        {
+          "type": "message",
+          "status": "completed"
+        },
+        {
+          "type": "function_call",
+          "status": "completed"
+        }
+      ],
+      "durationMs": 2019,
+      "usage": {
+        "total_tokens": 3584,
+        "input_tokens": 3375,
+        "output_tokens": 209,
+        "input_token_details": {
+          "text_tokens": 3375,
+          "audio_tokens": 0,
+          "image_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_token_details": {
+          "text_tokens": 209,
+          "audio_tokens": 0,
+          "reasoning_tokens": 114
+        }
+      }
+    },
+    {
+      "phase": "speech",
+      "status": "completed",
+      "metadata": {
+        "phase": "speech"
+      },
+      "outputTypes": [
+        {
+          "type": "message",
+          "status": "completed"
+        }
+      ],
+      "durationMs": 3249,
+      "usage": {
+        "total_tokens": 3403,
+        "input_tokens": 3043,
+        "output_tokens": 360,
+        "input_token_details": {
+          "text_tokens": 2839,
+          "audio_tokens": 204,
+          "image_tokens": 0,
+          "cached_tokens": 1024
+        },
+        "output_token_details": {
+          "text_tokens": 104,
+          "audio_tokens": 256,
+          "reasoning_tokens": 38
+        }
+      }
+    }
+  ],
+  "model": "gpt-realtime-2.1",
+  "configuration": {
+    "extractedFromCurrentRoute": true,
+    "sha256": "8da8f85b25e8d7d603e2efb8c5eebb6b5e1048ac0c3be15cbfc2038c54771653",
+    "outputModalities": [
+      "text"
+    ],
+    "maxOutputTokens": 1600,
+    "voice": "marin",
+    "transcriptionModel": "gpt-4o-mini-transcribe",
+    "turnDetection": {
+      "type": "server_vad",
+      "create_response": true,
+      "interrupt_response": true,
+      "silence_duration_ms": 500
+    },
+    "toolName": "apply_scene_operations",
+    "toolSchemaUsesAnyOf": true
+  },
+  "connectedMs": 1024,
+  "sessionAccepted": true,
+  "resolvedSession": {
+    "model": "gpt-realtime-2.1",
+    "outputModalities": [
+      "text"
+    ],
+    "voice": "marin",
+    "toolCount": 1,
+    "inputFormat": {
+      "type": "audio/pcm",
+      "rate": 24000
+    }
+  },
+  "toolValidation": {
+    "completeCall": true,
+    "strictDomainSchema": true,
+    "sceneEngine": true,
+    "semanticPass": true,
+    "operations": [
+      {
+        "type": "set_artwork",
+        "artworkId": "studio-artwork",
+        "design": "botanical"
+      },
+      {
+        "type": "move_artwork",
+        "artworkId": "studio-artwork",
+        "wall": "left",
+        "offset": -0.2,
+        "height": 1.85
+      }
+    ]
+  },
+  "audioContinuation": {
+    "audioBytes": 614400,
+    "transcript": "The painting was updated to the botanical design and its center moved 0.15 meters higher while keeping the same horizontal position and all furniture unchanged, but the change was only applied in the current session and was not saved.",
+    "toolCallCount": 0,
+    "persistenceResultSent": "ok:true; synthetic in-memory fixture only; persistence:none",
+    "sentEventOrder": [
+      "conversation.item.create system scene",
+      "conversation.item.create function_call_output",
+      "response.create audio tool_choice none metadata.phase speech"
+    ]
+  },
+  "websocketSessionMs": 6373,
+  "outcome": "passed_synthetic_text_tool_audio_compatibility",
+  "elapsedMs": 6388
+}

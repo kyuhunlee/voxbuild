@@ -170,6 +170,25 @@ svg { flex-shrink: 0; }
 .inspector-preview { height: 139px; margin: 17px 17px 0; padding: 5px 22px 19px; position: relative; background: radial-gradient(ellipse at 50% 40%, #2a2a27, #1c1c1b 80%); border: 1px solid #2c2c29; border-radius: 7px; }
 .inspector-preview .furniture-illustration { max-width: 150px; margin: auto; }
 .inspector-preview > span { position: absolute; bottom: 10px; left: 0; right: 0; text-align: center; font-size: 9px; color: #6d6d65; }
+.artwork-preview { display: block; height: 100%; max-width: 100%; flex-shrink: 0; }
+.selected-artwork-preview { display: flex; align-items: center; justify-content: center; padding: 10px 22px 29px; height: 153px; }
+.selected-artwork-preview .artwork-preview { filter: drop-shadow(3px 5px 5px #0005); }
+.artwork-designs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.artwork-designs button { position: relative; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 7px 4px; background: #20221c; border: 1px solid #363a2f; border-radius: 5px; }
+.artwork-designs .artwork-preview { height: 53px; }
+.artwork-designs button > span { font-size: 8px; color: #a7af99; }
+.artwork-designs button > svg:last-child:not(.artwork-preview) { position: absolute; top: 3px; right: 3px; padding: 1px; color: #26311b; border-radius: 50%; background: #c7d4af; }
+.artwork-designs button.selected, .artwork-wall-options button.selected { border-color: #9cae83; background: #2e3625; opacity: 1; cursor: default; }
+.artwork-designs button:hover:not(:disabled), .artwork-wall-options button:hover:not(:disabled), .artwork-nudge-controls button:hover:not(:disabled) { background: #30352a; border-color: #6c785c; }
+.artwork-wall-options { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.artwork-wall-options button { display: flex; justify-content: center; align-items: center; gap: 6px; min-height: 37px; background: #20231d; border: 1px solid #363a2f; border-radius: 5px; font-size: 10px; color: #bdc6af; }
+.artwork-placement-note { font-size: 9px; color: #8a927c; line-height: 1.7; margin-top: 11px; }
+.artwork-position-values { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 10px; }
+.artwork-position-values > span { display: flex; flex-direction: column; gap: 7px; padding: 9px; border: 1px solid #30352a; background: #1b1e17; border-radius: 5px; }
+.artwork-position-values small { font-size: 9px; font-weight: 400; color: #8b947c; }
+.artwork-position-values strong { font-size: 12px; font-weight: 450; font-variant-numeric: tabular-nums; color: #c9d0bd; }
+.artwork-nudge-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.artwork-nudge-controls button { display: flex; justify-content: center; align-items: center; gap: 6px; min-height: 39px; border: 1px solid #353b2d; background: #20241a; border-radius: 5px; font-size: 9px; color: #b3bda3; }
 .selected-title { padding: 17px 18px 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; }
 .selected-title h3 { font-size: 16px; font-weight: 500; letter-spacing: -.5px; color: #e6e6de; }
 .selected-title > span { color: #8c8c84; font-size: 11px; }
@@ -212,6 +231,10 @@ svg { flex-shrink: 0; }
 .inventory-list button:hover { background: #23251f; color: #e0e4d5; }
 .inventory-swatch { height: 10px; width: 10px; border: 1px solid #ffffff1a; border-radius: 3px; }
 .inventory-list button > svg { margin-left: auto; color: #4e5146; }
+.artwork-inventory { border-top: 1px solid var(--border); }
+.artwork-inventory .inventory-list .artwork-preview { width: 25px; height: 31px; margin-left: 0; }
+.artwork-inventory .inventory-list button { gap: 10px; }
+.artwork-inventory .inventory-list small { display: block; margin-top: 4px; color: #747e68; font-size: 9px; }
 .empty-inventory { padding: 13px 0; color: #74776b; font-size: 11px; line-height: 1.75; }
 .estimate-total { border-top: 1px solid var(--border); margin: 0 18px; padding: 17px 0 16px; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; }
 .estimate-total > span { font-size: 10px; color: #7d8073; }
@@ -331,6 +354,8 @@ svg { flex-shrink: 0; }
   .mobile-panel-buttons { right: 15px; left: 15px; bottom: 186px; justify-content: space-between; }
   .mobile-panel-buttons button:first-child { display: flex; }
   .mobile-panel-buttons button { padding: 8px 10px; }
+  .artwork-wall-options button, .artwork-nudge-controls button { min-height: 44px; }
+  .artwork-designs button { min-height: 82px; }
   .composer-area { left: 12px; right: 12px; bottom: 12px; }
   .command-composer { padding: 11px 10px 10px; border-radius: 10px; }
   .composer-heading { font-size: 9px; gap: 6px; }

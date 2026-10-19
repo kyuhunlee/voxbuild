@@ -54,6 +54,8 @@ test("domain validation rejects loose wire coordinates, IDs, colors, rotations, 
     [{ ...addChair, color: "blue" }],
     [{ type: "remove", objectId: "../invalid-id" }],
     [{ type: "set_environment", environmentId: "invented-style" }],
+    [{ type: "move_artwork", artworkId: "studio-artwork", wall: "right", offset: 0, height: 1.6 }],
+    [{ type: "set_artwork", artworkId: "studio-artwork", design: "invented" }],
     [],
     Array.from({ length: 13 }, () => addChair),
   ];
@@ -70,6 +72,18 @@ test("provider style operations pass domain validation without introducing new s
   assert.equal(after.room.wallColor, "#323c50");
   assert.deepEqual(after.objects, before.objects);
   assert.deepEqual(Object.keys(after.room), Object.keys(before.room));
+});
+
+test("provider artwork operations pass strict domain execution with identity preserved", () => {
+  const plan = ModelPlanSchema.parse({ message: "Move and update the painting.", operations: [
+    { type: "move_artwork", artworkId: "studio-artwork", wall: "left", offset: 0.5, height: 1.8 },
+    { type: "set_artwork", artworkId: "studio-artwork", design: "botanical" },
+  ] });
+  const before = createScene("model-art-test");
+  const after = applyOperations(before, OperationsSchema.parse(plan.operations));
+  assert.deepEqual(after.room.artworks, [{ id: "studio-artwork", wall: "left", offset: 0.5, height: 1.8, design: "botanical" }]);
+  assert.deepEqual(after.objects, before.objects);
+  assert.equal(after.revision, 1);
 });
 
 test("catalog and room semantics remain enforced after provider and domain parsing", () => {

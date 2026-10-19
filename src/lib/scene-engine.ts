@@ -1,5 +1,6 @@
 import { getCatalogItem } from "./catalog-data";
 import { ENVIRONMENTS } from "./environments";
+import { getArtworkPlacementError, getRoomArtworks } from "./room-decor";
 import { IdSchema, OperationsSchema, SceneSchema, type Operation, type Scene, type SceneObject } from "./schema";
 
 export class DomainError extends Error {
@@ -44,6 +45,20 @@ export function applyOperations(scene: Scene, operations: Operation[], options: 
   const now = options.now ?? (() => new Date());
 
   for (const operation of parsedOperations.data) {
+    if (operation.type === "move_artwork" || operation.type === "set_artwork") {
+      const artworks = getRoomArtworks(result.room);
+      const artwork = artworks.find((entry) => entry.id === operation.artworkId);
+      if (!artwork) throw new DomainError("ARTWORK_NOT_FOUND", `Painting '${operation.artworkId}' does not exist. Refresh the room before editing it.`);
+      if (operation.type === "move_artwork") {
+        artwork.wall = operation.wall;
+        artwork.offset = operation.offset;
+        artwork.height = operation.height;
+      } else artwork.design = operation.design;
+      const placementError = getArtworkPlacementError(result.room, artwork);
+      if (placementError) throw new DomainError("INVALID_ARTWORK_PLACEMENT", placementError);
+      result.room.artworks = artworks;
+      continue;
+    }
     if (operation.type === "set_environment") {
       const environment = ENVIRONMENTS.find((entry) => entry.id === operation.environmentId)!;
       result.room.wallColor = environment.wallColor;
@@ -77,6 +92,10 @@ export function applyOperations(scene: Scene, operations: Operation[], options: 
 
   // Also protect against malformed persisted data entering the renderer.
   result.objects.forEach((object) => validateObject(result, object));
+  if (result.room.artworks) for (const artwork of result.room.artworks) {
+    const placementError = getArtworkPlacementError(result.room, artwork);
+    if (placementError) throw new DomainError("INVALID_ARTWORK_PLACEMENT", placementError);
+  }
   result.revision += 1;
   result.updatedAt = now().toISOString();
   return result;

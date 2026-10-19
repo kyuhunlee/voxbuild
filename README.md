@@ -17,9 +17,10 @@ Prospective tenants can explore a sample apartment, add catalog furniture, and r
 ## What is implemented
 
 - A client-rendered React Three Fiber apartment with procedural furniture, orbit/top views, dimensions, selection, and manual controls. The default perspective camera is framed approximately 18% closer; the top view still fits the room.
-- Seven presets: Sunlit studio, City loft, Work from home, Quiet bedroom, Gathering room, Evening lounge, and Blank canvas. Quiet bedroom, Gathering room, and Evening lounge are new.
+- Six presets: Sunlit studio, Work from home, Quiet bedroom, Gathering room, Evening lounge, and Blank canvas. They have distinct window arrangements, lighting, and wall art; City loft is no longer offered for new rooms.
 - Fourteen furniture SKUs, including beds, dining furniture, storage, and an ottoman, with category filtering and search on desktop and mobile.
 - Six saved environment styles—Sunlit, Gallery, Forest, Desert, Coastal, and Midnight—change wall/floor finishes and lighting together, with furniture preserved. Style changes use the shared operation path from manual controls, text, and voice.
+- Selectable wall paintings with five designs, vertical/horizontal movement, and switching between the back and left walls. Manual, text, and voice edits share validation and Atlas persistence. Frames must stay clear of wall edges, windows, and other artwork; windows themselves belong to the preset.
 - Canned prompts and typed commands through AI SDK structured output and Vercel AI Gateway when configured.
 - Direct OpenAI WebRTC voice, started only by a microphone click. Completed tool calls use the same server command path as manual edits.
 - Signed anonymous visitor sessions, owner-scoped scenes, revision checks, and atomic command receipts in Atlas.
@@ -82,7 +83,9 @@ npx tsx scripts/evaluate.ts --list
 npx tsx scripts/verify-storage.ts --help
 ```
 
-On October 19, 2026, the expansion's production build, type check, and all **45 unit tests** passed. Tests cover Gateway runtime OIDC detection, domain bounds and colors, atomic batch rejection, owner isolation, revision races, duplicate receipts, provider-schema compatibility, environments, and voice ordering/interruption. Live API, Atlas, and user microphone evidence is recorded separately.
+On October 19, 2026, the room/artwork update's production build, type check, and all **52 unit tests** passed locally. Tests cover Gateway runtime OIDC detection, domain bounds and colors, atomic batch rejection, owner isolation, revision races, duplicate receipts, provider-schema compatibility, environments, legacy scenes, artwork placement, and voice ordering/interruption. Live API, Atlas, and user microphone evidence is recorded separately.
+
+The [room/artwork local API report](docs/evidence/decor-local.json) passed **14/14** checks with real Atlas and models: six distinct presets, rejection of the removed loft preset, artwork movement/design persistence, window collision and atomic batch rejection, style preservation, and primary/policy-fallback artwork edits. Local desktop/mobile checks verified selecting paintings, changing designs, raising them, switching walls, and saved-state reload. The [Realtime artwork report](docs/evidence/realtime-artwork-compatibility.json) verified a completed design-and-move tool call and spoken continuation over server WebSocket; it used synthetic input, local validation, **zero Atlas writes**, and no browser microphone.
 
 The [expanded local API report](docs/evidence/expanded-local.json) passed **18/18** checks: seven new furniture SKUs, three new presets, all six environment styles, and real model requests for an environment change and new furniture. Local live UI checks covered the default desktop viewport, 1280×800, and 390×844: new room geometry, readable night lighting, style save/reload, category filtering, mobile furniture addition, and top-view fit. No console errors were observed; upstream Three.js deprecation warnings remained.
 

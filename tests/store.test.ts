@@ -130,7 +130,7 @@ test("resets preserve identity, advance revision, and share deduplication guaran
   assert.equal(reset.scene.objects.length, 0);
   const duplicate = await repository.resetScene("owner-a", scene.id, "empty", 0, "reset-1");
   assert.equal(duplicate.duplicate, true);
-  await assert.rejects(repository.resetScene("owner-a", scene.id, "loft", 0, "reset-1"), hasCode("COMMAND_ID_REUSED"));
+  await assert.rejects(repository.resetScene("owner-a", scene.id, "office", 0, "reset-1"), hasCode("COMMAND_ID_REUSED"));
 });
 
 test("receipts remain bounded and an evicted original retry fails its revision precondition", async () => {

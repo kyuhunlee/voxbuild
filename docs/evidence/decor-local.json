@@ -1,0 +1,114 @@
+{
+  "date": "2026-10-19T09:17:44.381Z",
+  "baseUrl": "http://127.0.0.1:3000",
+  "capabilities": {
+    "database": true,
+    "gateway": true,
+    "voice": true
+  },
+  "checks": [
+    {
+      "name": "preset-studio",
+      "status": "passed",
+      "fixtureSceneId": "0d98c058-1baf-45c5-9df7-8e32af329579",
+      "revision": 0,
+      "windowLayout": "back-wide",
+      "windows": 1,
+      "artworks": 1
+    },
+    {
+      "name": "preset-office",
+      "status": "passed",
+      "fixtureSceneId": "3a592771-e1d0-4c2e-8999-bdbcc40c9d77",
+      "revision": 0,
+      "windowLayout": "left-pair",
+      "windows": 2,
+      "artworks": 2
+    },
+    {
+      "name": "preset-bedroom",
+      "status": "passed",
+      "fixtureSceneId": "b8c55221-aca7-4b2b-a5a0-3c34e7b335eb",
+      "revision": 0,
+      "windowLayout": "left-tall",
+      "windows": 1,
+      "artworks": 2
+    },
+    {
+      "name": "preset-dining",
+      "status": "passed",
+      "fixtureSceneId": "af6fc68e-42e7-4478-9ec4-190aa4f62d52",
+      "revision": 0,
+      "windowLayout": "corner",
+      "windows": 2,
+      "artworks": 2
+    },
+    {
+      "name": "preset-lounge",
+      "status": "passed",
+      "fixtureSceneId": "6b945143-2002-4280-86e8-90a63a28b523",
+      "revision": 0,
+      "windowLayout": "back-high",
+      "windows": 1,
+      "artworks": 2
+    },
+    {
+      "name": "preset-empty",
+      "status": "passed",
+      "fixtureSceneId": "76a074a0-05bd-4d59-9e1c-24916c63d26b",
+      "revision": 0,
+      "windowLayout": "none",
+      "windows": 0,
+      "artworks": 0
+    },
+    {
+      "name": "removed-loft-rejected",
+      "status": "passed"
+    },
+    {
+      "name": "artwork-move-saved",
+      "status": "passed",
+      "fixtureSceneId": "0d98c058-1baf-45c5-9df7-8e32af329579",
+      "revision": 1
+    },
+    {
+      "name": "artwork-design-saved",
+      "status": "passed",
+      "fixtureSceneId": "0d98c058-1baf-45c5-9df7-8e32af329579",
+      "revision": 2
+    },
+    {
+      "name": "window-overlap-rejected",
+      "status": "passed",
+      "fixtureSceneId": "0d98c058-1baf-45c5-9df7-8e32af329579",
+      "revision": 2
+    },
+    {
+      "name": "invalid-artwork-batch-atomic",
+      "status": "passed",
+      "fixtureSceneId": "0d98c058-1baf-45c5-9df7-8e32af329579",
+      "revision": 2
+    },
+    {
+      "name": "style-preserves-art-and-windows",
+      "status": "passed",
+      "fixtureSceneId": "0d98c058-1baf-45c5-9df7-8e32af329579",
+      "revision": 3
+    },
+    {
+      "name": "model-artwork-move-primary",
+      "status": "passed",
+      "fixtureSceneId": "4ff27a98-122f-497b-8482-cb8155ad45b5",
+      "revision": 1,
+      "model": "openai/gpt-4.1-mini"
+    },
+    {
+      "name": "model-artwork-design-policy-fallback",
+      "status": "passed",
+      "fixtureSceneId": "64d5b649-9976-4196-abb3-31a8403a49f8",
+      "revision": 1,
+      "model": "google/gemini-2.5-flash"
+    }
+  ],
+  "passed": 14
+}

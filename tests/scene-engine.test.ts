@@ -161,7 +161,7 @@ test("each environment changes only the palette while preserving old scene shape
     assert.deepEqual(SceneSchema.parse(JSON.parse(JSON.stringify(after))), after);
   }
   assert.deepEqual(before, original);
-  for (const [preset, environment] of [["studio", "sunlit"], ["loft", "gallery"], ["office", "forest"]] as const) {
+  for (const [preset, environment] of [["studio", "sunlit"], ["office", "forest"]] as const) {
     assert.equal(getEnvironmentForRoom(createScene(`legacy-${preset}`, preset).room).id, environment);
   }
   assert.equal(getEnvironmentForRoom({ wallColor: "#123456", floorColor: "#654321" }).id, "sunlit");

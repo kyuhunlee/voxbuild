@@ -40,9 +40,21 @@ export const ModelOperationSchema = z.union([
     type: z.literal("set_environment"),
     environmentId: z.string().describe("An exact environment ID from the supplied environments: sunlit, gallery, forest, desert, coastal, or midnight. Changes the room palette and lighting without moving or replacing furniture."),
   }).strict(),
+  z.object({
+    type: z.literal("move_artwork"),
+    artworkId: z.string().describe("The exact ID of an existing painting from the supplied artwork data."),
+    wall: z.string().describe("The wall: back or left. Paintings stay mounted on one of these walls."),
+    offset: z.number().describe("Horizontal wall position in meters: world X on the back wall, world Z on the left wall."),
+    height: z.number().describe("Height of the painting center above the floor in meters. The whole 0.9 by 1.1 meter painting must fit on the wall, clear of windows and other paintings."),
+  }).strict(),
+  z.object({
+    type: z.literal("set_artwork"),
+    artworkId: z.string().describe("The exact ID of an existing painting from the supplied artwork data."),
+    design: z.string().describe("Artwork design: abstract, botanical, coastal, geometric, or sunset. Changes the picture without moving its frame."),
+  }).strict(),
 ]);
 
-const ModelOperationsSchema = z.array(ModelOperationSchema).describe("One to twelve furniture or environment operations, executed atomically after server validation. Use only supplied catalog items, existing object IDs, and environment IDs.");
+const ModelOperationsSchema = z.array(ModelOperationSchema).describe("One to twelve furniture, environment, or artwork operations, executed atomically after server validation. Use only supplied catalog items, existing object/artwork IDs, and environment IDs.");
 
 export const ModelPlanSchema = z.object({
   message: z.string().describe("A brief user-facing description of the proposed edit. Do not claim it has been saved before the server accepts it."),

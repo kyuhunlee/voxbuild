@@ -6,6 +6,7 @@ import { Activity, AlertCircle, ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Box, 
 import { CATALOG, getCatalogItem } from "@/lib/catalog-data";
 import { ENVIRONMENTS, getEnvironmentForRoom } from "@/lib/environments";
 import { createScene, PRESETS, type PresetId } from "@/lib/presets";
+import { ARTWORK_DESIGNS, ARTWORK_HEIGHT, ARTWORK_WIDTH, findArtworkPlacement, getRoomArtworks, type ArtworkDesign } from "@/lib/room-decor";
 import { applyOperations } from "@/lib/scene-engine";
 import { SceneSchema, type CatalogItem, type Operation, type Scene, type SceneObject } from "@/lib/schema";
 import { useVoice, type VoiceEvent } from "@/hooks/useVoice";
@@ -22,6 +23,7 @@ const EMPTY_CAPABILITIES: Capabilities = { database: false, gateway: false, voic
 const PROMPTS = ["Make the sofa sage", "Add an ottoman", "Try the forest style"];
 const CATEGORY_LABELS: Record<string, string> = { sofa: "Sofas", chair: "Chairs", table: "Tables", bed: "Beds", storage: "Storage", ottoman: "Ottomans", desk: "Desks", lamp: "Lighting", plant: "Plants", rug: "Rugs" };
 const CATALOG_CATEGORIES = [...new Set(CATALOG.map((item) => item.category))];
+const ARTWORK_LABELS: Record<ArtworkDesign, string> = { abstract: "Abstract", botanical: "Botanical", coastal: "Coastal", geometric: "Geometric", sunset: "Sunset" };
 const COLOR_NAMES: Record<string, string> = {
   "#cc7656": "Terracotta", "#e7dfce": "Cream", "#687761": "Sage", "#446a87": "Blue", "#404448": "Charcoal", "#aa7953": "Oak", "#d8bc91": "Light oak", "#584336": "Walnut", "#c4a267": "Brass", "#b87858": "Terracotta", "#e5d6ba": "Natural", "#929b82": "Sage", "#b97861": "Clay", "#69828c": "Blue",
 };
@@ -125,6 +127,17 @@ function FurnitureIllustration({ category, sku, color }: Pick<CatalogItem, "cate
   </svg>;
 }
 
+function ArtworkPreview({ design }: { design: ArtworkDesign }) {
+  return <svg viewBox="0 0 72 88" className="artwork-preview" aria-hidden="true">
+    <rect width="72" height="88" rx="2" fill="#73583f" /><rect x="4" y="4" width="64" height="80" fill="#e7dec9" />
+    {design === "abstract" && <><path d="M12 68V37A20 20 0 0 1 52 37V68Z" fill="#bd775e" /><circle cx="46" cy="28" r="12" fill="#d4b778" /><path d="M22 75V45A15 15 0 0 1 52 45V75" fill="#777e64" /><path d="M15 73H58" stroke="#e7dec9" strokeWidth="3" /></>}
+    {design === "botanical" && <><path d="M36 74V20M36 55L20 38M36 44L52 28" stroke="#626e4d" strokeWidth="2" /><ellipse cx="25" cy="37" rx="7" ry="15" transform="rotate(-40 25 37)" fill="#798867" /><ellipse cx="48" cy="29" rx="7" ry="15" transform="rotate(42 48 29)" fill="#617957" /><ellipse cx="43" cy="58" rx="6" ry="13" transform="rotate(45 43 58)" fill="#9ba17b" /><path d="M25 68H47L44 78H28Z" fill="#ba8e6c" /></>}
+    {design === "coastal" && <><rect x="4" y="4" width="64" height="42" fill="#bbd2d2" /><circle cx="47" cy="26" r="10" fill="#f0d5a1" /><path d="M4 48Q22 36 40 47T68 46V67H4Z" fill="#729d9e" /><path d="M4 60Q22 52 42 63T68 60V84H4Z" fill="#e1c69c" /><path d="M6 55Q24 47 42 57T66 54" fill="none" stroke="#e4efdf" strokeWidth="2" /></>}
+    {design === "geometric" && <><rect x="12" y="15" width="24" height="28" fill="#bd7961" /><circle cx="47" cy="30" r="13" fill="#d2af6e" /><path d="M12 74L36 43L60 74Z" fill="#74857a" /><path d="M15 50H53V76" fill="none" stroke="#4f605d" strokeWidth="3" /></>}
+    {design === "sunset" && <><rect x="4" y="4" width="64" height="80" fill="#e4b58f" /><circle cx="36" cy="38" r="18" fill="#c96b4c" /><path d="M4 55Q23 44 40 55T68 53V84H4Z" fill="#b1816f" /><path d="M4 68Q23 56 43 68T68 66V84H4Z" fill="#776c72" /><path d="M26 59H46M30 64H42" stroke="#f1c291" strokeWidth="2" /></>}
+  </svg>;
+}
+
 class CanvasBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
@@ -140,8 +153,9 @@ export default function VoxBuildApp() {
   const [mode, setMode] = useState<WorkspaceMode>("loading");
   const modeRef = useRef<WorkspaceMode>("loading");
   const [capabilities, setCapabilities] = useState<Capabilities>(EMPTY_CAPABILITIES);
-  const [preset, setPreset] = useState<PresetId>("studio");
+  const [preset, setPreset] = useState<PresetId | null>("studio");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedArtworkId, setSelectedArtworkId] = useState<string | null>(null);
   const [view, setView] = useState<"perspective" | "top">("perspective");
   const [showDimensions, setShowDimensions] = useState(false);
   const [cameraKey, setCameraKey] = useState(0);
@@ -169,6 +183,7 @@ export default function VoxBuildApp() {
     sceneRef.current = validated;
     setScene(validated);
     setSelectedId((id) => validated.objects.some((object) => object.id === id) ? id : null);
+    setSelectedArtworkId((id) => getRoomArtworks(validated.room).some((artwork) => artwork.id === id) ? id : null);
     return validated;
   }, []);
   const changeMode = useCallback((next: WorkspaceMode) => { modeRef.current = next; setMode(next); }, []);
@@ -190,7 +205,8 @@ export default function VoxBuildApp() {
       const next = saved.scenes[0] ?? (await request<{ scene: Scene }>("/api/scenes", { method: "POST", body: JSON.stringify({ preset: "studio" }), signal })).scene;
       if (signal?.aborted) return;
       accept(next);
-      setPreset(PRESETS.find((entry) => entry.room.width === next.room.width && entry.room.depth === next.room.depth)?.id ?? "studio");
+      const matchingPresets = PRESETS.filter((entry) => entry.room.width === next.room.width && entry.room.depth === next.room.depth && entry.room.height === next.room.height && (next.room.windowLayout === undefined || entry.room.windowLayout === next.room.windowLayout));
+      setPreset(matchingPresets.length === 1 ? matchingPresets[0].id : null);
       changeMode("live");
       record({ title: saved.scenes.length ? "Saved room restored" : "New room saved", source: "MongoDB Atlas", status: "success", detail: { sceneId: next.id, revision: next.revision } });
     } catch (error) {
@@ -258,7 +274,7 @@ export default function VoxBuildApp() {
       const position = findPlacement(current, item);
       void executeOperations([{ type: "add", sku: item.sku, position, rotation: 0, color: item.defaultColor }]).then((result) => {
         const added = result.scene.objects.find((object) => !current.objects.some((previous) => previous.id === object.id));
-        if (added) { setSelectedId(added.id); setCatalogOpen(false); setInspectorOpen(true); }
+        if (added) { setSelectedId(added.id); setSelectedArtworkId(null); setCatalogOpen(false); setInspectorOpen(true); }
         notify(`${item.name} added${modeRef.current === "sample" ? " to the preview" : " and saved"}.`, "success");
       }).catch((error: unknown) => notify(error instanceof Error ? error.message : "Furniture could not be added.", "error"));
     } catch (error) { notify(error instanceof Error ? error.message : "Furniture could not be added.", "error"); }
@@ -272,6 +288,7 @@ export default function VoxBuildApp() {
       accept(next);
       setPreset(nextPreset);
       setSelectedId(null);
+      setSelectedArtworkId(null);
       setView("perspective");
       setCameraKey((key) => key + 1);
       record({ title: `${PRESETS.find((entry) => entry.id === nextPreset)?.name ?? "Room"} opened`, source: modeRef.current === "sample" ? "Local preview" : "MongoDB Atlas", status: "success", detail: { sceneId: next.id, revision: next.revision } });
@@ -331,20 +348,37 @@ export default function VoxBuildApp() {
     }));
   }
 
-  const selectObject = useCallback((id: string | null) => { setSelectedId(id); if (id) setInspectorOpen(true); }, []);
+  const selectObject = useCallback((id: string | null) => { setSelectedId(id); if (id) { setSelectedArtworkId(null); setCatalogOpen(false); setInspectorOpen(true); } }, []);
+  const selectArtwork = useCallback((id: string | null) => { setSelectedArtworkId(id); if (id) { setSelectedId(null); setCatalogOpen(false); setInspectorOpen(true); } }, []);
   const selected = scene.objects.find((object) => object.id === selectedId);
   const selectedItem = selected ? getCatalogItem(selected.sku) : undefined;
+  const artworks = getRoomArtworks(scene.room);
+  const selectedArtwork = artworks.find((artwork) => artwork.id === selectedArtworkId);
   const catalog = useMemo(() => CATALOG.filter((item) => (category === "all" || item.category === category) && `${item.name} ${item.category}`.toLowerCase().includes(search.trim().toLowerCase())), [search, category]);
   const roomEnvironment = getEnvironmentForRoom(scene.room);
   const environment = roomEnvironment.wallColor === scene.room.wallColor && roomEnvironment.floorColor === scene.room.floorColor ? roomEnvironment : undefined;
   const locked = busy || mode === "loading" || mode === "error";
   const total = scene.objects.reduce((sum, object) => sum + (getCatalogItem(object.sku)?.price ?? 0), 0);
   const area = scene.room.width * scene.room.depth;
-  const roomName = PRESETS.find((entry) => entry.id === preset)?.name ?? "Your apartment";
+  const roomName = PRESETS.find((entry) => entry.id === preset)?.name ?? "Saved room";
 
   function nudge(x: number, z: number) {
     if (!selected || pending.current) return;
     void handle(executeOperations([{ type: "move", objectId: selected.id, position: [Math.round((selected.position[0] + x) * 100) / 100, selected.position[1], Math.round((selected.position[2] + z) * 100) / 100] }]));
+  }
+
+  function nudgeArtwork(offset: number, height: number) {
+    if (!selectedArtworkId || pending.current) return;
+    const artwork = getRoomArtworks(sceneRef.current.room).find((entry) => entry.id === selectedArtworkId);
+    if (!artwork) return;
+    void handle(executeOperations([{ type: "move_artwork", artworkId: artwork.id, wall: artwork.wall, offset: Math.round((artwork.offset + offset) * 100) / 100, height: Math.round((artwork.height + height) * 100) / 100 }]));
+  }
+
+  function changeArtworkWall(wall: "back" | "left") {
+    if (!selectedArtworkId || pending.current) return;
+    const placement = findArtworkPlacement(sceneRef.current.room, selectedArtworkId, wall);
+    if (!placement) { notify(`There isn’t a clear spot on the ${wall} wall. Try the other wall or move another artwork first.`, "error"); return; }
+    void handle(executeOperations([{ type: "move_artwork", artworkId: selectedArtworkId, wall, ...placement }]));
   }
 
   return <div className="app-shell">
@@ -379,15 +413,15 @@ export default function VoxBuildApp() {
 
       <main className="room-workspace">
         <div className="room-toolbar">
-          <div className="room-picker"><span className="room-picker-icon"><Layers size={16} /></span><div><label htmlFor="room-preset">Your space</label><div className="select-wrap"><select id="room-preset" value={preset} onChange={(event) => changePreset(event.target.value as PresetId)} disabled={locked}>{PRESETS.map((entry) => <option value={entry.id} key={entry.id}>{entry.name}</option>)}</select><ChevronDown size={13} /></div></div></div>
+          <div className="room-picker"><span className="room-picker-icon"><Layers size={16} /></span><div><label htmlFor="room-preset">Your space</label><div className="select-wrap"><select id="room-preset" value={preset ?? "saved"} onChange={(event) => changePreset(event.target.value as PresetId)} disabled={locked}>{preset === null && <option value="saved" disabled>Saved room</option>}{PRESETS.map((entry) => <option value={entry.id} key={entry.id}>{entry.name}</option>)}</select><ChevronDown size={13} /></div></div></div>
           <div className="room-toolbar-actions"><button className="icon-button" onClick={reloadScene} disabled={locked} aria-label="Reload saved room" title="Reload saved room"><RefreshCw size={15} /></button><span className="toolbar-divider" /><span className="room-size">{area.toFixed(0)} m²</span><span className="object-count">{scene.objects.length} pieces</span></div>
         </div>
         <div className="stage">
           <div className="stage-topline"><div className="stage-caption"><span className="stage-caption-dot" />Sample apartment<span className="stage-caption-separator">/</span>{scene.room.width.toFixed(1)} × {scene.room.depth.toFixed(1)} m</div><div className="stage-view-controls"><button className={view === "perspective" ? "active" : ""} onClick={() => setView("perspective")} aria-label="Perspective view" title="Perspective view" aria-pressed={view === "perspective"}><Box size={15} /></button><button className={view === "top" ? "active" : ""} onClick={() => setView("top")} aria-label="Top view" title="Top view" aria-pressed={view === "top"}><Grid2X2 size={15} /></button></div></div>
-          <div className="canvas-wrap"><CanvasBoundary><RoomCanvas key={cameraKey} scene={scene} selectedId={selectedId} onSelect={selectObject} view={view} showDimensions={showDimensions} /></CanvasBoundary></div>
+          <div className="canvas-wrap"><CanvasBoundary><RoomCanvas key={cameraKey} scene={scene} selectedId={selectedId} onSelect={selectObject} selectedArtworkId={selectedArtworkId} onSelectArtwork={selectArtwork} view={view} showDimensions={showDimensions} /></CanvasBoundary></div>
           <div className="stage-side-controls"><button className={showDimensions ? "active" : ""} onClick={() => setShowDimensions((show) => !show)} aria-label="Toggle room dimensions" title="Room dimensions" aria-pressed={showDimensions}><Ruler size={16} /></button><button onClick={() => { setView("perspective"); setCameraKey((key) => key + 1); }} aria-label="Reset camera" title="Reset camera"><Maximize2 size={15} /></button></div>
           <div className="stage-navigation"><MousePointer2 size={12} /><span>Drag to orbit</span><span className="navigation-dot" /> <span>Scroll to zoom</span></div>
-          <div className="mobile-panel-buttons"><button onClick={() => { setInspectorOpen(false); setCatalogOpen(true); }}><PanelLeft size={14} />Furniture</button><button onClick={() => { setCatalogOpen(false); setSelectedId(null); setInspectorOpen(true); }}><SlidersHorizontal size={14} />Room style</button>{selected && <button onClick={() => { setCatalogOpen(false); setInspectorOpen(true); }}><MousePointer2 size={14} />Edit piece</button>}</div>
+          <div className="mobile-panel-buttons"><button onClick={() => { setInspectorOpen(false); setCatalogOpen(true); }}><PanelLeft size={14} />Furniture</button><button onClick={() => { setCatalogOpen(false); setSelectedId(null); setSelectedArtworkId(null); setInspectorOpen(true); }}><SlidersHorizontal size={14} />Room style</button>{(selected || selectedArtwork) && <button onClick={() => { setCatalogOpen(false); setInspectorOpen(true); }}><MousePointer2 size={14} />{selectedArtwork ? "Edit artwork" : "Edit piece"}</button>}</div>
 
           {(mode === "loading" || mode === "error") && <div className="workspace-connection"><span>{mode === "loading" ? <LoaderCircle size={15} className="spin" /> : <AlertCircle size={15} />}{mode === "loading" ? "Connecting your workspace…" : "Your workspace is unavailable."}</span>{mode === "error" && <button onClick={() => void initialize()}>Try again</button>}</div>}
 
@@ -412,8 +446,8 @@ export default function VoxBuildApp() {
         </div>
       </main>
 
-      <aside className={`inspector-panel ${inspectorOpen ? "mobile-open" : ""}`} aria-label={selected ? "Selected furniture inspector" : "Room details"}>
-        <div className="inspector-heading"><h2>{selected ? "Make it yours" : "Room details"}</h2><button className="icon-button" onClick={() => { if (selected) setSelectedId(null); setInspectorOpen(false); }} aria-label={selected ? "Deselect furniture and close inspector" : "Close room details"}>{selected || inspectorOpen ? <X size={15} /> : <SlidersHorizontal size={15} />}</button></div>
+      <aside className={`inspector-panel ${inspectorOpen ? "mobile-open" : ""}`} aria-label={selectedArtwork ? "Selected artwork inspector" : selected ? "Selected furniture inspector" : "Room details"}>
+        <div className="inspector-heading"><h2>{selectedArtwork ? "Art on your walls" : selected ? "Make it yours" : "Room details"}</h2><button className="icon-button" onClick={() => { setSelectedId(null); setSelectedArtworkId(null); setInspectorOpen(false); }} aria-label={selectedArtwork ? "Deselect artwork and close inspector" : selected ? "Deselect furniture and close inspector" : "Close room details"}>{selected || selectedArtwork || inspectorOpen ? <X size={15} /> : <SlidersHorizontal size={15} />}</button></div>
         <section className="room-style-section" aria-labelledby="room-style-heading"><div className="section-label"><h4 id="room-style-heading">Room style</h4><span>{environment?.name ?? "Custom palette"}</span></div><div className="environment-options">{ENVIRONMENTS.map((style) => <button key={style.id} className={`environment-option ${style.id === environment?.id ? "selected" : ""}`} aria-label={`Apply ${style.name} room style`} aria-pressed={style.id === environment?.id} title={style.description} disabled={locked || style.id === environment?.id} onClick={() => void handle(executeOperations([{ type: "set_environment", environmentId: style.id }]))}><span className="environment-swatch" aria-hidden="true" style={{ backgroundColor: style.wallColor }}><span style={{ backgroundColor: style.floorColor }} />{style.id === environment?.id && <Check size={12} />}</span><span>{style.name}</span></button>)}</div><p>Walls, flooring, and light. Your furniture stays.</p></section>
         {selected && selectedItem ? <>
           <div className="inspector-preview"><FurnitureIllustration sku={selectedItem.sku} category={selectedItem.category} color={selected.color} /><span>Selected piece</span></div>
@@ -422,11 +456,18 @@ export default function VoxBuildApp() {
           <section className="inspector-section"><div className="section-label"><h4>Position</h4><span>0.25 m steps</span></div><div className="position-values"><span><small>X</small>{selected.position[0].toFixed(2)}<small>m</small></span><span><small>Z</small>{selected.position[2].toFixed(2)}<small>m</small></span></div><div className="nudge-controls"><button disabled={locked} onClick={() => nudge(-0.25, 0)} aria-label="Move selected furniture left"><ArrowLeft size={16} /></button><button disabled={locked} onClick={() => nudge(0, -0.25)} aria-label="Move selected furniture toward back wall"><ArrowUp size={16} /></button><button disabled={locked} onClick={() => nudge(0, 0.25)} aria-label="Move selected furniture toward front"><ArrowDown size={16} /></button><button disabled={locked} onClick={() => nudge(0.25, 0)} aria-label="Move selected furniture right"><ArrowRight size={16} /></button></div></section>
           <section className="inspector-section rotation-section"><div className="section-label"><h4>Rotation</h4><span>{Math.round(selected.rotation * 180 / Math.PI)}°</span></div><button className="button full-width" disabled={locked} onClick={() => void handle(executeOperations([{ type: "rotate", objectId: selected.id, rotation: (selected.rotation + Math.PI / 2) % (Math.PI * 2) }]))}><RotateCw size={14} />Rotate 90°</button></section>
           <div className="inspector-bottom"><button className="remove-button" disabled={locked} onClick={() => void handle(executeOperations([{ type: "remove", objectId: selected.id }]))}><Trash2 size={14} />Remove from room</button><p>Changes apply to your {mode === "sample" ? "local preview" : "saved room"}.</p></div>
+        </> : selectedArtwork ? <>
+          <div className="inspector-preview selected-artwork-preview"><ArtworkPreview design={selectedArtwork.design} /><span>Wall-mounted artwork</span></div>
+          <div className="selected-title"><h3>{ARTWORK_LABELS[selectedArtwork.design]} study</h3><p>{ARTWORK_WIDTH} × {ARTWORK_HEIGHT} m <span>W × H · framed print</span></p></div>
+          <section className="inspector-section"><div className="section-label"><h4>Artwork design</h4><span>Five studies</span></div><div className="artwork-designs">{ARTWORK_DESIGNS.map((design) => <button key={design} className={design === selectedArtwork.design ? "selected" : ""} aria-label={`Set artwork design to ${ARTWORK_LABELS[design]}`} aria-pressed={design === selectedArtwork.design} disabled={locked || design === selectedArtwork.design} onClick={() => void handle(executeOperations([{ type: "set_artwork", artworkId: selectedArtwork.id, design }]))}><ArtworkPreview design={design} /><span>{ARTWORK_LABELS[design]}</span>{design === selectedArtwork.design && <Check size={12} />}</button>)}</div></section>
+          <section className="inspector-section"><div className="section-label"><h4>Hang on a wall</h4><span>Wall-mounted</span></div><div className="artwork-wall-options">{(["back", "left"] as const).map((wall) => <button key={wall} className={selectedArtwork.wall === wall ? "selected" : ""} disabled={locked || selectedArtwork.wall === wall} aria-pressed={selectedArtwork.wall === wall} onClick={() => changeArtworkWall(wall)}>{wall === "back" ? "Back wall" : "Left wall"}{selectedArtwork.wall === wall && <Check size={12} />}</button>)}</div><p className="artwork-placement-note">Changing walls finds a clear spot beside windows and other artwork.</p></section>
+          <section className="inspector-section"><div className="section-label"><h4>Position on wall</h4><span>0.20 m steps</span></div><div className="artwork-position-values"><span><small>Along wall</small><strong>{selectedArtwork.offset.toFixed(2)} <small>m</small></strong></span><span><small>Center height</small><strong>{selectedArtwork.height.toFixed(2)} <small>m</small></strong></span></div><div className="artwork-nudge-controls"><button disabled={locked} onClick={() => nudgeArtwork(-0.2, 0)} aria-label={selectedArtwork.wall === "back" ? "Move artwork left along back wall" : "Move artwork toward back along left wall"}><ArrowLeft size={14} /><span>{selectedArtwork.wall === "back" ? "Move left" : "Toward back"}</span></button><button disabled={locked} onClick={() => nudgeArtwork(0.2, 0)} aria-label={selectedArtwork.wall === "back" ? "Move artwork right along back wall" : "Move artwork toward front along left wall"}><ArrowRight size={14} /><span>{selectedArtwork.wall === "back" ? "Move right" : "Toward front"}</span></button><button disabled={locked} onClick={() => nudgeArtwork(0, -0.2)} aria-label="Lower artwork"><ArrowDown size={14} /><span>Lower</span></button><button disabled={locked} onClick={() => nudgeArtwork(0, 0.2)} aria-label="Raise artwork"><ArrowUp size={14} /><span>Raise</span></button></div><p className="artwork-placement-note">The frame stays on the wall. Positions that cross an edge, window, or another artwork are kept unchanged.</p></section>
         </> : <>
           <div className="room-overview"><span className="room-overview-icon"><Box size={27} strokeWidth={1.3} /></span><h3>{roomName}</h3><p>A little space for your next chapter.</p><div className="room-metrics"><div><strong>{area.toFixed(1)}<span> m²</span></strong><small>Floor area</small></div><div><strong>{scene.room.height.toFixed(1)}<span> m</span></strong><small>Ceiling height</small></div></div></div>
           <section className="room-inventory"><div className="section-label"><h4>In your room</h4><span>{scene.objects.length} pieces</span></div><div className="inventory-list">{scene.objects.map((object) => { const item = getCatalogItem(object.sku); return item ? <button key={object.id} onClick={() => selectObject(object.id)}><span className="inventory-swatch" style={{ background: object.color }} /><span>{item.name}</span><ChevronRight size={13} /></button> : null; })}{!scene.objects.length && <p className="empty-inventory">Your room is ready. Add your first piece from the catalog.</p>}</div></section>
+          <section className="room-inventory artwork-inventory"><div className="section-label"><h4>On your walls</h4><span>{artworks.length} {artworks.length === 1 ? "artwork" : "artworks"}</span></div><div className="inventory-list">{artworks.map((artwork) => <button key={artwork.id} onClick={() => selectArtwork(artwork.id)} aria-label={`Edit ${ARTWORK_LABELS[artwork.design]} artwork on ${artwork.wall} wall`}><ArtworkPreview design={artwork.design} /><span>{ARTWORK_LABELS[artwork.design]} study<small>{artwork.wall === "back" ? "Back wall" : "Left wall"}</small></span><ChevronRight size={13} /></button>)}{!artworks.length && <p className="empty-inventory">A clean canvas. Furnished room presets include wall-mounted artwork.</p>}</div></section>
           <div className="estimate-total"><span>Furniture estimate</span><strong>${total.toLocaleString()}</strong><p>Illustrative catalog prices. No purchase is made.</p></div>
-          <div className="inspector-help"><MousePointer2 size={17} /><p>Select any piece to change its finish, move it, or try a different angle.</p></div>
+          <div className="inspector-help"><MousePointer2 size={17} /><p>Select furniture to change its finish or position. Select a framed artwork to change its design and move it along a wall.</p></div>
         </>}
         <div className="inspector-footer"><span className="revision-label">Revision {scene.revision}</span><span>{mode === "live" ? "Cloud saved" : "Local sample"}</span></div>
       </aside>

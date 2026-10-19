@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { EnvironmentIdSchema } from "./environments";
+import { ArtworkDesignSchema, ArtworkSchema, WallSchema, WindowLayoutIdSchema } from "./room-decor";
 
 /** All lengths are meters. Object positions identify the floor-centered base. */
 export const IdSchema = z.string().min(1).max(80).regex(/^[a-zA-Z0-9][a-zA-Z0-9_-]*$/, "Use letters, digits, underscores, and hyphens for IDs.");
@@ -16,7 +17,15 @@ export const RoomSchema = z.object({
   height: z.number().finite().min(2).max(8),
   wallColor: ColorSchema,
   floorColor: ColorSchema,
-}).strict();
+  windowLayout: WindowLayoutIdSchema.optional(),
+  artworks: z.array(ArtworkSchema).max(8).optional(),
+}).strict().superRefine((room, context) => {
+  const ids = new Set<string>();
+  room.artworks?.forEach((artwork, index) => {
+    if (ids.has(artwork.id)) context.addIssue({ code: "custom", message: "Artwork IDs must be unique.", path: ["artworks", index, "id"] });
+    ids.add(artwork.id);
+  });
+});
 
 export const SceneObjectSchema = z.object({
   id: IdSchema,
@@ -48,6 +57,8 @@ export const OperationSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("rotate"), objectId: IdSchema, rotation: RotationSchema }).strict(),
   z.object({ type: z.literal("remove"), objectId: IdSchema }).strict(),
   z.object({ type: z.literal("set_environment"), environmentId: EnvironmentIdSchema }).strict(),
+  z.object({ type: z.literal("move_artwork"), artworkId: IdSchema, wall: WallSchema, offset: CoordinateSchema, height: z.number().finite().min(0).max(8) }).strict(),
+  z.object({ type: z.literal("set_artwork"), artworkId: IdSchema, design: ArtworkDesignSchema }).strict(),
 ]);
 
 export const OperationsSchema = z.array(OperationSchema).min(1).max(12);

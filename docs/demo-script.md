@@ -30,6 +30,7 @@ Confirm the deployment actually reports live storage and Gateway capabilities. T
 
 1. **Explore more kinds of rooms.** Open Quiet bedroom, Gathering room, or Evening lounge from **Your space**. Use the catalog category filter to find beds, storage, or dining pieces. On mobile, open **Furniture**, filter, and add a piece. Explain that changing the room preset creates a new saved room.
 2. **Change the mood without replacing the layout.** Open **Room style** and choose Coastal or Midnight from Sunlit, Gallery, Forest, Desert, Coastal, and Midnight. Show the existing furniture IDs and arrangement remain, then reload the saved room to verify the style persists. A text request such as “Switch to Midnight and keep all furniture unchanged” illustrates the bounded `set_environment` operation. The [synthetic Realtime environment check](evidence/realtime-environment-compatibility.json) verified tool/audio compatibility over server WebSocket with zero Atlas writes and no browser microphone; it is not proof of this deployed voice flow.
+3. **Make the walls personal.** Compare the office's paired left windows, the bedroom's tall window, and the lounge's high window. Click a painting in the canvas or under **On your walls**, choose one of five designs, and use **Raise**, **Lower**, or the wall controls. Reload to show the edit persisted. A text request such as “Move the painting 20 centimeters higher” uses the same validated executor. Windows remain fixed to the chosen room preset; City loft is no longer in the picker.
 
 ## If a live dependency fails
 
