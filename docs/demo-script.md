@@ -4,9 +4,11 @@ Use a verified public Vercel deployment in a browser that supports WebGL. Allow 
 
 **Current readiness, October 19, 2026:** [the hosted app](https://voxbuild-nu.vercel.app) passed **10/10 storage checks**, **14/14 semantic text-command checks**, and hosted primary/policy-fallback checks with Atlas rereads. [The source repository](https://github.com/kyuhunlee/voxbuild) is public. The user confirmed actual deployed microphone edits, spoken feedback, interruption with a new spoken edit, and Stop releasing the microphone. Those voice observations are manual, not instrumented. A separate agent browser check fully reloaded the voice-edited room and retained the blue sofa with Cloud saved revision 6. The sequence below is the presentation runbook, not a claim that this complete timed presentation has been rehearsed.
 
+The expansion at deployed commit `d5951a9` adds 14 catalog SKUs, seven presets, six room styles, and a camera approximately 18% closer. Its build/type check, 45 unit tests, [18/18 local live API checks](evidence/expanded-local.json), and desktop/mobile UI checks passed. Production also passed [18/18 expanded API checks](evidence/expanded-production.json), [14/14 semantic checks](evidence/semantic-production-expanded.json), and [primary/policy-fallback checks](evidence/gateway-production-expanded.json). The refreshed hosted UI preserved the current room at revision 14 with all catalog items/styles visible and no console errors.
+
 ## Before presenting
 
-Confirm the deployment actually reports live storage and Gateway capabilities. Test one text edit and reload, then microphone connection. Keep a second browser tab with the architecture document and the [production evaluation report](evidence/semantic-production.json). It records 14/14 semantic success, p50 1,192 ms, p95 2,049 ms, and $0.0095565 returned Gateway cost; these are API observations, not voice latency or a production guarantee. Check the provider budget. Do not begin by asserting that a catalog fixture is an AWS integration or that sample mode proves cloud persistence.
+Confirm the deployment actually reports live storage and Gateway capabilities. Test one text edit and reload, then microphone connection. Keep a second browser tab with the architecture document and the [post-expansion production evaluation](evidence/semantic-production-expanded.json): 14/14 semantic success, p50 1,352 ms, p95 1,976 ms, and $0.0139261 returned Gateway cost. The [earlier baseline](evidence/semantic-production.json) separately records 14/14, p50 1,192 ms, p95 2,049 ms, and $0.0095565. These are small API observations, not voice latency or performance guarantees. Check the provider budget. Do not begin by asserting that a catalog fixture is an AWS integration or that sample mode proves cloud persistence.
 
 ## Five-minute path
 
@@ -23,6 +25,11 @@ Confirm the deployment actually reports live storage and Gateway capabilities. T
 **3:30 — Show a boundary failure.** Type: “Move the sofa to x=100, y=0, z=0 exactly. If invalid, leave the room unchanged.” A clarification/refusal or a rejected command is acceptable; the important invariant is that the scene stays unchanged. Use the deterministic tests to explain stale revisions and duplicate command protection rather than manufacturing a provider outage.
 
 **4:15 — Close with the migration path.** The existing catalog, listings, and Atlas data stay. Vercel supplies the web experience, server execution, AI abstraction/routing, and preview delivery. State the proposed pilot metrics and the next experiment: whether planning increases qualified tour requests.
+
+## Expansion steps
+
+1. **Explore more kinds of rooms.** Open Quiet bedroom, Gathering room, or Evening lounge from **Your space**. Use the catalog category filter to find beds, storage, or dining pieces. On mobile, open **Furniture**, filter, and add a piece. Explain that changing the room preset creates a new saved room.
+2. **Change the mood without replacing the layout.** Open **Room style** and choose Coastal or Midnight from Sunlit, Gallery, Forest, Desert, Coastal, and Midnight. Show the existing furniture IDs and arrangement remain, then reload the saved room to verify the style persists. A text request such as “Switch to Midnight and keep all furniture unchanged” illustrates the bounded `set_environment` operation. The [synthetic Realtime environment check](evidence/realtime-environment-compatibility.json) verified tool/audio compatibility over server WebSocket with zero Atlas writes and no browser microphone; it is not proof of this deployed voice flow.
 
 ## If a live dependency fails
 

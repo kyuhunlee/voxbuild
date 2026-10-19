@@ -1,0 +1,161 @@
+{
+  "date": "2026-10-19T09:08:23.180Z",
+  "baseUrl": "https://voxbuild-nu.vercel.app",
+  "capabilities": {
+    "database": true,
+    "gateway": true,
+    "voice": true
+  },
+  "checks": [
+    {
+      "name": "primary",
+      "status": "passed",
+      "fixtureSceneId": "98eb8414-486e-4f8e-b010-b0d3ee8a8c55",
+      "revision": 1,
+      "telemetry": {
+        "requestId": "4260c907-b6ab-459a-8f92-7d4c4d377854",
+        "commandId": "f76e3a7e-b4e8-4078-ab6b-0f2764b8e38c",
+        "source": "AI Gateway",
+        "requestedModel": "openai/gpt-4.1-mini",
+        "model": "openai/gpt-4.1-mini",
+        "sdkReportedModel": "openai/gpt-4.1-mini",
+        "usage": {
+          "inputTokens": 2774,
+          "inputTokenDetails": {
+            "noCacheTokens": 2774,
+            "cacheReadTokens": 0,
+            "cacheWriteTokens": 0
+          },
+          "outputTokens": 34,
+          "outputTokenDetails": {
+            "textTokens": 34,
+            "reasoningTokens": 0
+          },
+          "totalTokens": 2808
+        },
+        "routingTest": null,
+        "gateway": {
+          "cost": "0.001164",
+          "routing": {
+            "originalModelId": "openai/gpt-4.1-mini",
+            "resolvedProvider": "openai",
+            "fallbacksAvailable": [
+              "azure"
+            ],
+            "canonicalSlug": "openai/gpt-4.1-mini",
+            "finalProvider": "openai",
+            "modelAttemptCount": 1,
+            "modelAttempts": [
+              {
+                "canonicalSlug": "openai/gpt-4.1-mini",
+                "success": true,
+                "providerAttemptCount": 1,
+                "providerAttempts": [
+                  {
+                    "provider": "openai",
+                    "success": true,
+                    "startTime": 1792400902964,
+                    "endTime": 1792400903642,
+                    "statusCode": 200
+                  }
+                ]
+              }
+            ],
+            "totalProviderAttemptCount": 1
+          }
+        },
+        "catalogSource": "fixture",
+        "catalogMs": 0,
+        "modelMs": 757,
+        "databaseMs": 21,
+        "totalMs": 869,
+        "revision": 1,
+        "operations": [
+          {
+            "type": "recolor",
+            "objectId": "studio-sofa",
+            "color": "#687761"
+          }
+        ],
+        "duplicate": false
+      }
+    },
+    {
+      "name": "provider-policy-fallback",
+      "status": "passed",
+      "fixtureSceneId": "1b7fa003-b50b-4d1d-8dc0-00588afc683f",
+      "revision": 1,
+      "telemetry": {
+        "requestId": "5e808038-8279-46e6-a9ec-b7ba0fbd179f",
+        "commandId": "dc1d024d-2288-4418-95b5-52cfd774bfe4",
+        "source": "AI Gateway",
+        "requestedModel": "openai/gpt-4.1-mini",
+        "model": "google/gemini-2.5-flash",
+        "sdkReportedModel": "openai/gpt-4.1-mini",
+        "usage": {
+          "inputTokens": 2434,
+          "inputTokenDetails": {
+            "noCacheTokens": 2434,
+            "cacheReadTokens": 0
+          },
+          "outputTokens": 159,
+          "outputTokenDetails": {
+            "textTokens": 40,
+            "reasoningTokens": 119
+          },
+          "totalTokens": 2593
+        },
+        "routingTest": "primary-excluded-by-provider-policy",
+        "gateway": {
+          "cost": "0.0011277",
+          "routing": {
+            "originalModelId": "google/gemini-2.5-flash",
+            "resolvedProvider": "google",
+            "fallbacksAvailable": [],
+            "canonicalSlug": "google/gemini-2.5-flash",
+            "finalProvider": "google",
+            "modelAttemptCount": 2,
+            "modelAttempts": [
+              {
+                "canonicalSlug": "openai/gpt-4.1-mini",
+                "success": false,
+                "providerAttemptCount": 0,
+                "providerAttempts": []
+              },
+              {
+                "canonicalSlug": "google/gemini-2.5-flash",
+                "success": true,
+                "providerAttemptCount": 1,
+                "providerAttempts": [
+                  {
+                    "provider": "google",
+                    "success": true,
+                    "startTime": 1792400904039,
+                    "endTime": 1792400905442,
+                    "statusCode": 200
+                  }
+                ]
+              }
+            ],
+            "totalProviderAttemptCount": 1
+          }
+        },
+        "catalogSource": "fixture",
+        "catalogMs": 0,
+        "modelMs": 1490,
+        "databaseMs": 9,
+        "totalMs": 1518,
+        "revision": 1,
+        "operations": [
+          {
+            "type": "recolor",
+            "objectId": "studio-sofa",
+            "color": "#687761"
+          }
+        ],
+        "duplicate": false
+      }
+    }
+  ],
+  "verifiedCommit": "d5951a91c8f45efa16c74d757b39309981093390"
+}
