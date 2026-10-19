@@ -1,0 +1,124 @@
+{
+  "prompt": "Change the olive plant's pot to cream.",
+  "databaseWrites": 0,
+  "method": "Three bounded direct AI Gateway generations per version, using the exact text route system prompt and ModelPlanSchema. Generated operations are parsed with the strict OperationsSchema and, when valid, applied only to an in-memory studio fixture.",
+  "change": "Require the complete catalog color string, including its leading #, in model schema guidance and text/voice instructions. Runtime validation remains strict.",
+  "before": {
+    "date": "2026-10-19T09:26:31.606Z",
+    "model": "openai/gpt-4.1-mini",
+    "samples": [
+      {
+        "attempt": 1,
+        "operations": [
+          {
+            "type": "recolor",
+            "objectId": "studio-plant",
+            "color": "e7dfce"
+          }
+        ],
+        "schemaValid": false,
+        "issues": [
+          {
+            "code": "invalid_format",
+            "path": [
+              0,
+              "color"
+            ],
+            "message": "Use a lowercase six-digit hex color from the catalog."
+          }
+        ],
+        "resultingPlantColor": null
+      },
+      {
+        "attempt": 2,
+        "operations": [
+          {
+            "type": "recolor",
+            "objectId": "studio-plant",
+            "color": "e7dfce"
+          }
+        ],
+        "schemaValid": false,
+        "issues": [
+          {
+            "code": "invalid_format",
+            "path": [
+              0,
+              "color"
+            ],
+            "message": "Use a lowercase six-digit hex color from the catalog."
+          }
+        ],
+        "resultingPlantColor": null
+      },
+      {
+        "attempt": 3,
+        "operations": [
+          {
+            "type": "recolor",
+            "objectId": "studio-plant",
+            "color": "e7dfce"
+          }
+        ],
+        "schemaValid": false,
+        "issues": [
+          {
+            "code": "invalid_format",
+            "path": [
+              0,
+              "color"
+            ],
+            "message": "Use a lowercase six-digit hex color from the catalog."
+          }
+        ],
+        "resultingPlantColor": null
+      }
+    ]
+  },
+  "after": {
+    "date": "2026-10-19T09:27:18.389Z",
+    "model": "openai/gpt-4.1-mini",
+    "samples": [
+      {
+        "attempt": 1,
+        "operations": [
+          {
+            "type": "recolor",
+            "objectId": "studio-plant",
+            "color": "#e7dfce"
+          }
+        ],
+        "schemaValid": true,
+        "issues": [],
+        "resultingPlantColor": "#e7dfce"
+      },
+      {
+        "attempt": 2,
+        "operations": [
+          {
+            "type": "recolor",
+            "objectId": "studio-plant",
+            "color": "#e7dfce"
+          }
+        ],
+        "schemaValid": true,
+        "issues": [],
+        "resultingPlantColor": "#e7dfce"
+      },
+      {
+        "attempt": 3,
+        "operations": [
+          {
+            "type": "recolor",
+            "objectId": "studio-plant",
+            "color": "#e7dfce"
+          }
+        ],
+        "schemaValid": true,
+        "issues": [],
+        "resultingPlantColor": "#e7dfce"
+      }
+    ]
+  },
+  "limitations": "These six generations demonstrate this fixture before and after the guidance change. They do not establish a general model reliability rate or verify hosted persistence."
+}
