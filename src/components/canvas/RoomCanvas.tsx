@@ -10,6 +10,8 @@ import type { Scene, SceneObject } from "@/lib/schema";
 import Architecture, { Dimensions } from "./Architecture";
 import Furniture from "./Furniture";
 
+const DEFAULT_PERSPECTIVE_ZOOM = 1.3;
+
 export interface RoomCanvasProps {
   scene: Scene;
   selectedId: string | null;
@@ -40,6 +42,8 @@ function CameraRig({ view, width, depth, reducedMotion }: { view: RoomCanvasProp
   const destination = useRef(new Vector3(6.4, 5.75, 8.05));
 
   useEffect(() => {
+    camera.zoom = view === "top" ? 1 : DEFAULT_PERSPECTIVE_ZOOM;
+    camera.updateProjectionMatrix();
     const scale = Math.max(width / 6, depth / 5.2);
     const narrow = Math.max(1, 1.25 / (size.width / Math.max(size.height, 1)));
     destination.current.set(...(view === "top" ? [0, 12.6 * scale * narrow, 0.001] as const : [6.4 * scale * narrow, 5.75 * scale * narrow, 8.05 * scale * narrow] as const));
@@ -147,7 +151,7 @@ function RoomCanvas({ scene, selectedId, onSelect, selectedArtworkId, onSelectAr
     <Canvas
       shadows
       dpr={[1, 1.5]}
-      camera={{ position: [6.4, 5.75, 8.05], fov: 38, near: 0.1, far: 150 }}
+      camera={{ position: [6.4, 5.75, 8.05], zoom: DEFAULT_PERSPECTIVE_ZOOM, fov: 38, near: 0.1, far: 150 }}
       gl={{ antialias: true, alpha: false, powerPreference: "high-performance", toneMapping: ACESFilmicToneMapping }}
       onCreated={({ gl }) => { gl.toneMappingExposure = 1.08; }}
       onPointerMissed={() => { onSelect(null); onSelectArtwork(null); setHovered(false); }}

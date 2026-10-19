@@ -8,7 +8,7 @@ The reference scenario assumes existing AWS listing/catalog services and MongoDB
 
 The central contract is simple: **the model proposes operations; the server validates and saves; the browser renders the acknowledged result.**
 
-The current experience has **14 furniture SKUs**, **six presets**, and six environment styles: **Sunlit, Gallery, Forest, Desert, Coastal, and Midnight**. Presets now have distinct window arrangements, lighting, and artwork; City loft is removed from new-room choices. Five painting designs can move along either visible wall, with placement validation and atomic persistence. Styles preserve furniture and artwork while changing finishes and lighting. Category filtering and search help browse the catalog; the perspective camera is approximately 18% closer. The earlier catalog expansion at `d5951a9` has its own production evidence below.
+The current experience has **14 furniture SKUs**, **six presets**, and six environment styles: **Sunlit, Gallery, Forest, Desert, Coastal, and Midnight**. Presets now have distinct window arrangements, lighting, and artwork; City loft is removed from new-room choices. Five painting designs can move along either visible wall, with placement validation and atomic persistence. Styles preserve furniture and artwork while changing finishes and lighting. Category filtering and search help browse the catalog; the default perspective view is now 30% more zoomed in than the preceding default, with top-view framing unchanged. The earlier catalog expansion at `d5951a9` has its own production evidence below.
 
 ## Submission artifacts
 
