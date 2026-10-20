@@ -3,7 +3,7 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { ContactShadows, Line, OrbitControls } from "@react-three/drei";
 import { memo, useEffect, useMemo, useRef, useState, type ComponentRef } from "react";
-import { ACESFilmicToneMapping, Group, MathUtils, Vector3 } from "three";
+import { ACESFilmicToneMapping, Box3, Group, MathUtils, PerspectiveCamera, Vector3 } from "three";
 import { getCatalogItem } from "@/lib/catalog-data";
 import { getEnvironmentForRoom, type Environment } from "@/lib/environments";
 import type { Scene, SceneObject } from "@/lib/schema";
@@ -34,7 +34,26 @@ function useReducedMotion() {
   return reduced;
 }
 
-function CameraRig({ view, width, depth, reducedMotion }: { view: RoomCanvasProps["view"]; width: number; depth: number; reducedMotion: boolean }) {
+function centerPerspectiveRoom(camera: PerspectiveCamera, position: Vector3, target: Vector3, width: number, depth: number, height: number, viewport: { width: number; height: number }) {
+  const framingCamera = camera.clone();
+  framingCamera.clearViewOffset();
+  framingCamera.position.copy(position);
+  framingCamera.lookAt(target);
+  framingCamera.updateMatrixWorld();
+  // Match the cutaway silhouette: the floor slab and only the two visible walls.
+  const outline = [-1, 1].flatMap((x) => [-1, 1].map((z) => new Vector3(x * (width / 2 + 0.08), -0.175, z * (depth / 2 + 0.08))));
+  outline.push(
+    new Vector3(-width / 2 - 0.14, height + 0.045, -depth / 2 - 0.14),
+    new Vector3(width / 2, height + 0.045, -depth / 2 - 0.14),
+    new Vector3(-width / 2 - 0.14, height + 0.045, depth / 2 + 0.01),
+  );
+  const center = new Box3().setFromPoints(outline.map((point) => point.project(framingCamera))).getCenter(new Vector3());
+  const viewportWidth = Math.max(1, viewport.width);
+  const viewportHeight = Math.max(1, viewport.height);
+  camera.setViewOffset(viewportWidth, viewportHeight, center.x * viewportWidth / 2, -center.y * viewportHeight / 2, viewportWidth, viewportHeight);
+}
+
+function CameraRig({ view, width, depth, height, reducedMotion }: { view: RoomCanvasProps["view"]; width: number; depth: number; height: number; reducedMotion: boolean }) {
   const controls = useRef<ComponentRef<typeof OrbitControls>>(null);
   const { camera, size } = useThree();
   const moving = useRef(true);
@@ -48,6 +67,10 @@ function CameraRig({ view, width, depth, reducedMotion }: { view: RoomCanvasProp
     const narrow = Math.max(1, 1.25 / (size.width / Math.max(size.height, 1)));
     destination.current.set(...(view === "top" ? [0, 12.6 * scale * narrow, 0.001] as const : [6.4 * scale * narrow, 5.75 * scale * narrow, 8.05 * scale * narrow] as const));
     target.current.set(0, view === "top" ? 0 : 0.6, 0);
+    if (camera instanceof PerspectiveCamera) {
+      if (view === "top") camera.clearViewOffset();
+      else centerPerspectiveRoom(camera, destination.current, target.current, width, depth, height, size);
+    }
     moving.current = true;
     if (reducedMotion) {
       camera.position.copy(destination.current);
@@ -55,7 +78,7 @@ function CameraRig({ view, width, depth, reducedMotion }: { view: RoomCanvasProp
       controls.current?.update();
       moving.current = false;
     }
-  }, [view, width, depth, camera, reducedMotion, size.width, size.height]);
+  }, [view, width, depth, height, camera, reducedMotion, size.width, size.height]);
 
   useFrame((_, delta) => {
     if (!moving.current || !controls.current) return;
@@ -185,7 +208,7 @@ function RoomCanvas({ scene, selectedId, onSelect, selectedArtworkId, onSelectAr
       {scene.objects.map((object) => <SceneFurniture key={`${scene.id}:${object.id}`} object={object} selected={selectedId === object.id} onSelect={selectFurniture} onHover={setHovered} reducedMotion={reducedMotion} />)}
       <ContactShadows position={[0, 0.006, 0]} opacity={0.24} scale={shadowSize * 2} blur={2.4} far={3} resolution={256} color="#4c3927" />
       {showDimensions && <Dimensions room={scene.room} lighting={environment.lighting} />}
-      <CameraRig view={view} width={scene.room.width} depth={scene.room.depth} reducedMotion={reducedMotion} />
+      <CameraRig view={view} width={scene.room.width} depth={scene.room.depth} height={scene.room.height} reducedMotion={reducedMotion} />
     </Canvas>
   </div>;
 }
