@@ -1,4 +1,13 @@
-export type CaseStudySectionId = "scenario" | "architecture" | "vercel" | "boundary" | "demo" | "rollout" | "outcomes" | "tradeoffs";
+export type CaseStudySectionId = "scenario" | "architecture" | "vercel" | "demo" | "outcomes" | "rollout" | "tradeoffs" | "tooling";
+export type CaseStudyTone = "proof" | "target" | "retained" | "risk";
+
+export type CaseStudyCard = {
+  title: string;
+  body: string;
+  tone: CaseStudyTone;
+  tag: string;
+  value?: string;
+};
 
 export type CaseStudyBlock = {
   title: string;
@@ -12,202 +21,142 @@ export type CaseStudySection = {
   label: string;
   title: string;
   intro: string;
-  blocks: CaseStudyBlock[];
+  cards: CaseStudyCard[];
+  details?: CaseStudyBlock[];
 };
 
 export const CASE_STUDY_SECTIONS: CaseStudySection[] = [
   {
     id: "scenario",
-    label: "Customer & pain",
-    title: "Help tenants picture a home",
-    intro: "A realistic rental-platform scenario: listings and catalog services run on AWS, application documents live in MongoDB Atlas, and the customer already has an identity system and a web release pipeline.",
-    blocks: [
-      {
-        title: "Where the experience slows down",
-        body: "Photos and static plans leave tenants to imagine furniture arrangements and a home-office setup. Uncertainty can delay a tour decision and send repetitive suitability questions to leasing teams. The conversion impact is a hypothesis to measure, not a demonstrated gain.",
-      },
-      {
-        title: "Where the architecture becomes hard to operate",
-        bullets: [
-          "Bespoke release and preview work slows experiments, so useful listing features take longer to reach tenants.",
-          "Separate model integrations make provider changes and cost attribution harder, increasing maintenance work and obscuring cost per interaction.",
-          "Generated edits, retries, and competing saves can corrupt a design without validation and concurrency controls, losing tenants’ work and trust.",
-        ],
-      },
+    label: "Customer problem",
+    title: "Help renters picture their next home",
+    intro: "A fictional long-term rental marketplace, inspired by Apartments.com and StreetEasy, wants renters to test furniture layouts before deciding whether to tour.",
+    cards: [
+      { title: "The customer", body: "The customer is an established rental marketplace with listings, data, identity, and a release pipeline. Its users are prospective tenants considering a tour.", tone: "retained", tag: "Scenario" },
+      { title: "The business case", body: "Photos cannot show a renter’s own furniture layout. Uncertainty can delay tours and create leasing questions. More qualified tours and fewer questions are hypotheses.", tone: "risk", tag: "Business friction" },
+      { title: "The technical friction", body: "Custom releases and separate model integrations slow feature iterations and increase maintenance. Unvalidated AI edits risk losing tenants’ designs.", tone: "risk", tag: "Engineering friction" },
+    ],
+    details: [
+      { title: "Scenario assumptions", body: "AWS listing/catalog/photo services, MongoDB Atlas, an existing identity provider, and a web release pipeline are assumptions for this fictional customer. They are not claims about either reference brand’s actual architecture. Conversion gains and support savings are hypotheses to test." },
     ],
   },
   {
     id: "architecture",
-    label: "Where Vercel fits",
-    title: "Augment the platform. Connect the data.",
-    intro: "VoxBuild is the deployed planner slice of a larger rental-platform architecture. Vercel adds the application and text AI layer while the customer retains its systems of record.",
-    blocks: [
-      {
-        title: "Two inputs, one accepted state",
-        rows: [
-          { label: "Text", value: "Browser → Vercel Function → AI SDK and AI Gateway → proposed operations." },
-          { label: "Voice", value: "Browser ↔ OpenAI Realtime over WebRTC → completed tool calls returned through the browser." },
-          { label: "Shared save path", value: "Server validation → atomic Atlas update → acknowledged scene → browser rendering." },
-        ],
-      },
-      {
-        title: "The deliberate boundary",
-        body: "The model proposes bounded edits; it cannot write directly to the database or execute generated code. Three.js renders locally on the visitor’s device. Vercel Functions handle credentials, ownership, model requests, and saves. Accepted room state survives a deployment; an unfinished generation or voice connection does not.",
-      },
+    label: "Architecture",
+    title: "Add Vercel. Keep the customer’s core.",
+    intro: "Augment the application and connect existing data; avoid a platform migration.",
+    cards: [
+      { title: "What stays, and why", body: "AWS services, Atlas data, and customer identity stay in place to preserve existing APIs, data ownership, and access policies.", tone: "retained", tag: "Customer systems" },
+      { title: "The demo boundary", body: "Atlas writes are real. The AWS catalog is a labeled fixture. Customer SSO is proposed; the demo uses signed anonymous sessions.", tone: "retained", tag: "Explicit boundary" },
+    ],
+    details: [
+      { title: "Why keep Atlas?", body: "A bounded scene, its revision, and command receipts fit one document. Atomic updates and revision checks protect accepted state. PostgreSQL with JSONB could also support this pattern; retaining the customer’s database is the rationale." },
+      { title: "Transport and durability", body: "Text uses Vercel Functions → AI SDK → AI Gateway. Voice media connects directly from the browser to OpenAI Realtime over WebRTC. Both use the validated save API. Accepted state survives deploys; unfinished generation and voice connections do not." },
+      { title: "Connectivity", body: "The demo Atlas Free/M0 cluster is on AWS US_EAST_1. Scoped database users connect over TLS. The optional HTTPS catalog adapter is an integration seam; fixture reads make no AWS request." },
     ],
   },
   {
     id: "vercel",
     label: "Vercel choices",
-    title: "Four primitives with specific jobs",
-    intro: "The assessment asks for three or more Vercel products or primitives, including an AI primitive. These choices support the working slice without adding unnecessary infrastructure.",
-    blocks: [
-      {
-        title: "What we use and why",
-        rows: [
-          { label: "Next.js on Vercel Functions", value: "Delivers the web application and Node.js request handlers together. Database connections and model waits still need pooling, timeouts, and regional planning." },
-          { label: "AI SDK", value: "Turns text requests into structured plans through a shared model interface. Valid JSON can still be wrong, so domain validation remains authoritative." },
-          { label: "AI Gateway", value: "Centralizes text-model access, routing, configured fallback, and returned usage/cost metadata. Voice uses a separate direct provider path." },
-          { label: "Git deployments and Preview Deployments", value: "Makes each change reviewable and deployable. Main deploys automatically, with repository type/test/build checks. A gated Preview promotion and canary rollout remain proposed operating steps." },
-        ],
-      },
+    title: "Vercel’s technical and business value",
+    intro: "Add the application and AI layer without replacing AWS or Atlas.",
+    cards: [
+      { title: "Next.js + Functions", body: "The UI and API share one deployment. This can reduce runtime and release plumbing when launching a planner.", tone: "proof", tag: "Application" },
+      { title: "AI SDK", body: "Structured plans use a shared model interface. This can reduce provider-specific maintenance as the team tests new models.", tone: "proof", tag: "AI planning" },
+      { title: "AI Gateway", body: "One text API provides routing, fallback, and cost metadata. The team can compare models and understand feature costs.", tone: "proof", tag: "AI routing" },
+      { title: "Git deployments + Previews", body: "Main deploys automatically; per-change Preview reviews are proposed. The goal is earlier stakeholder feedback and less manual release work.", tone: "proof", tag: "Git deployed" },
     ],
-  },
-  {
-    id: "boundary",
-    label: "What stays",
-    title: "Preserve the customer’s existing world",
-    intro: "This is an incremental addition to a rental platform, rather than a migration of its listings, data, and identity. The demo distinguishes the target integration from the systems it actually exercises.",
-    blocks: [
-      {
-        title: "Outside Vercel",
-        rows: [
-          { label: "AWS listings, photos, and catalog", value: "Stay under the customer’s ownership. The demo uses a labeled catalog fixture; an optional HTTPS metadata adapter provides the integration seam. Fixture reads make no AWS request." },
-          { label: "MongoDB Atlas", value: "Remains the durable scene store in the scenario. The demo uses a new Free/M0 cluster on AWS US_EAST_1 and has verified real writes and rereads." },
-          { label: "Customer identity", value: "Stays with the existing identity provider in the target design. The public demo uses signed anonymous sessions, not customer SSO." },
-        ],
-      },
-      {
-        title: "Why Atlas fits",
-        body: "A bounded room is loaded and saved as one document, including its revision and command receipts. PostgreSQL with JSONB could support the same pattern; retaining the customer’s database is the architectural rationale.",
-      },
+    details: [
+      { title: "Trade-offs to defend", rows: [
+        { label: "Next.js + Functions", value: "Database pooling, request timeouts, and regional placement remain application design decisions." },
+        { label: "AI SDK", value: "A structured plan can still be wrong. Independent domain validation decides which operations can be saved." },
+        { label: "AI Gateway", value: "Gateway handles text planning. Direct OpenAI Realtime voice retains separate provider dependence and accounting. The demonstrated fallback is policy-driven, not an induced provider outage." },
+        { label: "Git deployments + Previews", value: "Automatic production deployment from main is proven. Preview validation, gated promotion, canary, and timed rollback remain proposed customer operating steps." },
+      ] },
     ],
   },
   {
     id: "demo",
-    label: "Demo & evidence",
-    title: "A small slice with a complete save path",
-    intro: "Explore six authored rooms, 14 furniture SKUs, six environment styles, and five painting designs. Use the canned prompts, type a request, speak after enabling the microphone, or edit through the controls.",
-    blocks: [
-      {
-        title: "What the reviewer can prove",
-        body: "Change a piece, inspect the operation in Architecture, then reload the saved room. The public Vercel URL and public GitHub repository make the implementation reviewable; incremental history and decision comments preserve its evolution.",
-      },
-      {
-        title: "Recorded on October 19, 2026",
-        bullets: [
-          "52 deterministic domain, storage, schema, and voice-coordination tests passed.",
-          "Production passed 10 storage checks, 14 room/artwork checks, and the final 14-case text regression with Atlas rereads.",
-          "The user confirmed deployed voice edits, speech, interruption, and Stop releasing the microphone. Policy-routed fallback was tested; provider-outage recovery was not.",
-        ],
-      },
-      {
-        title: "Refined on November 12, 2026",
-        body: "61 deterministic tests passed, including stale text responses and interrupted or queued voice edits. Production passed 10 storage, 14 room/artwork, and 14 text-command checks. Automated type/test/build checks also passed. A synthetic Realtime session validated tool/audio output without a microphone or Atlas writes; desktop/mobile checks covered the guide and saved-edit reload.",
-      },
+    label: "Demo proof",
+    title: "Change it. Inspect it. Reload.",
+    intro: "Use the public demo to prove one complete AI-to-database interaction.",
+    cards: [
+      { title: "Make a change", body: "Try “Make the sofa sage,” speak after allowing the microphone, or use furniture controls. No test account needed.", tone: "proof", tag: "Try it live" },
+      { title: "Inspect and reload", body: "Open Architecture for returned operations and metadata. Reload the saved room to confirm accepted state crossed the Atlas boundary.", tone: "proof", tag: "Show the boundary" },
+      { title: "Automated tests", value: "61", body: "Schema, domain, storage, and voice-coordination tests passed.", tone: "proof", tag: "Recorded proof" },
+      { title: "Production checks", value: "38 / 38", body: "Deployed storage, room/artwork, and text-command checks passed.", tone: "proof", tag: "Recorded proof" },
     ],
-  },
-  {
-    id: "rollout",
-    label: "Rollout & recovery",
-    title: "Expand only after the guardrails hold",
-    intro: "GitHub main already triggers Production deployments. The sequence below is a proposed customer rollout; this demo has not exercised a canary or Preview-to-Production promotion.",
-    blocks: [
-      {
-        title: "From preview to pilot",
-        bullets: [
-          "Preview: isolate database credentials and sessions; run build, type, domain, live API, and browser checks.",
-          "Canary: start with internal users, then a small property or visitor cohort. Staged traffic controls are not implemented here.",
-          "Cutover: review delivery lead time, model portability, cost attribution, and resilience alongside tenant outcomes. Expand only when the agreed pilot gates hold.",
-        ],
-      },
-      {
-        title: "Recover without losing accepted designs",
-        body: "Disable the planner entry point or restore a compatible deployment. Code rollback does not undo database changes; retain readers for the newer optional scene fields. If a save times out, reload canonical state before retrying. Exact retained manual/voice commands are replayable; the full text-generation endpoint is not idempotent.",
-      },
+    details: [
+      { title: "Evidence scope", body: "The November 12 production reports contain 10 storage, 14 room/artwork, and 14 semantic text checks, with persisted rereads. These are recorded checks, not a live health monitor or a production reliability estimate." },
+      { title: "Voice evidence", body: "The user confirmed deployed voice edits, speech, interruption, and Stop releasing the microphone. A synthetic Realtime session separately checked current tool/audio compatibility without a browser microphone or Atlas writes. Browser voice latency remains unmeasured." },
+      { title: "Reviewable implementation", body: "The public repository preserves incremental history and decision comments. The demo includes six authored rooms, 14 furniture SKUs, six environment styles, and five painting designs." },
     ],
   },
   {
     id: "outcomes",
-    label: "Success measures",
-    title: "Success the customer can measure",
-    intro: "The assessment’s example names four outcomes, not numerical pass marks. These measures apply them to VoxBuild. Engineering thresholds are proposed pilot gates; customer baselines, delivery savings, and business uplift remain unmeasured.",
-    blocks: [
-      {
-        title: "Faster path from prototype to production",
-        rows: [
-          { label: "Measure", value: "Elapsed time and engineer hours from an approved planner change to a validated preview and production release; time to recover through rollback." },
-          { label: "Pilot target", value: "Reduce median delivery time and manual release work against the customer’s existing pipeline. Agree the improvement threshold after measuring that baseline." },
-          { label: "Current evidence", value: "Public deployment, incremental Git history, automatic production deployment, and CI type/test/build checks work. Customer lead-time savings, Preview promotion, canary, and rollback timing have not been demonstrated." },
-        ],
-      },
-      {
-        title: "Less provider-specific application code",
-        rows: [
-          { label: "Measure", value: "Provider-specific integrations maintained, files changed, and engineering time required to switch an approved text model." },
-          { label: "Pilot target", value: "Switch text models through Gateway configuration without changing the room schema, command executor, or persistence contract. Qualify each model against the same semantic suite." },
-          { label: "Current evidence", value: "OpenAI primary and Google policy-routed fallback use the same AI SDK plan and validated save path. Direct OpenAI Realtime voice remains a separate integration, outside this portability claim." },
-        ],
-      },
-      {
-        title: "Per-model or per-run cost visibility",
-        rows: [
-          { label: "Measure", value: "Coverage of request-level executed model/provider, tokens, returned cost, latency, and outcome. Track attributable AI spend per accepted edit, including priced failed attempts." },
-          { label: "Pilot target", value: "Attribute completed text runs to their model and outcome; mark missing prices as unknown. Reconcile provider spend and add separate voice accounting before setting a customer budget." },
-          { label: "Current evidence", value: "All 14 requests in the November 12 text run returned usage and cost, totaling $0.0176794. Architecture exposes per-request metadata. This excludes voice and unknown failed-request costs; it is not an exhaustive spend ledger." },
-        ],
-      },
-      {
-        title: "Improved resilience through model flexibility and failover",
-        rows: [
-          { label: "Measure", value: "Semantic success and p95 response time by model route; invalid writes; save/reload recovery; behavior during an actual provider failure." },
-          { label: "Pilot target", value: "At least 90% semantic success, warm text p95 below five seconds, rejection of invalid mutations, and successful save/reload checks. Exercise a real outage and rollback; benchmark voice latency separately." },
-          { label: "Current evidence", value: "61 deterministic tests and 38 production checks passed. Text passed 14/14 with p50 1,802 ms and p95 2,762 ms. Policy-routed fallback passed; provider-outage recovery and a production availability rate remain unproven." },
-        ],
-        body: "An earlier October run had a 9,800 ms p95. Small regression samples are signals to keep measuring, not performance guarantees.",
-      },
-      {
-        title: "Tenant and business outcomes",
-        rows: [
-          { label: "Measure", value: "Qualified tour requests per eligible listing visitor; saved designs per planner start; suitability-related support contacts per 1,000 eligible visitors; AI cost per accepted edit." },
-          { label: "Pilot target", value: "Compare eligible planner and control cohorts over an agreed pilot window. Set baselines, sample size, minimum worthwhile conversion lift, support guardrails, and cost limits before launch." },
-          { label: "Current evidence", value: "No tenant pilot or measured conversion lift exists yet. The demo proves the engineering path; engagement, abandonment, accessibility feedback, and business value must be validated with customers." },
-        ],
-      },
+    label: "Success metrics",
+    title: "Measure delivery, cost, and renter value",
+    intro: "Four assessment outcomes, plus renter value.",
+    cards: [
+      { title: "Faster delivery", body: "Track release time and engineer hours against the current pipeline. Savings are not yet measured.", tone: "target", tag: "Baseline needed" },
+      { title: "Less provider-specific code", body: "OpenAI and Google share one text executor. Voice is separate; maintenance savings are unmeasured.", tone: "proof", tag: "Shared path proven" },
+      { title: "Cost per model / run", value: "$0.0177", body: "Total for 14 text requests; each returned usage and cost. Excludes voice and unpriced failures.", tone: "proof", tag: "Recorded sample" },
+      { title: "Resilience & fallback", value: "14 / 14", body: "Text checks; p95 2.76 s. Pilot: ≥90% success, warm p95 <5 s. Real outage untested.", tone: "proof", tag: "Recorded sample" },
+      { title: "Tenant and business value", body: "Compare tour requests per eligible visitor. Track saved designs, support contacts, and cost per accepted edit. No conversion lift claimed.", tone: "target", tag: "Pilot needed" },
+    ],
+    details: [
+      { title: "How to judge the pilot", rows: [
+        { label: "Faster path from prototype to production", value: "Measure approved change → validated preview/production time, engineer hours, and rollback time. Set the improvement threshold after baselining the existing pipeline." },
+        { label: "Less provider-specific application code", value: "Count provider-specific integrations, files changed, and time to switch approved text models. Keep the scene schema, executor, and persistence contract unchanged; qualify each model on the same semantic suite." },
+        { label: "Per-model or per-run cost visibility", value: "Attribute executed model/provider, tokens, cost, latency, and outcome by request. Mark missing prices as unknown. Reconcile provider spend, priced failures, and separate voice accounting before setting customer budgets." },
+        { label: "Improved resilience through model flexibility and failover", value: "Measure semantic success, p95 latency, invalid-write rejection, and save/reload recovery by model route. Exercise a real provider outage and rollback. Benchmark voice separately." },
+        { label: "Business outcomes", value: "Compare eligible planner and control cohorts. Pre-agree pilot duration, sample size, minimum worthwhile tour-conversion lift, support guardrails, and cost limits. Track suitability-support contacts per 1,000 eligible visitors." },
+      ] },
+      { title: "Read the results accurately", body: "November 12: text passed 14/14 with p50 1,802 ms, p95 2,762 ms, and $0.0176794 returned cost. An earlier October run had a 9,800 ms p95. Small regression samples are not performance guarantees. Policy-driven fallback is proven; provider-outage recovery is not. The assessment supplies no numeric pass marks; ≥90% and <5 seconds are our proposed pilot gates." },
+    ],
+  },
+  {
+    id: "rollout",
+    label: "Rollout",
+    title: "Expand after the pilot earns it",
+    intro: "Main deploys automatically; the customer rollout below is proposed.",
+    cards: [
+      { title: "Preview + validation", body: "Isolate credentials. Run build, domain, AI, persistence, and browser checks before exposing the change.", tone: "target", tag: "Before launch" },
+      { title: "Canary + cutover", body: "Start internally, then a small cohort. Expand when technical guardrails and agreed business outcomes hold.", tone: "target", tag: "Controlled rollout" },
+      { title: "Rollback", body: "Disable the planner or restore compatible code. Preserve designs: code rollback does not reverse database changes.", tone: "target", tag: "Recovery plan" },
+    ],
+    details: [
+      { title: "What remains to exercise", body: "The demo has not exercised Preview-to-Production promotion, a canary, or a timed rollback. Add release gates and rehearse recovery before a customer pilot. Readers must remain compatible with newer optional scene fields." },
     ],
   },
   {
     id: "tradeoffs",
-    label: "Scope & ownership",
-    title: "Know what this proof does and does not cover",
-    intro: "The assessment rewards architectural judgment and ownership. This slice prioritizes a working interaction, validation, and persistence over a broad feature list.",
-    blocks: [
-      {
-        title: "Deliberate limits",
-        bullets: [
-          "Photo reconstruction, automatic measurement, Vercel Blob, and durable Workflows are deferred. Rooms are authored presets.",
-          "This is a conceptual preview. Furniture collision, circulation clearance, and real-world fit need stronger verification.",
-          "Direct Realtime voice adds separate provider dependence and accounting. Admission limits and a browser timer are not hard spending caps.",
-        ],
-      },
-      {
-        title: "Before a customer pilot",
-        body: "Add customer authorization, provider budgets, restricted connectivity, and retention controls. The approved demo Atlas 0.0.0.0/0 access rule has no automatic expiry and must be removed after the demo. Cookie loss also means losing access to an anonymous design.",
-      },
-      {
-        title: "Development ownership",
-        body: "Built with Codex desktop and collaborating agents, TypeScript, tests, real-provider evaluations, and browser checks. The candidate owns explaining, defending, debugging, and changing the final implementation. The live discussion may change a constraint such as region, budget, or identity.",
-      },
+    label: "Risks & limits",
+    title: "Be explicit before customer kickoff",
+    intro: "This is a working concept preview with limits to resolve before a pilot.",
+    cards: [
+      { title: "Access and privacy", body: "Add customer authorization, retention rules, and restricted database access. Losing the anonymous-session cookie loses access to its design.", tone: "risk", tag: "Before a pilot" },
+      { title: "Cost and recovery", body: "Voice needs separate accounting and spending controls. After a save timeout, reload saved state before retrying.", tone: "risk", tag: "Operating risk" },
+      { title: "Concept, not certified fit", body: "Rooms are authored presets. Photo reconstruction, automatic measurement, and stronger collision/circulation checks are outside this slice.", tone: "risk", tag: "Product scope" },
+    ],
+    details: [
+      { title: "Network access", body: "The approved Atlas 0.0.0.0/0 demo access rule has no automatic expiry. Remove it after the demo; restricted connectivity is required before a customer pilot. TLS and scoped database users remain in place." },
+      { title: "Retry and durability limits", body: "Retained exact manual/voice commands can be replayed through command receipts. The full text-generation endpoint is not idempotent. A timeout may follow a committed save, so reload canonical state before retrying. Accepted state survives deployments; unfinished generation and voice connections do not." },
+      { title: "Deferred infrastructure", body: "Vercel Blob and durable Workflows are not used. Browser timers and admission limits are not hard provider spending caps." },
+    ],
+  },
+  {
+    id: "tooling",
+    label: "Tools & ownership",
+    title: "AI assisted the build. I own the result.",
+    intro: "Codex desktop and collaborating agents supported implementation, review, and validation.",
+    cards: [
+      { title: "Development tooling", body: "TypeScript, Next.js, Codex desktop, and collaborating agents. Incremental commits and decision comments preserve how the work evolved.", tone: "proof", tag: "Disclosed" },
+      { title: "Validation", body: "Build/type checks, deterministic tests, a 14-case semantic evaluation, real-provider checks, Atlas rereads, and desktop/mobile walkthroughs.", tone: "proof", tag: "Reviewed behavior" },
+      { title: "Candidate ownership", body: "Explain boundaries, defend trade-offs, debug failures, and adapt when the interviewer changes a constraint.", tone: "target", tag: "Live discussion" },
+    ],
+    details: [
+      { title: "AI behavior review", body: "The semantic suite checks requested state changes, unmentioned-state preservation, revisions, and persisted rereads. Invalid plans are rejected before commit. Small evaluations do not establish general model accuracy, business uplift, or an availability SLA." },
     ],
   },
 ];
