@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { ArrowLeft, ArrowRight, AudioLines, BookOpen, CheckCircle2, ChevronDown, Database, ExternalLink, Flag, MessageSquare, ShieldCheck, TriangleAlert, X } from "lucide-react";
 import { CASE_STUDY_SECTIONS, type CaseStudyTone } from "@/lib/case-study";
+import VercelProductDecision from "./VercelProductDecision";
 import "./case-study-guide.css";
 
 const STATUS_ICONS = { proof: CheckCircle2, target: Flag, retained: Database, risk: TriangleAlert } satisfies Record<CaseStudyTone, typeof Flag>;
@@ -73,7 +74,8 @@ export default function CaseStudyGuide({ onOpen }: { onOpen: () => void }) {
             <div className="case-study-progress" aria-hidden="true"><span style={{ width: ((sectionIndex + 1) / CASE_STUDY_SECTIONS.length * 100) + "%" }} /></div>
             <div className="case-study-hero"><h3 ref={sectionTitle} tabIndex={-1} id="case-study-section-title">{section.title}</h3><p>{section.intro}</p></div>
             {section.id === "architecture" && <ArchitectureOverview />}
-            <div className={"case-study-cards" + (section.id === "rollout" ? " case-study-sequence" : "")}>
+            {section.id === "vercel" && <VercelProductDecision />}
+            {section.id !== "vercel" && <div className={"case-study-cards" + (section.id === "rollout" ? " case-study-sequence" : "")}>
               {section.cards.map((card, index) => {
                 const StatusIcon = STATUS_ICONS[card.tone];
                 return <section className="case-study-card" data-tone={card.tone} key={card.title}>
@@ -81,7 +83,7 @@ export default function CaseStudyGuide({ onOpen }: { onOpen: () => void }) {
                   <div className="case-study-card-copy"><span className="case-study-card-tag"><StatusIcon size={13} aria-hidden="true" />{card.tag}</span><h4>{card.title}</h4>{card.value && <strong className="case-study-card-value">{card.value}</strong>}<p>{card.body}</p></div>
                 </section>;
               })}
-            </div>
+            </div>}
             {section.id === "demo" && <div className="case-study-demo-links"><button type="button" onClick={closeGuide}>Try it in the room<ArrowRight size={15} aria-hidden="true" /></button><a href="https://voxbuild-nu.vercel.app/" target="_blank" rel="noopener noreferrer">Public demo<ExternalLink size={13} aria-hidden="true" /></a><a href="https://github.com/kyuhunlee/voxbuild" target="_blank" rel="noopener noreferrer">Public repo<ExternalLink size={13} aria-hidden="true" /></a></div>}
             {!!section.details?.length && <details className="case-study-details" key={section.id}><summary>Details for Q&A<ChevronDown size={16} aria-hidden="true" /></summary><div>{section.details.map((block) => <section key={block.title}><h4>{block.title}</h4>{block.body && <p>{block.body}</p>}{block.bullets && <ul>{block.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}</ul>}{block.rows && <dl>{block.rows.map((row) => <div key={row.label}><dt>{row.label}</dt><dd>{row.value}</dd></div>)}</dl>}</section>)}</div></details>}
           </article>

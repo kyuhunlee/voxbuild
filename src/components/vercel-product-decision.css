@@ -1,0 +1,53 @@
+.product-decisions { margin-top: 1px; }
+.product-decision-picker { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-bottom: 17px; }
+.product-decision-picker button { min-height: 40px; padding: 8px 10px; border: 1px solid #45555d; border-radius: 7px; color: #b7c8ca; background: #19252b; font-size: 12px; line-height: 1.35; text-align: center; }
+.product-decision-picker button:hover { background: #263b43; color: #edf4ef; }
+.product-decision-picker button[aria-pressed="true"] { background: #2d4645; border-color: #83a9a0; color: #e1f0e8; }
+.product-decision-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.product-decision-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 9px; font-size: 11px; line-height: 1.5; color: #b9c8de; }
+.product-decision-heading > span { padding: 3px 7px; border: 1px solid #485d74; border-radius: 4px; background: #243345; }
+.product-decision-heading a { display: inline-flex; align-items: center; gap: 6px; padding-top: 3px; color: #b6cfcd; text-align: right; }
+.product-decision-panel > h4 { margin: 0 0 7px; color: #e4eee8; font-size: 16px; font-weight: 550; letter-spacing: -.2px; line-height: 1.4; }
+.product-decision-alternative { margin: 0 0 15px; font-size: 13px; color: #aebfc4; line-height: 1.55; }
+.product-decision-alternative > span { color: #c8d4dd; }
+.product-decision-comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.product-decision-comparison > section { min-width: 0; padding: 15px 16px; border: 1px solid #45505e; border-radius: 8px; background: #202b34; }
+.product-decision-comparison .product-decision-adopt { border-color: #496c64; background: #213630; }
+.product-decision-comparison h5 { display: flex; align-items: center; gap: 7px; margin: 0 0 10px; font-size: 12px; font-weight: 550; color: #c5cede; line-height: 1.5; }
+.product-decision-adopt h5 { color: #c2e0cf; }
+.product-decision-comparison ul { margin: 0; padding-left: 15px; color: #bccbcd; }
+.product-decision-comparison li { padding-left: 2px; font-size: 14px; line-height: 1.55; }
+.product-decision-comparison li + li { margin-top: 7px; }
+.product-decision-build li::marker { color: #a9b9d1; }
+.product-decision-adopt li::marker { color: #b3d5c2; }
+.product-decision-benefit { display: flex; align-items: flex-start; gap: 10px; margin: 15px 0; color: #b9d9c9; }
+.product-decision-benefit > svg { flex-shrink: 0; margin-top: 3px; }
+.product-decision-benefit p { display: flex; flex-direction: column; gap: 3px; margin: 0; }
+.product-decision-benefit strong { font-size: 12px; font-weight: 550; color: #c9e1d4; }
+.product-decision-benefit span { font-size: 14px; line-height: 1.6; color: #c1d1cd; }
+.product-decision-evidence { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid #3e5057; padding-top: 15px; gap: 20px; }
+.product-decision-evidence > section { min-width: 0; }
+.product-decision-evidence-label, .product-decision-story-label { display: inline-flex; align-items: center; gap: 5px; margin-bottom: 7px; font-size: 11px; line-height: 1.5; color: #a7d0bd; }
+.product-decision-story-label { color: #c5bfe3; }
+.product-decision-story-label:hover, .product-decision-heading a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.product-decision-evidence p { margin: 0; color: #b7c7cc; font-size: 13px; line-height: 1.6; }
+.product-decision-evidence strong { color: #e0e7ec; font-weight: 550; }
+.product-decision-evidence small { display: block; margin-top: 7px; color: #99acb7; font-size: 11px; line-height: 1.6; }
+.product-decision-ownership { margin-top: 14px; border-top: 1px solid #3e5057; }
+.product-decision-ownership summary { display: flex; align-items: center; justify-content: space-between; min-height: 42px; gap: 10px; padding: 11px 0; list-style: none; cursor: pointer; color: #b5c5cd; font-size: 12px; }
+.product-decision-ownership summary::-webkit-details-marker { display: none; }
+.product-decision-ownership[open] summary svg { transform: rotate(180deg); }
+.product-decision-ownership > p { margin: 0 0 10px; color: #b2c2cb; font-size: 13px; line-height: 1.65; }
+@media (max-width: 800px) { .product-decision-picker button { padding-inline: 7px; font-size: 11px; } .product-decision-comparison > section { padding: 13px; } .product-decision-evidence { gap: 15px; } }
+@media (max-width: 640px) {
+  .product-decision-picker { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 16px; gap: 7px; }
+  .product-decision-picker button { min-height: 42px; font-size: 12px; }
+  .product-decision-heading { font-size: 11px; }
+  .product-decision-heading > span { max-width: 65%; }
+  .product-decision-panel > h4 { font-size: 16px; }
+  .product-decision-comparison, .product-decision-evidence { grid-template-columns: minmax(0, 1fr); }
+  .product-decision-comparison > section { padding: 15px 16px; }
+  .product-decision-comparison h5 { font-size: 13px; }
+  .product-decision-evidence { gap: 16px; }
+  .product-decision-evidence p { font-size: 14px; }
+}

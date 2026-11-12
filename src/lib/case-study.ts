@@ -58,21 +58,13 @@ export const CASE_STUDY_SECTIONS: CaseStudySection[] = [
   {
     id: "vercel",
     label: "Vercel choices",
-    title: "Vercel’s technical and business value",
-    intro: "Add the application and AI layer without replacing AWS or Atlas.",
-    cards: [
-      { title: "Next.js + Functions", body: "The UI and API share one deployment. This can reduce runtime and release plumbing when launching a planner.", tone: "proof", tag: "Application" },
-      { title: "AI SDK", body: "Structured plans use a shared model interface. This can reduce provider-specific maintenance as the team tests new models.", tone: "proof", tag: "AI planning" },
-      { title: "AI Gateway", body: "One text API provides routing, fallback, and cost metadata. The team can compare models and understand feature costs.", tone: "proof", tag: "AI routing" },
-      { title: "Git deployments + Previews", body: "Main deploys automatically; per-change Preview reviews are proposed. The goal is earlier stakeholder feedback and less manual release work.", tone: "proof", tag: "Git deployed" },
-    ],
+    title: "Why adopt Vercel instead of building it?",
+    intro: "Build the renter experience. Adopt the integration and delivery layers that support it.",
+    cards: [],
     details: [
-      { title: "Trade-offs to defend", rows: [
-        { label: "Next.js + Functions", value: "Database pooling, request timeouts, and regional placement remain application design decisions." },
-        { label: "AI SDK", value: "A structured plan can still be wrong. Independent domain validation decides which operations can be saved." },
-        { label: "AI Gateway", value: "Gateway handles text planning. Direct OpenAI Realtime voice retains separate provider dependence and accounting. The demonstrated fallback is policy-driven, not an induced provider outage." },
-        { label: "Git deployments + Previews", value: "Automatic production deployment from main is proven. Preview validation, gated promotion, canary, and timed rollback remain proposed customer operating steps." },
-      ] },
+      { title: "The recommendation", body: "Adopt the open-source AI SDK for application integration and managed AI Gateway for model operations. Use Next.js/Functions and Git previews for the planner’s release path. Keep AWS systems, Atlas, and customer identity. The expected return is engineering capacity for renter features, earlier feedback, and measurable AI operating costs." },
+      { title: "How to make the business case", body: "Compare implementation hours, ongoing maintenance and on-call effort, platform/model charges, and release or failure costs for each option. Use the customer’s own baselines; do not turn another company’s case-study results into a savings forecast. SDK adoption has no library fee, but model usage, hosting, upgrades, and managed services still have costs." },
+      { title: "When another option can fit", body: "A direct provider SDK may be enough for a stable single-model feature. An existing internal gateway or release platform may already meet the requirements. Validate the extra value of Vercel against those capabilities, network/data policies, and total cost before expanding the pilot." },
     ],
   },
   {
