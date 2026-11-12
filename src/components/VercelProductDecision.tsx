@@ -1,21 +1,41 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Blocks, Check, ChevronDown, ExternalLink, TrendingUp } from "lucide-react";
 import { VERCEL_PRODUCT_DECISIONS } from "@/lib/vercel-product-decisions";
 import "./vercel-product-decision.css";
 
 export default function VercelProductDecision() {
   const [selectedId, setSelectedId] = useState(VERCEL_PRODUCT_DECISIONS[0].id);
-  const comparisons = useRef<HTMLDivElement>(null);
+  const comparisons = useRef<HTMLElement>(null);
+  const picker = useRef<HTMLDivElement>(null);
   const decision = VERCEL_PRODUCT_DECISIONS.find((entry) => entry.id === selectedId) ?? VERCEL_PRODUCT_DECISIONS[0];
 
-  return <div ref={comparisons} className="product-decisions">
-    <div className="product-decision-picker" role="group" aria-label="Vercel product comparisons">
-      {VERCEL_PRODUCT_DECISIONS.map((entry) => <button type="button" key={entry.id} aria-pressed={entry.id === decision.id} aria-controls="vercel-product-decision" onClick={() => { setSelectedId(entry.id); comparisons.current?.scrollIntoView({ block: "start", behavior: "auto" }); }}>{entry.label}</button>)}
+  function updatePickerClearance() {
+    const panel = comparisons.current;
+    const scroller = panel?.closest<HTMLElement>(".case-study-content");
+    if (!panel || !scroller || !picker.current) return;
+    const topPadding = Number.parseFloat(getComputedStyle(scroller).paddingTop) || 0;
+    const clearance = Math.ceil(picker.current.getBoundingClientRect().height + topPadding) + 16;
+    panel.style.setProperty("--product-picker-clearance", clearance + "px");
+  }
+
+  useEffect(() => {
+    updatePickerClearance();
+    const scroller = comparisons.current?.closest<HTMLElement>(".case-study-content");
+    if (!picker.current || !scroller) return;
+    const observer = new ResizeObserver(updatePickerClearance);
+    observer.observe(picker.current);
+    observer.observe(scroller);
+    return () => observer.disconnect();
+  }, []);
+
+  return <div className="product-decisions">
+    <div ref={picker} className="product-decision-picker" role="group" aria-label="Vercel product comparisons">
+      {VERCEL_PRODUCT_DECISIONS.map((entry) => <button type="button" key={entry.id} aria-pressed={entry.id === decision.id} aria-controls="vercel-product-decision" onClick={() => { setSelectedId(entry.id); updatePickerClearance(); comparisons.current?.scrollIntoView({ block: "start", behavior: "auto" }); }}>{entry.label}</button>)}
     </div>
     <p className="product-decision-status" role="status">Showing {decision.label} comparison.</p>
-    <section id="vercel-product-decision" className="product-decision-panel" aria-labelledby="product-decision-title">
+    <section ref={comparisons} id="vercel-product-decision" className="product-decision-panel" aria-labelledby="product-decision-title">
       <div className="product-decision-heading"><span>{decision.kind}</span><a href={decision.source.href} target="_blank" rel="noopener noreferrer">{decision.source.label}<ExternalLink size={12} aria-hidden="true" /></a></div>
       <h4 id="product-decision-title">{decision.recommendation}</h4>
       <p className="product-decision-alternative"><span>Alternative:</span> {decision.alternative}</p>

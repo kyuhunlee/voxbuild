@@ -209,6 +209,7 @@ export default function VoxBuildApp() {
   const [cameraKey, setCameraKey] = useState(0);
   const [architectureOpen, setArchitectureOpen] = useState(false);
   const [architectureView, setArchitectureView] = useState<"activity" | "system">("activity");
+  const architectureTrigger = useRef<HTMLButtonElement>(null);
   const activityTab = useRef<HTMLButtonElement>(null);
   const systemTab = useRef<HTMLButtonElement>(null);
   const [testFallback, setTestFallback] = useState(false);
@@ -281,10 +282,15 @@ export default function VoxBuildApp() {
       setArchitectureOpen(false);
       setCatalogOpen(false);
       setInspectorOpen(false);
+      if (architectureOpen) architectureTrigger.current?.focus();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [architectureOpen, catalogOpen, inspectorOpen]);
+
+  useEffect(() => {
+    if (architectureOpen) (architectureView === "activity" ? activityTab : systemTab).current?.focus();
+  }, [architectureOpen, architectureView]);
 
   const enqueue = useCallback(<T,>(work: (current: Scene) => Promise<T>): Promise<T> => {
     pending.current += 1;
@@ -328,6 +334,7 @@ export default function VoxBuildApp() {
   }, [notify, record]);
   const voice = useVoice({ scene, enabled: mode === "live" && capabilities.voice, onOperations: (operations, commandId, isCurrent) => executeOperations(operations, commandId, "Voice · AI Gateway", isCurrent), onEvent: voiceEvent });
   const voiceActive = !["idle", "error"].includes(voice.status);
+  const voiceConnected = voiceActive && voice.status !== "connecting";
 
   const handle = useCallback(async (task: Promise<{ scene: Scene; message: string }>) => {
     try { const result = await task; notify(result.message, "success"); }
@@ -457,7 +464,7 @@ export default function VoxBuildApp() {
           {busy || mode === "loading" ? <LoaderCircle className="spin" size={13} /> : mode === "live" ? <Cloud size={14} /> : mode === "error" ? <AlertCircle size={14} /> : <span className="status-dot" />}
           {busy ? mode === "sample" ? "Updating preview" : "Saving changes" : mode === "loading" ? "Connecting" : mode === "live" ? "All changes saved" : mode === "error" ? "Connection issue" : "Local sample"}
         </span>
-        <button className={`button architecture-button ${architectureOpen ? "is-active" : ""}`} onClick={() => setArchitectureOpen((open) => !open)} aria-label="Architecture" aria-expanded={architectureOpen}><Code2 size={15} /><span>Architecture</span></button>
+        <button ref={architectureTrigger} className={`button architecture-button ${architectureOpen ? "is-active" : ""}`} onClick={() => setArchitectureOpen((open) => !open)} aria-label="Architecture" aria-expanded={architectureOpen} aria-controls="architecture-drawer"><Code2 size={15} /><span>Architecture</span></button>
         <span className="avatar" title="Your private visitor session">You</span>
       </div>
     </header>
@@ -495,7 +502,7 @@ export default function VoxBuildApp() {
           <div className="composer-area">
             {notice && <div key={notice.id} className={`notice notice-${notice.kind}`} role={notice.kind === "error" ? "alert" : "status"} aria-atomic="true">{notice.kind === "error" ? <AlertCircle size={15} /> : notice.kind === "success" ? <Check size={15} /> : <Sparkles size={15} />}<span>{notice.message}</span><button onClick={() => setNotice(null)} aria-label="Dismiss message"><X size={13} /></button></div>}
             <div className="command-composer">
-              <div className="composer-heading"><span className="composer-spark"><Sparkles size={14} /></span><span>{voiceActive ? voice.status === "connecting" ? "Connecting your microphone…" : voice.status === "thinking" ? "Working on your room…" : voice.status === "speaking" ? "Your room, in conversation" : "Listening. Make yourself at home." : "A little change. A whole new room."}</span><span className="composer-mode">{mode === "sample" ? "Local preview" : voiceActive ? "Voice connected" : "Room assistant"}</span></div>
+              <div className="composer-heading"><span className="composer-spark"><Sparkles size={14} /></span><span>{voiceActive ? voice.status === "connecting" ? "Connecting your microphone…" : voice.status === "thinking" ? "Working on your room…" : voice.status === "speaking" ? "Your room, in conversation" : "Listening. Make yourself at home." : "A little change. A whole new room."}</span><span className="composer-mode" role="status">{mode === "sample" ? "Local preview" : voice.status === "connecting" ? "Connecting voice" : voiceConnected ? "Voice connected" : "Room assistant"}</span></div>
               <form onSubmit={(event: FormEvent) => { event.preventDefault(); void submitPrompt(prompt); }} className="command-form">
                 <button type="button" className={`microphone-button ${voiceActive ? "listening" : ""}`} aria-label={voiceActive ? "Stop voice conversation" : "Start voice conversation"} title={voiceActive ? "Stop voice" : "Talk to your room"} disabled={mode === "loading" || mode === "error"} onClick={() => {
                   if (voiceActive) voice.stop();
@@ -503,12 +510,12 @@ export default function VoxBuildApp() {
                   else void voice.start();
                 }}>{voice.status === "connecting" ? <LoaderCircle size={18} className="spin" /> : voiceActive ? <MicOff size={18} /> : <Mic size={18} />}</button>
                 <input value={prompt} onChange={(event) => setPrompt(event.target.value)} placeholder="“Add a bookcase and try the coastal style”" aria-label="Describe a change to your room" disabled={locked} maxLength={1000} autoComplete="off" />
-                {voiceActive && <div className="voice-level" aria-hidden="true">{[0.5, 0.85, 1, 0.65, 0.4].map((factor, index) => <span key={index} style={{ height: 3 + voice.level * factor * 20 }} />)}</div>}
+                {voiceConnected && <div className="voice-level" aria-hidden="true">{[0.5, 0.85, 1, 0.65, 0.4].map((factor, index) => <span key={index} style={{ height: 3 + voice.level * factor * 20 }} />)}</div>}
                 <button className="send-button" type="submit" disabled={locked || !prompt.trim()} aria-label="Apply room prompt">{busy ? <LoaderCircle size={16} className="spin" /> : <ArrowUp size={17} />}</button>
               </form>
               <div className="prompt-suggestions"><span>{mode === "sample" ? "Try a preview" : "Try asking"}</span>{PROMPTS.map((text) => <button key={text} disabled={locked} onClick={() => void submitPrompt(text, true)}>{text}<Plus size={11} /></button>)}</div>
             </div>
-            <div className="composer-footnote">{mode === "sample" ? <><span className="small-status-dot" />Local sample · Changes stay in this tab · No AI connected</> : <><span className={`small-status-dot${mode === "live" ? " live" : ""}`} />{mode === "loading" ? "Opening your saved room…" : mode === "error" ? "Reconnect to check your latest saved room." : voiceActive ? "Microphone is on. Click the mic to end your conversation." : "Every accepted change is validated and saved."}</>}</div>
+            <div className="composer-footnote">{mode === "sample" ? <><span className="small-status-dot" />Local sample · Changes stay in this tab · No AI connected</> : <><span className={`small-status-dot${mode === "live" ? " live" : ""}`} />{mode === "loading" ? "Opening your saved room…" : mode === "error" ? "Reconnect to check your latest saved room." : voice.status === "connecting" ? "Starting voice. Allow microphone access if prompted." : voiceConnected ? "Microphone is on. Click the mic to end your conversation." : "Every accepted change is validated and saved."}</>}</div>
           </div>
         </div>
       </main>
@@ -539,15 +546,15 @@ export default function VoxBuildApp() {
         <div className="inspector-footer"><span className="revision-label">Revision {scene.revision}</span><span>{busy ? mode === "sample" ? "Updating preview" : "Saving…" : mode === "live" ? "Cloud saved" : mode === "sample" ? "Local sample" : mode === "error" ? "Not connected" : "Connecting"}</span></div>
       </aside>
 
-      {architectureOpen && <aside className="architecture-drawer" aria-label="Architecture and observed activity">
-        <div className="architecture-heading"><div><Code2 size={18} /><h2>Under the hood</h2></div><button className="icon-button" onClick={() => setArchitectureOpen(false)} aria-label="Close architecture"><X size={17} /></button></div>
+      {architectureOpen && <aside id="architecture-drawer" className="architecture-drawer" aria-label="Architecture and observed activity">
+        <div className="architecture-heading"><div><Code2 size={18} /><h2>Under the hood</h2></div><button className="icon-button" onClick={() => { setArchitectureOpen(false); architectureTrigger.current?.focus(); }} aria-label="Close architecture"><X size={17} /></button></div>
         <div className="architecture-views" role="tablist" aria-label="Architecture views" onKeyDown={(event) => { if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return; event.preventDefault(); const next = event.key === "Home" ? "activity" : event.key === "End" ? "system" : architectureView === "activity" ? "system" : "activity"; setArchitectureView(next); (next === "activity" ? activityTab : systemTab).current?.focus(); }}><button ref={activityTab} type="button" id="architecture-activity-tab" role="tab" aria-selected={architectureView === "activity"} aria-controls="architecture-activity-panel" tabIndex={architectureView === "activity" ? 0 : -1} onClick={() => setArchitectureView("activity")}>Activity</button><button ref={systemTab} type="button" id="architecture-system-tab" role="tab" aria-selected={architectureView === "system"} aria-controls="architecture-system-panel" tabIndex={architectureView === "system" ? 0 : -1} onClick={() => setArchitectureView("system")}>System map</button></div>
         <div id="architecture-system-panel" role="tabpanel" aria-labelledby="architecture-system-tab" hidden={architectureView !== "system"} className="architecture-content"><SystemArchitecture onOpen={() => voice.stop()} /></div><div id="architecture-activity-panel" role="tabpanel" aria-labelledby="architecture-activity-tab" hidden={architectureView !== "activity"} className="architecture-content"><p className="architecture-intro">A scene you can inspect.<br />A system you can explain.</p>
           <div className="architecture-path"><span>Browser</span><ChevronRight size={13} /><span>Vercel</span><ChevronRight size={13} /><span>AI + Atlas</span></div>
           <div className="integration-list">
             <div><span className="integration-icon"><Layers size={15} /></span><span><strong>Vercel Functions</strong><small>Validate commands · commit scene revisions</small></span><span className={`integration-dot ${mode !== "error" && mode !== "loading" ? "connected" : ""}`} /></div>
             <div><span className="integration-icon"><Sparkles size={15} /></span><span><strong>AI Gateway</strong><small>Structured text + realtime voice access</small></span><span className={`integration-dot ${capabilities.gateway && mode === "live" ? "connected" : ""}`} title={capabilities.gateway ? "Configured" : "Not connected"} /></div>
-            <div><span className="integration-icon"><Mic size={15} /></span><span><strong>OpenAI Realtime</strong><small>Voice via AI Gateway · WebSocket</small></span><span className={`integration-dot ${voiceActive ? "connected" : ""}`} title={voiceActive ? "Voice connected" : capabilities.voice ? "Ready to connect" : "Not configured"} /></div>
+            <div><span className="integration-icon"><Mic size={15} /></span><span><strong>OpenAI Realtime</strong><small>Voice via AI Gateway · WebSocket</small></span><span className={`integration-dot ${voiceConnected ? "connected" : ""}`} title={voice.status === "connecting" ? "Connecting voice" : voiceConnected ? "Voice connected" : capabilities.voice ? "Ready to connect" : "Not configured"} /></div>
             <div><span className="integration-icon"><Database size={15} /></span><span><strong>MongoDB Atlas</strong><small>{mode === "live" ? "Owned scenes · atomic revisions + receipts" : "Not connected · sample stays in this tab"}</small></span><span className={`integration-dot ${mode === "live" ? "connected" : ""}`} /></div>
           </div>
           <div className="architecture-catalog"><Box size={14} /><span>Catalog: explicit local fixture</span><span>{CATALOG.length} SKUs</span></div>

@@ -1,4 +1,5 @@
-.product-decisions { margin-top: 1px; }
+.product-decisions { --product-picker-clearance: 108px; margin-top: 1px; }
+.product-decision-panel, .product-decision-panel :is(a, summary) { scroll-margin-block-start: var(--product-picker-clearance); }
 .product-decision-picker { position: sticky; top: -1px; z-index: 4; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; padding: 8px 0; margin: -8px 0 17px; border-bottom: 1px solid var(--case-border, #35474d); background: var(--case-surface, #1b282d); }
 .product-decision-picker button { min-height: 44px; padding: 9px 12px; border: 1px solid #45555d; border-radius: 7px; color: #b7c8ca; background: #19252b; font-size: 13px; line-height: 1.35; text-align: center; }
 .product-decision-picker button:hover { background: #263b43; color: #edf4ef; }
@@ -67,6 +68,7 @@
 .product-decision-ownership > p { margin: 0 0 10px; color: #b2c2cb; font-size: 13px; line-height: 1.65; }
 @media (max-width: 800px) { .product-decision-picker button { padding-inline: 7px; font-size: 12px; } .product-decision-comparison { gap: 12px; } .product-decision-comparison > section { padding: 16px; } .product-customer-story-metrics > div { padding-inline: 10px; } }
 @media (max-width: 640px) {
+  .product-decisions { --product-picker-clearance: 152px; }
   .product-decision-picker { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 16px; gap: 7px; }
   .product-decision-picker button { min-height: 42px; font-size: 12px; }
   .product-decision-heading { font-size: 11px; }

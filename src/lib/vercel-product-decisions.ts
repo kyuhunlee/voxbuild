@@ -77,7 +77,7 @@ export const VERCEL_PRODUCT_DECISIONS: VercelProductDecision[] = [
       { title: "Centralize model access", body: "Use one managed endpoint and Gateway authentication for supported models. Spend less effort maintaining individual provider connections and price tables as the approved model set grows." },
     ],
     benefit: "Consolidate routed AI spend across the team and keep approved backup models available, with less routing infrastructure to operate.",
-    proof: "The recorded 14-request text run returned usage and cost, and policy-routed fallback passed. A Gateway voice WebSocket probe also connected; browser microphone behavior and dollar accounting still need separate validation.",
+    proof: "The recorded 14-request text run returned usage and cost, and policy-routed fallback passed. A Gateway voice probe connected, and the user confirmed voice works in the preview. Voice dollar cost and serving-provider attribution remain unmeasured.",
     ownership: "Approve models and data policies, configure text fallbacks, evaluate quality, set budgets, and reconcile spend. Gateway aggregates routed usage across team projects. Voice now uses Gateway too, but missing session/provider/cost fields remain unknown; the app does not invent per-response voice costs. No automatic in-session voice fallback is implemented. Routing does not guarantee a correct plan or durable save.",
     source: { label: "AI Gateway docs", href: "https://vercel.com/docs/ai-gateway" },
     example: {
