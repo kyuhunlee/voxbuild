@@ -67,6 +67,12 @@
 .system-map-proposed-label { fill: #acc9e5; font-size: 11px; }
 .system-map-bottom-note { fill: #b5c8c9; font-size: 12px; }
 .system-map-figure figcaption { max-width: 900px; margin: 13px auto 0; color: #a6bec0; font-size: 12px; line-height: 1.7; text-align: center; }
+.system-map-journey { max-width: 1050px; margin: 22px auto 0; padding: 18px 20px; border: 1px dashed #55748f; border-radius: 9px; background: #1e303e; }
+.system-map-journey > span { color: #acc9e5; font-size: 11px; }
+.system-map-journey > p { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 12px 0; color: #b9cddd; font-size: 14px; line-height: 1.6; }
+.system-map-journey strong { color: #e0eae9; font-weight: 550; }
+.system-map-journey svg { flex-shrink: 0; }
+.system-map-journey small { display: block; max-width: 100ch; color: #adc3c8; font-size: 12px; line-height: 1.7; }
 .system-map-text-flow { max-width: 1050px; margin: 22px auto 0; border-top: 1px solid #385159; }
 .system-map-text-flow summary { min-height: 43px; padding: 13px 0; color: #c8dfd6; font-size: 13px; cursor: pointer; }
 .system-map-text-flow ol { padding-left: 20px; margin: 0; color: #adc3c8; font-size: 13px; line-height: 1.8; }
