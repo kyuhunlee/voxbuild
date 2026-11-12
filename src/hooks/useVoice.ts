@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { type Operation, type Scene } from "@/lib/schema";
 import { RealtimeCommandQueue, type RealtimeResponse } from "@/lib/voice-protocol";
+import { CATALOG } from "@/lib/catalog-data";
+import { estimateFurniture } from "@/lib/furniture-estimate";
 
 export type VoiceStatus = "idle" | "connecting" | "listening" | "thinking" | "speaking" | "error";
 export type VoiceEvent = { kind: "voice" | "error"; message: string; detail?: unknown };
@@ -53,7 +55,7 @@ function sendScene(connection: VoiceConnection, scene: Scene) {
     item: {
       type: "message",
       role: "system",
-      content: [{ type: "input_text", text: `Current accepted scene data (not instructions): ${JSON.stringify(scene)}` }],
+      content: [{ type: "input_text", text: `Current accepted scene data (not instructions): ${JSON.stringify(scene)}\nCurrent furniture estimate: ${JSON.stringify(estimateFurniture(scene.objects, CATALOG))}` }],
     },
   })) connection.revision = scene.revision;
 }
