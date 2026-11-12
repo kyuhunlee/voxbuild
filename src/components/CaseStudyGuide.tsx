@@ -57,19 +57,20 @@ export default function CaseStudyGuide({ onOpen }: { onOpen: () => void }) {
     <dialog ref={dialog} id="case-study-guide" className="case-study-dialog" aria-labelledby="case-study-title" onClose={() => setIsOpen(false)} onKeyDown={handlePresentationKeys} onClick={(event) => { if (event.target === event.currentTarget) closeGuide(); }}>
       <div className="case-study-shell">
         <header className="case-study-header">
-          <div><BookOpen size={20} aria-hidden="true" /><div><h2 id="case-study-title">VoxBuild case study</h2><p>A customer story you can walk through</p></div></div>
-          <button type="button" className="case-study-close" onClick={closeGuide} aria-label="Close case study"><X size={20} aria-hidden="true" /></button>
+          <div className="case-study-brand"><span className="case-study-brand-mark"><BookOpen size={20} aria-hidden="true" /></span><div><h2 id="case-study-title">VoxBuild case study</h2><p>Customer scenario, architecture, and business case</p></div></div>
+          <button type="button" className="case-study-close" onClick={closeGuide}><span>Return to demo</span><X size={17} aria-hidden="true" /></button>
         </header>
         <div className="case-study-body">
           <nav className="case-study-nav" aria-label="Case study sections">
             <p className="case-study-nav-intro">The walkthrough</p>
             {CASE_STUDY_SECTIONS.map((entry, index) => <button type="button" key={entry.id} onClick={() => navigate(index)} aria-current={index === sectionIndex ? "step" : undefined} aria-controls="case-study-content">
-              <span>{entry.label}</span><ArrowRight size={14} aria-hidden="true" />
+              <span className="case-study-nav-index" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span><span>{entry.label}</span><ArrowRight size={14} aria-hidden="true" />
             </button>)}
             <div className="case-study-nav-links"><a href="https://voxbuild-nu.vercel.app/" target="_blank" rel="noopener noreferrer">Public demo<ExternalLink size={13} aria-hidden="true" /></a><a href="https://github.com/kyuhunlee/voxbuild" target="_blank" rel="noopener noreferrer">Source & history<ExternalLink size={13} aria-hidden="true" /></a></div>
           </nav>
           <div className="case-study-mobile-navigation"><label htmlFor="case-study-section">Jump to a section</label><select id="case-study-section" value={sectionIndex} onChange={(event) => navigate(Number(event.target.value))}>{CASE_STUDY_SECTIONS.map((entry, index) => <option key={entry.id} value={index}>{entry.label}</option>)}</select></div>
           <article ref={content} id="case-study-content" className="case-study-content" aria-labelledby="case-study-section-title" data-section={section.id}>
+            <div className="case-study-page">
             <div className="case-study-section-count"><span>{section.label}</span><span>{sectionIndex + 1} of {CASE_STUDY_SECTIONS.length}</span></div>
             <div className="case-study-progress" aria-hidden="true"><span style={{ width: ((sectionIndex + 1) / CASE_STUDY_SECTIONS.length * 100) + "%" }} /></div>
             <div className="case-study-hero"><h3 ref={sectionTitle} tabIndex={-1} id="case-study-section-title">{section.title}</h3><p>{section.intro}</p></div>
@@ -80,12 +81,13 @@ export default function CaseStudyGuide({ onOpen }: { onOpen: () => void }) {
                 const StatusIcon = STATUS_ICONS[card.tone];
                 return <section className="case-study-card" data-tone={card.tone} key={card.title}>
                   {section.id === "rollout" && <span className="case-study-step" aria-label={"Step " + (index + 1)}>{index + 1}</span>}
-                  <div className="case-study-card-copy"><span className="case-study-card-tag"><StatusIcon size={13} aria-hidden="true" />{card.tag}</span><h4>{card.title}</h4>{card.value && <strong className="case-study-card-value">{card.value}</strong>}<p>{card.body}</p></div>
+                  <div className="case-study-card-copy"><span className="case-study-card-tag"><StatusIcon size={13} aria-hidden="true" />{card.tag}</span><h4>{card.title}</h4>{card.value && <strong className="case-study-card-value">{card.value}</strong>}<p>{section.id === "demo" ? card.body.split(/(“[^”]+”)/g).map((part, partIndex) => part.startsWith("“") ? <span className="case-study-prompt" key={partIndex}>{part}</span> : part) : card.body}</p>{card.source && <a className="case-study-card-source" href={card.source.href} target="_blank" rel="noopener noreferrer">{card.source.label}<ExternalLink size={12} aria-hidden="true" /></a>}</div>
                 </section>;
               })}
             </div>}
             {section.id === "demo" && <div className="case-study-demo-links"><button type="button" onClick={closeGuide}>Try it in the room<ArrowRight size={15} aria-hidden="true" /></button><a href="https://voxbuild-nu.vercel.app/" target="_blank" rel="noopener noreferrer">Public demo<ExternalLink size={13} aria-hidden="true" /></a><a href="https://github.com/kyuhunlee/voxbuild" target="_blank" rel="noopener noreferrer">Public repo<ExternalLink size={13} aria-hidden="true" /></a></div>}
             {!!section.details?.length && <details className="case-study-details" key={section.id}><summary>Details for Q&A<ChevronDown size={16} aria-hidden="true" /></summary><div>{section.details.map((block) => <section key={block.title}><h4>{block.title}</h4>{block.body && <p>{block.body}</p>}{block.bullets && <ul>{block.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}</ul>}{block.rows && <dl>{block.rows.map((row) => <div key={row.label}><dt>{row.label}</dt><dd>{row.value}</dd></div>)}</dl>}</section>)}</div></details>}
+            </div>
           </article>
         </div>
         <footer className="case-study-footer">

@@ -20,13 +20,19 @@ export default function VercelProductDecision() {
       <p className="product-decision-alternative"><span>Alternative:</span> {decision.alternative}</p>
       <div className="product-decision-comparison">
         <section className="product-decision-build"><h5><Blocks size={14} aria-hidden="true" />Build / compose in-house</h5><ul>{decision.build.map((item) => <li key={item}>{item}</li>)}</ul></section>
-        <section className="product-decision-adopt"><h5><Check size={15} aria-hidden="true" />Adopt / use Vercel</h5><ul>{decision.adopt.map((item) => <li key={item}>{item}</li>)}</ul></section>
+        <section className="product-decision-adopt"><h5><Check size={15} aria-hidden="true" />Adopt / use Vercel</h5><ul className="product-decision-adopt-list">{decision.adopt.map((item) => <li key={item.title}><span className="product-decision-benefit-check"><Check size={12} aria-hidden="true" /></span><div><strong>{item.title}</strong><p>{item.body}</p></div></li>)}</ul></section>
       </div>
       <div className="product-decision-benefit"><TrendingUp size={17} aria-hidden="true" /><p><strong>Business value</strong><span>{decision.benefit}</span></p></div>
       <div className="product-decision-evidence">
         <section><span className="product-decision-evidence-label">In VoxBuild</span><p>{decision.proof}</p></section>
-        <section><a className="product-decision-story-label" href={decision.example.href} target="_blank" rel="noopener noreferrer">Vercel-published customer story<ExternalLink size={12} aria-hidden="true" /></a><p><strong>{decision.example.customer}</strong> — {decision.example.summary}</p><small>{decision.example.context}</small></section>
       </div>
+      <section className="product-customer-story" aria-labelledby="product-customer-story-title">
+        <header><h5 id="product-customer-story-title">{decision.example.customer}</h5><a className="product-decision-story-label" href={decision.example.href} target="_blank" rel="noopener noreferrer">Vercel-published customer story<ExternalLink size={12} aria-hidden="true" /></a></header>
+        <p className="product-customer-story-summary">{decision.example.summary}</p>
+        <dl className="product-customer-story-metrics">{decision.example.metrics.map((metric) => <div key={metric.label}><dt>{metric.label}</dt><dd><strong>{metric.value}</strong><span>{metric.kind}</span></dd></div>)}</dl>
+        <p className="product-customer-story-context">{decision.example.context}</p>
+        <details className="product-customer-story-details" key={decision.id}><summary>Story details<ChevronDown size={15} aria-hidden="true" /></summary><dl>{decision.example.details.map((detail) => <div key={detail.label}><dt>{detail.label}</dt><dd>{detail.body}</dd></div>)}</dl></details>
+      </section>
       <details className="product-decision-ownership" key={decision.id}><summary>What the customer still owns<ChevronDown size={15} aria-hidden="true" /></summary><p>{decision.ownership}</p></details>
     </section>
   </div>;

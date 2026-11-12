@@ -13,6 +13,7 @@ import { enforceSameOrigin, requireSession } from "@/lib/server/session";
 import { errorResponse, HttpError, readJson } from "@/lib/server/errors";
 import { enforceRateLimit } from "@/lib/server/rate-limit";
 import { hasGatewayCredentials } from "@/lib/server/gateway-auth";
+import { readGatewayTrace } from "@/lib/gateway-telemetry";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -26,8 +27,9 @@ export async function POST(request: Request) {
     enforceSameOrigin(request); const owner = await requireSession();
     const input = InputSchema.parse(await readJson(request));
     const model = process.env.AI_GATEWAY_MODEL;
+    const fallbackModel = process.env.AI_GATEWAY_FALLBACK_MODEL;
     if (!model || !hasGatewayCredentials()) throw new HttpError(503, "The AI Gateway is not configured on this deployment.", "AI_NOT_CONFIGURED");
-    if (input.testFallback && (model.startsWith("google/") || !process.env.AI_GATEWAY_FALLBACK_MODEL?.startsWith("google/"))) throw new HttpError(400, "This routing test requires a non-Google primary and a Google fallback model.", "ROUTING_TEST_UNAVAILABLE");
+    if (input.testFallback && (model.startsWith("google/") || !fallbackModel?.startsWith("google/"))) throw new HttpError(400, "This routing test requires a non-Google primary and a Google fallback model.", "ROUTING_TEST_UNAVAILABLE");
     const scene = await getSceneAtRevision(owner.id, input.sceneId, input.expectedRevision);
     await enforceRateLimit(owner.id, "text-generation", 40, 60 * 60 * 1000);
     await enforceRateLimit("global", "text-generation", 400, 24 * 60 * 60 * 1000);
@@ -59,7 +61,7 @@ export async function POST(request: Request) {
       maxRetries: 0,
       abortSignal: AbortSignal.any([request.signal, AbortSignal.timeout(30_000)]),
       providerOptions: { gateway: {
-        ...(process.env.AI_GATEWAY_FALLBACK_MODEL ? { models: [process.env.AI_GATEWAY_FALLBACK_MODEL] } : {}),
+        ...(fallbackModel ? { models: [fallbackModel] } : {}),
         ...(input.testFallback ? { only: ["google"] } : {}),
         user: owner.id, tags: ["voxbuild", "scene-command"],
       } },
@@ -73,18 +75,21 @@ export async function POST(request: Request) {
       ? await applyCommand(owner.id, { sceneId: scene.id, commandId: input.commandId, expectedRevision: input.expectedRevision, operations: plan.operations })
       // Questions must not return a stale snapshot over a concurrently accepted edit.
       : { scene: await getSceneAtRevision(owner.id, scene.id, input.expectedRevision), duplicate: false };
-    const gateway = result.providerMetadata?.gateway;
-    const routing = gateway?.routing && typeof gateway.routing === "object" && !Array.isArray(gateway.routing) ? gateway.routing : null;
-    const resolvedModel = routing && "canonicalSlug" in routing && typeof routing.canonicalSlug === "string" ? routing.canonicalSlug : null;
-    return NextResponse.json({ scene: committed.scene, message: plan.message, operations: plan.operations, telemetry: {
+    const gateway = result.finalStep.providerMetadata?.gateway;
+    const telemetry = {
       requestId, commandId: input.commandId, source: "AI Gateway", requestedModel: model,
-      model: resolvedModel, sdkReportedModel: result.response.modelId, usage: result.usage,
+      configuredFallbackModels: fallbackModel ? [fallbackModel] : [],
+      sdkReportedModel: result.response.modelId, usage: result.usage,
       routingTest: input.testFallback ? "primary-excluded-by-provider-policy" : null, gateway: gateway ? {
         generationId: gateway.generationId ?? null, cost: gateway.cost ?? null, routing: gateway.routing ?? null,
       } : null,
       catalogSource: catalog.source, catalogMs, modelMs,
       databaseMs: Math.round(performance.now() - databaseStart), totalMs: Math.round(performance.now() - start),
       revision: committed.scene.revision, operations: plan.operations, duplicate: committed.duplicate,
+    };
+    const trace = readGatewayTrace(telemetry);
+    return NextResponse.json({ scene: committed.scene, message: plan.message, operations: plan.operations, telemetry: {
+      ...telemetry, model: trace?.executedModel ?? null, provider: trace?.executedProvider ?? null,
     } }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) { return errorResponse(error); }
 }

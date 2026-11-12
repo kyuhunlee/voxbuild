@@ -1,4 +1,4 @@
-export type CaseStudySectionId = "scenario" | "architecture" | "vercel" | "demo" | "outcomes" | "rollout" | "tradeoffs" | "tooling";
+export type CaseStudySectionId = "scenario" | "architecture" | "vercel" | "voice" | "demo" | "outcomes" | "rollout" | "tradeoffs" | "tooling";
 export type CaseStudyTone = "proof" | "target" | "retained" | "risk";
 
 export type CaseStudyCard = {
@@ -7,6 +7,7 @@ export type CaseStudyCard = {
   tone: CaseStudyTone;
   tag: string;
   value?: string;
+  source?: { label: string; href: string };
 };
 
 export type CaseStudyBlock = {
@@ -68,17 +69,41 @@ export const CASE_STUDY_SECTIONS: CaseStudySection[] = [
     ],
   },
   {
-    id: "demo",
-    label: "Demo proof",
-    title: "Change it. Inspect it. Reload.",
-    intro: "Use the public demo to prove one complete AI-to-database interaction.",
+    id: "voice",
+    label: "Why voice",
+    title: "Keep your eyes on the room",
+    intro: "Test a natural way to edit a visual space, with text and direct controls always available.",
     cards: [
-      { title: "Make a change", body: "Try “Make the sofa sage,” speak after allowing the microphone, or use furniture controls. No test account needed.", tone: "proof", tag: "Try it live" },
-      { title: "Inspect and reload", body: "Open Architecture for returned operations and metadata. Reload the saved room to confirm accepted state crossed the Atlas boundary.", tone: "proof", tag: "Show the boundary" },
-      { title: "Automated tests", value: "61", body: "Schema, domain, storage, and voice-coordination tests passed.", tone: "proof", tag: "Recorded proof" },
-      { title: "Production checks", value: "38 / 38", body: "Deployed storage, room/artwork, and text-command checks passed.", tone: "proof", tag: "Recorded proof" },
+      { title: "A useful job for voice", body: "Say “Make the sofa sage” while orbiting the room, then interrupt to refine it. The hypothesis: fewer interface steps help renters explore a layout and decide whether to tour.", tone: "target", tag: "Customer hypothesis" },
+      { title: "Voice interaction has traction", value: "46%", body: "Of U.S. AI users report using voice at least sometimes: 19% primarily speak, and 27% mix speech and typing. Includes dictation and spoken prompts, not just live voice agents.", tone: "retained", tag: "2026 survey", source: { label: "Menlo Ventures / Morning Consult", href: "https://menlovc.com/perspective/2026-the-state-of-consumer-ai/" } },
+      { title: "Why OpenAI Realtime + WebRTC", body: "Realtime combines speech, interruptions, and tool calls. OpenAI recommends WebRTC for consistent browser performance. VoxBuild keeps the API key on the server and sends live media directly between the browser and OpenAI.", tone: "proof", tag: "Implemented choice", source: { label: "Official OpenAI WebRTC guide", href: "https://developers.openai.com/api/docs/guides/voice-webrtc" } },
+      { title: "Learn now. Keep options open.", body: "Pilot voice beside text. Both use the same scene operations and validated save path, so a future voice provider can reuse that contract. A replacement still needs transport work and evaluation.", tone: "target", tag: "Adaptable architecture" },
     ],
     details: [
+      { title: "What the adoption figures establish", body: "Menlo Ventures and Morning Consult surveyed 5,067 U.S. adults in July 2026 with national weighting. The voice question was new, so it does not establish year-over-year voice growth or rental demand. The same report shows daily overall AI use rising from 19% of U.S. adults in 2025 to 25% in 2026; that is not a voice-specific growth rate." },
+      { title: "Why this provider and transport", body: "OpenAI Realtime offers integrated speech interaction and tool use, avoiding a separate transcription → language model → speech synthesis pipeline for this demo. The unified WebRTC setup negotiates SDP through a Vercel Function with server-side credentials; live audio then bypasses Functions. The user confirmed edits, spoken replies, interruption, and microphone release. Evaluate provider quality, availability commitments, data policies, and cost for a customer pilot; brand reputation alone is insufficient." },
+      { title: "How to earn the next investment", body: "Compare opt-in voice and text task completion, time to an accepted edit, corrections, latency, and cost. Track saved designs and qualified tour inquiries. Keep visible microphone consent, an obvious Stop action, and text controls for quiet or shared spaces. Do not call the feature future-proof or claim conversion lift before measuring it." },
+      { title: "A clear Vercel boundary", body: "Vercel handles the application, session setup, and validated save API. Text generation uses AI SDK and AI Gateway; this direct OpenAI voice session does not. Voice needs separate spend tracking and its own provider-recovery strategy." },
+    ],
+  },
+  {
+    id: "demo",
+    label: "Demo",
+    title: "Turn a conversation into a room",
+    intro: "Type or speak one prompt at a time. Show the visual change, ask a question, then reload to check the saved result.",
+    cards: [
+      { title: "Change the atmosphere", body: "“Change the style of the room to midnight.” Show the new palette and lighting while the furniture stays in place.", tone: "proof", tag: "Room style" },
+      { title: "Add and personalize", body: "In Blank canvas: “Add a sofa.” Then: “Change the color of the sofa to sage.” Show a new catalog item and a precise follow-up edit.", tone: "proof", tag: "Furniture" },
+      { title: "Layer the lighting", body: "In Sunlit studio: “Add another lamp next to the sofa.” Show that a second lamp is added while existing furniture is preserved.", tone: "proof", tag: "Context-aware edit" },
+      { title: "Ask about the budget", body: "“How much does all the furniture in the room cost?” Compare the answer with Furniture estimate. Prices are illustrative catalog values.", tone: "proof", tag: "Read-only question" },
+      { title: "Explore a different layout", body: "Choose Quiet bedroom. “Move the bed half a meter to the right.” Or: “Rearrange the room for better feng shui. Keep a clear path through the room.” Review the proposed layout.", tone: "target", tag: "Exploratory prompt" },
+      { title: "Show that it persists", body: "Open Architecture for returned operations and request metadata. Reload the saved room to confirm accepted changes crossed the Atlas boundary.", tone: "proof", tag: "Inspect and reload" },
+    ],
+    details: [
+      { title: "A short presentation flow", body: "Start with Sunlit studio: midnight style → sage sofa → another lamp → furniture cost → inspect and reload. Use Blank canvas to demonstrate adding a sofa, and Quiet bedroom for moving a bed. Opening this guide stops voice; close it and reconnect the microphone before speaking." },
+      { title: "What these prompts demonstrate", body: "Room styles, additions, recolors, moves, and rotations use bounded scene operations. Budget questions can return an answer without changing the room; compare model arithmetic with the displayed Furniture estimate. Broad layout requests may need clarification. Feng shui is an exploratory design request, not a validated assessment; the demo has no complete circulation or collision solver." },
+      { title: "Demonstrate Gateway routing", body: "The configured text primary is OpenAI gpt-4.1-mini; the backup is Google gemini-2.5-flash. Turn on Test Gateway fallback in Architecture, then submit a text prompt. Observed activity shows the requested route and Gateway’s executed model/provider. The switch restricts routing to Google, excluding the primary before execution; it is a real Gateway policy test, not an induced provider outage. Voice uses a separate OpenAI Realtime connection." },
+      { title: "Recorded checks", body: "69 deterministic schema, domain, storage, voice-coordination, and Gateway-telemetry tests passed. The deployed storage, room/artwork, and text-command reports passed 38/38 checks. These suggested presentation prompts are not all individually covered by that evaluation." },
       { title: "Evidence scope", body: "The November 12 production reports contain 10 storage, 14 room/artwork, and 14 semantic text checks, with persisted rereads. These are recorded checks, not a live health monitor or a production reliability estimate." },
       { title: "Voice evidence", body: "The user confirmed deployed voice edits, speech, interruption, and Stop releasing the microphone. A synthetic Realtime session separately checked current tool/audio compatibility without a browser microphone or Atlas writes. Browser voice latency remains unmeasured." },
       { title: "Reviewable implementation", body: "The public repository preserves incremental history and decision comments. The demo includes six authored rooms, 14 furniture SKUs, six environment styles, and five painting designs." },

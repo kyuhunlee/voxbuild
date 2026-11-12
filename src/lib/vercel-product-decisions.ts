@@ -5,12 +5,19 @@ export type VercelProductDecision = {
   recommendation: string;
   alternative: string;
   build: string[];
-  adopt: string[];
+  adopt: { title: string; body: string }[];
   benefit: string;
   proof: string;
   ownership: string;
   source: { label: string; href: string };
-  example: { customer: string; summary: string; context: string; href: string };
+  example: {
+    customer: string;
+    summary: string;
+    context: string;
+    href: string;
+    metrics: { value: string; label: string; kind: string }[];
+    details: { label: string; body: string }[];
+  };
 };
 
 // Official product documentation and Vercel-published customer stories reviewed November 12, 2026.
@@ -28,9 +35,9 @@ export const VERCEL_PRODUCT_DECISIONS: VercelProductDecision[] = [
       "Maintain common usage and cancellation handling.",
     ],
     adopt: [
-      "One generation API across supported models.",
-      "Schema-based structured output.",
-      "Common results and controls in application code.",
+      { title: "Change models through a shared API", body: "Use common generation calls across supported providers. Evaluate alternatives without rewriting the planner’s application interface, reducing repetitive integration work." },
+      { title: "Generate plans against a schema", body: "Describe the room-operation structure once and use structured output instead of maintaining ad hoc response parsers. Our domain checks still decide which edits are safe to save." },
+      { title: "Reuse request handling", body: "Work with common usage, result, and cancellation interfaces. Keep application behavior consistent as model choices change, while retaining responsibility for evaluations and dependency updates." },
     ],
     benefit: "Reduce integration work when evaluating models, so engineers can focus on the renter experience.",
     proof: "VoxBuild uses AI SDK for primary and policy-routed fallback plans, feeding the same scene executor.",
@@ -38,9 +45,19 @@ export const VERCEL_PRODUCT_DECISIONS: VercelProductDecision[] = [
     source: { label: "AI SDK docs", href: "https://vercel.com/docs/ai-sdk" },
     example: {
       customer: "Gamma",
-      summary: "Uses AI SDK instead of custom orchestration to evolve agent behavior without rebuilding its backend.",
-      context: "Published February 28, 2026. An architecture example, not a forecast of our engineering savings.",
+      summary: "AI SDK and shared middleware reduce repetitive work when adding image models.",
+      context: "Published February 28, 2026. Reported image-pipeline results; not a forecast for VoxBuild’s text planner.",
       href: "https://vercel.com/customers/gamma-builds-design-first-agents-with-vercel",
+      metrics: [
+        { value: "~30 lines", label: "Configuration to add an image model", kind: "Integration effort" },
+        { value: "Hours vs. weeks", label: "Reported new-model release turnaround", kind: "Delivery improvement" },
+        { value: "60 / 20", label: "Image models / providers supported", kind: "Scale, not savings" },
+      ],
+      details: [
+        { label: "The friction", body: "Frequent model launches and more sophisticated agents increased integration complexity." },
+        { label: "What changed", body: "Common SDK interfaces and Gamma’s middleware handle tracing, cost tracking, and image preprocessing. Model configuration supplies its capabilities, sizes, and cost formula." },
+        { label: "Why it matters here", body: "A shared integration layer can make model evaluation less invasive while the room schema and executor remain ours. Thirty lines describes configuration, not all testing or integration work. No dollar saving is published." },
+      ],
     },
   },
   {
@@ -55,19 +72,29 @@ export const VERCEL_PRODUCT_DECISIONS: VercelProductDecision[] = [
       "Combine routing, usage, latency, and cost records.",
     ],
     adopt: [
-      "Managed endpoint and centralized authentication.",
-      "Configurable provider and model fallbacks.",
-      "Request logs, cost, usage, and routing metadata.",
+      { title: "See shared AI spend in one dashboard", body: "Aggregate Gateway-routed usage and cost across team projects, with project views and model/provider request logs. Give engineering and finance a common place to investigate spend." },
+      { title: "Configure backup providers and models", body: "Route failed or unavailable requests to approved fallbacks. Preserve a path to service when a provider has trouble, rather than operating our own failover proxy." },
+      { title: "Centralize model access", body: "Use one managed endpoint and Gateway authentication for supported models. Spend less effort maintaining individual provider connections and price tables as the approved model set grows." },
     ],
-    benefit: "Keep model choice and feature-cost visibility while reducing the model infrastructure the team must operate.",
+    benefit: "Consolidate routed AI spend across the team and keep approved backup models available, with less routing infrastructure to operate.",
     proof: "Policy-routed fallback passed. All 14 recorded text requests returned usage and cost; a real outage remains untested.",
-    ownership: "Approve models and data policies, evaluate quality, set budgets, and reconcile spend. Gateway adds a service dependency and does not make room saves durable. VoxBuild voice still uses OpenAI directly with separate accounting.",
+    ownership: "Approve models and data policies, configure fallbacks, evaluate quality, set budgets, and reconcile spend. The dashboard aggregates Gateway requests across team projects, with project-level views and model/provider request logs. Calls that bypass Gateway are excluded: VoxBuild’s direct OpenAI voice spend is separate. Failover handles request failures; it does not guarantee a semantically correct room plan or a durable save.",
     source: { label: "AI Gateway docs", href: "https://vercel.com/docs/ai-gateway" },
     example: {
       customer: "Tailscale",
-      summary: "Chose AI Gateway over in-house routing. Returned request costs let Aperture show spend without maintaining provider price tables.",
-      context: "Published September 11, 2026. Tailscale keeps its own identity/connectivity layer; its wider product also uses Sandbox.",
+      summary: "Moved provider calls behind Gateway while keeping Aperture’s existing endpoint and identity layer.",
+      context: "Published September 11, 2026. A reported internal cutover, not an uptime SLA or a measured cost saving.",
       href: "https://vercel.com/customers/how-tailscale-built-a-customer-facing-model-router-on-ai-gateway",
+      metrics: [
+        { value: "Seconds", label: "Company-wide internal cutover", kind: "Migration result" },
+        { value: "0 interruptions", label: "Reported during that cutover", kind: "Migration result" },
+        { value: "Hundreds", label: "Models available through one API", kind: "Access scale" },
+      ],
+      details: [
+        { label: "The friction", body: "Aperture’s single endpoint still relied on separate provider integrations behind the scenes." },
+        { label: "What changed", body: "The team switched downstream requests to Gateway. Employees kept using the same endpoint; Gateway returned request costs without Tailscale maintaining provider price tables." },
+        { label: "Why it matters here", body: "Retain customer identity and product behavior while adopting managed model operations. The story gives no exact seconds, engineering-hours saving, or dollar saving. Its wider product also uses Sandbox." },
+      ],
     },
   },
   {
@@ -82,19 +109,29 @@ export const VERCEL_PRODUCT_DECISIONS: VercelProductDecision[] = [
       "Connect runtime diagnostics and regional placement.",
     ],
     adopt: [
-      "Framework-aware app and API deployments.",
-      "Managed request-driven compute that scales.",
-      "Function logs and configurable regions.",
+      { title: "Release the interface and APIs together", body: "Deploy the Next.js planner and its server routes as one application. Reduce the coordination needed to ship a new interaction or fix across separate hosting stacks." },
+      { title: "Use managed request-driven compute", body: "Let Vercel handle runtime capacity for Functions within platform limits. The team can build renter features instead of provisioning and maintaining another server fleet." },
+      { title: "Keep iteration close to the application", body: "Use Function logs to investigate failures and choose regions near retained services. Shorten the path from a planner issue to a reviewed fix, without migrating AWS or Atlas." },
     ],
-    benefit: "Spend less team capacity on a new application platform while preserving the customer’s AWS services and Atlas data.",
+    benefit: "Release planner and listing-experience improvements faster while keeping the customer’s AWS services and Atlas data.",
     proof: "VoxBuild’s interface and Node.js APIs deploy together. Accepted edits reach external Atlas and survive reloads.",
-    ownership: "Authorization, business logic, pooling, timeouts, regional choices, and data security remain application decisions. Compare platform and usage charges with the customer’s existing operating costs; no cost saving has been measured here.",
+    ownership: "Authorization, business logic, pooling, timeouts, regional choices, and data security remain application decisions. New listings should normally arrive through the existing listing API as data updates, without a code deployment. Faster deployments benefit new features and fixes; VoxBuild does not implement listing publication. Compare platform and usage charges with existing operating costs; no saving has been measured here.",
     source: { label: "Vercel Functions docs", href: "https://vercel.com/docs/functions" },
     example: {
       customer: "Coxwave",
-      summary: "Reported an 85% reduction in deployment time after adopting Next.js and Vercel for faster iteration.",
-      context: "Published August 13, 2025. This reflects its wider Vercel setup, not a Functions-only benchmark or our expected result.",
+      summary: "Adopted Next.js and Vercel to reduce release overhead for its GenAI applications.",
+      context: "Published August 13, 2025. Results span the Vercel platform; they are not Functions-only gains or VoxBuild measurements.",
       href: "https://vercel.com/customers/how-coxwave-delivers-genai-value-faster-with-vercel",
+      metrics: [
+        { value: "85% less", label: "Deployment time", kind: "Reported improvement" },
+        { value: "Weekly → 2/day", label: "Production release cadence", kind: "Reported improvement" },
+        { value: "52% less", label: "Production recovery time", kind: "Reported improvement" },
+      ],
+      details: [
+        { label: "The friction", body: "Its CloudFront/S3 setup added environment and deployment overhead for dynamic Next.js applications." },
+        { label: "What changed", body: "The frontend team adopted Vercel’s deployment workflow, Previews, CDN, scaling, and Instant Rollback, taking ownership of the release lifecycle." },
+        { label: "Why it matters here", body: "Faster software releases can get renter-facing improvements and fixes into review sooner. Recovery gains include Instant Rollback, which VoxBuild has not drilled. The story gives no absolute deployment minutes or dollar saving." },
+      ],
     },
   },
   {
@@ -109,19 +146,29 @@ export const VERCEL_PRODUCT_DECISIONS: VercelProductDecision[] = [
       "Maintain review links and release integrations.",
     ],
     adopt: [
-      "Automatic URLs for non-production branch builds.",
-      "Preview-scoped environment configuration.",
-      "Git-triggered production releases.",
+      { title: "Review a working change before release", body: "Get an automatic URL for each non-production branch deployment. Product and design can try the actual planner together, shortening feedback loops beyond screenshots or a shared staging environment." },
+      { title: "Scope configuration to the environment", body: "Use Preview-specific settings and credentials for review builds. Reduce manual environment setup; the team still needs separate test data and appropriate access protection." },
+      { title: "Connect releases to the Git workflow", body: "Trigger builds and deployments from commits, with main updating Production in this demo. Replace custom review-environment plumbing while keeping the customer’s CI checks and release policies." },
     ],
     benefit: "Get product feedback on a working change earlier, with less preview-environment plumbing to maintain.",
     proof: "Main auto-deployment and CI work. Gated promotion, canary, and a rollback drill remain proposed customer steps.",
     ownership: "Protect preview access, isolate test data, and define approval and rollout gates. Preview URLs do not automatically isolate Atlas data, and rolling back code does not undo database changes.",
     source: { label: "Vercel environment docs", href: "https://vercel.com/docs/deployments/environments" },
     example: {
-      customer: "Coxwave",
-      summary: "Used previews for parallel LLM experiments; reported production releases increasing from weekly to twice daily.",
-      context: "Published August 13, 2025. A customer-reported outcome across several platform features, not proof of a causal Preview-only effect.",
-      href: "https://vercel.com/customers/how-coxwave-delivers-genai-value-faster-with-vercel",
+      customer: "justInCase",
+      summary: "Recovered developer time by removing queued or failed previews from its release workflow.",
+      context: "Published November 30, 2022. Customer-reported results; team and per-developer hours describe related savings and must not be added together.",
+      href: "https://vercel.com/customers/how-vercel-helped-justincase-technologies-cut-their-build-time-in-half",
+      metrics: [
+        { value: "72 h/month", label: "Developer time saved across the team", kind: "Reported time saving" },
+        { value: ">6 h/dev/month", label: "Frontend developer time saved", kind: "Reported time saving" },
+        { value: "50% faster", label: "Builds, in the story’s wording", kind: "Reported improvement" },
+      ],
+      details: [
+        { label: "The friction", body: "Frequent small changes needed stakeholder review, but previews queued or failed and multiple delivery pipelines required maintenance." },
+        { label: "What changed", body: "Vercel Previews and the deployment workflow reduced that waiting and maintenance work, leaving more time for product development." },
+        { label: "Why it matters here", body: "Working review URLs can shorten feedback loops for the planner. Baseline our own review delays and engineering hours before claiming savings. The story gives no absolute before/after build times or dollar saving." },
+      ],
     },
   },
 ];

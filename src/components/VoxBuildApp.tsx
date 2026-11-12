@@ -10,14 +10,16 @@ import { ARTWORK_DESIGNS, ARTWORK_HEIGHT, ARTWORK_WIDTH, findArtworkPlacement, g
 import { applyOperations } from "@/lib/scene-engine";
 import { SceneSchema, type CatalogItem, type Operation, type Scene, type SceneObject } from "@/lib/schema";
 import { useVoice, type VoiceEvent } from "@/hooks/useVoice";
+import { readGatewayTrace, type GatewayTrace } from "@/lib/gateway-telemetry";
 import CaseStudyGuide from "./CaseStudyGuide";
+import GatewayActivity from "./GatewayActivity";
 
 const RoomCanvas = dynamic(() => import("./canvas/RoomCanvas"), { ssr: false, loading: () => <div className="canvas-loading"><Box size={28} strokeWidth={1.25} /><span>Opening your room…</span></div> });
 
 type Capabilities = { database: boolean; gateway: boolean; voice: boolean };
 type WorkspaceMode = "loading" | "sample" | "live" | "error";
 type Notice = { id: number; message: string; kind: "success" | "error" | "info" };
-type ActivityEntry = { id: string; time: string; title: string; source: string; status: "success" | "error" | "info"; detail?: unknown; duration?: number };
+type ActivityEntry = { id: string; time: string; title: string; source: string; status: "success" | "error" | "info"; detail?: unknown; duration?: number; gatewayTrace?: GatewayTrace | null };
 type CommandResult = { scene: Scene; message?: string; duplicate?: boolean; operations?: Operation[]; telemetry?: unknown };
 
 const EMPTY_CAPABILITIES: Capabilities = { database: false, gateway: false, voice: false };
@@ -395,10 +397,10 @@ export default function VoxBuildApp() {
       try {
         const result = await request<CommandResult>("/api/scene-agent", { method: "POST", body: JSON.stringify({ sceneId: current.id, commandId: crypto.randomUUID(), expectedRevision: current.revision, prompt: trimmed, testFallback: requestFallback }) });
         const next = accept(result.scene);
-        record({ title: result.message ?? "Text command accepted", source: "AI Gateway", status: "success", duration: performance.now() - started, detail: { prompt: trimmed, operations: result.operations, revision: next.revision, telemetry: result.telemetry } });
+        record({ title: result.message ?? "Text command accepted", source: "AI Gateway", status: "success", duration: performance.now() - started, gatewayTrace: readGatewayTrace(result.telemetry), detail: { prompt: trimmed, operations: result.operations, revision: next.revision, telemetry: result.telemetry } });
         return { scene: next, message: result.message ?? "Room updated and saved." };
       } catch (error) {
-        record({ title: error instanceof Error ? error.message : "Text command failed", source: "AI Gateway", status: "error", duration: performance.now() - started, detail: { prompt: trimmed } });
+        record({ title: error instanceof Error ? error.message : "Text command failed", source: "AI Gateway", status: "error", duration: performance.now() - started, detail: { prompt: trimmed, routingTestRequested: requestFallback, routing: "No successful response metadata returned; execution is unconfirmed." } });
         setPrompt(trimmed);
         throw error;
       }
@@ -540,10 +542,10 @@ export default function VoxBuildApp() {
             <div><span className="integration-icon"><Database size={15} /></span><span><strong>MongoDB Atlas</strong><small>{mode === "live" ? "Owned scenes · atomic revisions + receipts" : "Not connected · sample stays in this tab"}</small></span><span className={`integration-dot ${mode === "live" ? "connected" : ""}`} /></div>
           </div>
           <div className="architecture-catalog"><Box size={14} /><span>Catalog: explicit local fixture</span><span>{CATALOG.length} SKUs</span></div>
-          <label className="fallback-test"><span><strong>Test Gateway fallback</strong><small>Excludes the primary provider by policy on the next text request. This is a routing test, not a provider outage.</small></span><input type="checkbox" checked={testFallback} disabled={!capabilities.gateway || mode !== "live" || busy} onChange={(event) => setTestFallback(event.target.checked)} /><span className="toggle-track" aria-hidden="true" /></label>
+          <label className="fallback-test"><span><strong>Test Gateway fallback</strong><small>Applies to typed prompts while enabled; switching this on makes no request. Submit a prompt to call the real Gateway with a Google-only policy, then inspect its route below. This tests routing, not an outage.</small></span><input type="checkbox" checked={testFallback} disabled={!capabilities.gateway || mode !== "live" || busy} onChange={(event) => setTestFallback(event.target.checked)} /><span className="toggle-track" aria-hidden="true" /></label>
           <div className="activity-heading"><h3><Activity size={14} />Observed activity</h3><span>{activity.length} events</span></div>
-          <p className="activity-note">Real events from this tab. Timings are measured browser round trips. Expand an event for returned metadata.</p>
-          <div className="activity-list">{activity.map((entry) => <details key={entry.id} className={`activity-entry activity-${entry.status}`}><summary><span className="event-dot" /><div><span className="event-title">{entry.title}</span><span className="event-meta">{entry.source}<span>{entry.duration !== undefined ? `${Math.round(entry.duration)} ms · ` : ""}{entry.time}</span></span></div><ChevronDown size={12} /></summary>{entry.detail !== undefined && <pre>{JSON.stringify(entry.detail, null, 2)}</pre>}</details>)}{!activity.length && <p className="empty-inventory">Your first scene event will appear here.</p>}</div>
+          <p className="activity-note">Real events from this tab. Timings are browser round trips. Expand a text event to compare requested, fallback, and executed models.</p>
+          <div className="activity-list">{activity.map((entry) => <details key={entry.id} className={`activity-entry activity-${entry.status}`}><summary><span className="event-dot" /><div><span className="event-title">{entry.title}</span>{entry.gatewayTrace && <span className="gateway-route-preview">{entry.gatewayTrace.routingTest ? "Routing test · " : ""}{entry.gatewayTrace.executedModel ?? "Executed model not returned"} · {entry.gatewayTrace.executedProvider ?? "Provider not returned"}</span>}<span className="event-meta">{entry.source}<span>{entry.duration !== undefined ? `${Math.round(entry.duration)} ms · ` : ""}{entry.time}</span></span></div><ChevronDown size={12} /></summary>{entry.gatewayTrace && <GatewayActivity trace={entry.gatewayTrace} />}{entry.detail !== undefined && (entry.gatewayTrace ? <details className="gateway-raw"><summary>Raw response metadata</summary><pre>{JSON.stringify(entry.detail, null, 2)}</pre></details> : <pre>{JSON.stringify(entry.detail, null, 2)}</pre>)}</details>)}{!activity.length && <p className="empty-inventory">Your first scene event will appear here.</p>}</div>
         </div><div className="architecture-footer">Models propose. The server validates and saves.</div>
       </aside>}
     </div>
