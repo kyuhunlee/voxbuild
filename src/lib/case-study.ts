@@ -128,7 +128,7 @@ export const CASE_STUDY_SECTIONS: CaseStudySection[] = [
         bullets: [
           "Preview: isolate database credentials and sessions; run build, type, domain, live API, and browser checks.",
           "Canary: start with internal users, then a small property or visitor cohort. Staged traffic controls are not implemented here.",
-          "Cutover: expand when error, latency, semantic-success, and cost guardrails hold and product evidence supports the experience.",
+          "Cutover: review delivery lead time, model portability, cost attribution, and resilience alongside tenant outcomes. Expand only when the agreed pilot gates hold.",
         ],
       },
       {
@@ -140,20 +140,49 @@ export const CASE_STUDY_SECTIONS: CaseStudySection[] = [
   {
     id: "outcomes",
     label: "Success measures",
-    title: "Separate engineering proof from business value",
-    intro: "Agree baselines, pilot duration, sample size, and success thresholds with the customer. The recorded checks demonstrate a working slice; they do not establish a conversion improvement or a production reliability rate.",
+    title: "Success the customer can measure",
+    intro: "The assessment’s example names four outcomes, not numerical pass marks. These measures apply them to VoxBuild. Engineering thresholds are proposed pilot gates; customer baselines, delivery savings, and business uplift remain unmeasured.",
     blocks: [
       {
-        title: "Technical guardrails",
-        body: "Initial targets: at least 90% semantic success on the command suite, rejection of invalid domain mutations, successful save/reload checks, and warm-pilot p95 text response below five seconds. Measure voice end-of-utterance to visible change separately.",
+        title: "Faster path from prototype to production",
+        rows: [
+          { label: "Measure", value: "Elapsed time and engineer hours from an approved planner change to a validated preview and production release; time to recover through rollback." },
+          { label: "Pilot target", value: "Reduce median delivery time and manual release work against the customer’s existing pipeline. Agree the improvement threshold after measuring that baseline." },
+          { label: "Current evidence", value: "Public deployment, incremental Git history, automatic production deployment, and CI type/test/build checks work. Customer lead-time savings, Preview promotion, canary, and rollback timing have not been demonstrated." },
+        ],
       },
       {
-        title: "Recorded latency and cost",
-        body: "The November 12 production text run passed 14/14, with median 1,802 ms and p95 2,762 ms; returned Gateway cost was $0.0176794. An earlier October run had a 9,800 ms p95, so keep monitoring the latency tail. Small regression samples are not performance guarantees, and these costs exclude voice and total account spend.",
+        title: "Less provider-specific application code",
+        rows: [
+          { label: "Measure", value: "Provider-specific integrations maintained, files changed, and engineering time required to switch an approved text model." },
+          { label: "Pilot target", value: "Switch text models through Gateway configuration without changing the room schema, command executor, or persistence contract. Qualify each model against the same semantic suite." },
+          { label: "Current evidence", value: "OpenAI primary and Google policy-routed fallback use the same AI SDK plan and validated save path. Direct OpenAI Realtime voice remains a separate integration, outside this portability claim." },
+        ],
       },
       {
-        title: "Business pilot",
-        body: "Compare qualified tour-request conversion, planning engagement, abandonment, and suitability-related support questions. Include accessibility feedback and cost per successful interaction before expanding the pilot.",
+        title: "Per-model or per-run cost visibility",
+        rows: [
+          { label: "Measure", value: "Coverage of request-level executed model/provider, tokens, returned cost, latency, and outcome. Track attributable AI spend per accepted edit, including priced failed attempts." },
+          { label: "Pilot target", value: "Attribute completed text runs to their model and outcome; mark missing prices as unknown. Reconcile provider spend and add separate voice accounting before setting a customer budget." },
+          { label: "Current evidence", value: "All 14 requests in the November 12 text run returned usage and cost, totaling $0.0176794. Architecture exposes per-request metadata. This excludes voice and unknown failed-request costs; it is not an exhaustive spend ledger." },
+        ],
+      },
+      {
+        title: "Improved resilience through model flexibility and failover",
+        rows: [
+          { label: "Measure", value: "Semantic success and p95 response time by model route; invalid writes; save/reload recovery; behavior during an actual provider failure." },
+          { label: "Pilot target", value: "At least 90% semantic success, warm text p95 below five seconds, rejection of invalid mutations, and successful save/reload checks. Exercise a real outage and rollback; benchmark voice latency separately." },
+          { label: "Current evidence", value: "61 deterministic tests and 38 production checks passed. Text passed 14/14 with p50 1,802 ms and p95 2,762 ms. Policy-routed fallback passed; provider-outage recovery and a production availability rate remain unproven." },
+        ],
+        body: "An earlier October run had a 9,800 ms p95. Small regression samples are signals to keep measuring, not performance guarantees.",
+      },
+      {
+        title: "Tenant and business outcomes",
+        rows: [
+          { label: "Measure", value: "Qualified tour requests per eligible listing visitor; saved designs per planner start; suitability-related support contacts per 1,000 eligible visitors; AI cost per accepted edit." },
+          { label: "Pilot target", value: "Compare eligible planner and control cohorts over an agreed pilot window. Set baselines, sample size, minimum worthwhile conversion lift, support guardrails, and cost limits before launch." },
+          { label: "Current evidence", value: "No tenant pilot or measured conversion lift exists yet. The demo proves the engineering path; engagement, abandonment, accessibility feedback, and business value must be validated with customers." },
+        ],
       },
     ],
   },
