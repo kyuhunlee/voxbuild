@@ -10,6 +10,16 @@ The central contract is simple: **the model proposes operations; the server vali
 
 The current experience has **14 furniture SKUs**, **six presets**, and six environment styles: **Sunlit, Gallery, Forest, Desert, Coastal, and Midnight**. Presets now have distinct window arrangements, lighting, and artwork; City loft is removed from new-room choices. Five painting designs can move along either visible wall, with placement validation and atomic persistence. Styles preserve furniture and artwork while changing finishes and lighting. Category filtering and search help browse the catalog; the default view uses 1.495× perspective zoom, with top-view framing unchanged. The earlier catalog expansion at `d5951a9` has its own production evidence below.
 
+## Developer experience and ROI
+
+The engineering hypothesis is that self-service previews and a shared release workflow shorten review queues, while managed Functions, delivery, and Gateway reduce infrastructure upkeep and provider plumbing. Developers can put recovered capacity into renter features, potentially avoiding future dedicated DevOps hires around the planner. This does not eliminate operations: the customer still owns IAM/security, SSO, data governance, incident response, model evaluations, and application maintenance.
+
+[Vercel’s justInCase Technologies customer story](https://vercel.com/customers/how-vercel-helped-justincase-technologies-cut-their-build-time-in-half) reports **72 hours of developer time saved per month across its team**. This published customer result supports the opportunity; it is neither a VoxBuild measurement nor a forecast for the rental marketplace.
+
+Baseline the customer’s review wait, approved change to validated preview/production, release and rollback effort, maintenance hours, and on-call load. **Annual capacity value = recovered engineering hours/month × loaded hourly cost × 12.** Deduct incremental platform/model-usage costs, migration effort, and remaining operations costs not already reflected in recovered hours. Time redirected to product work is capacity; only an actual spending reduction or documented avoided planned hire is cash savings. Do not double-count the same hours as capacity and staffing savings, or deduct remaining operations twice. VoxBuild has no measured customer dollar savings.
+
+Start with the smallest change that earns its cost. Keep the customer’s existing host and OpenAI SDK if Gateway alone meets the need; adopt AI SDK feature by feature when its shared integration justifies the migration effort. Add managed delivery where the current release workflow is a bottleneck. The implemented planner demonstrates these choices together; customer adoption can be incremental.
+
 ## Submission artifacts
 
 | Assessment requirement | Artifact or evidence | Verification state |

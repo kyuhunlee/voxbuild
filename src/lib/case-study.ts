@@ -1,4 +1,4 @@
-export type CaseStudySectionId = "scenario" | "architecture" | "vercel" | "voice" | "demo" | "outcomes" | "rollout" | "tradeoffs" | "tooling";
+export type CaseStudySectionId = "scenario" | "architecture" | "vercel" | "developer-roi" | "voice" | "demo" | "outcomes" | "rollout" | "tradeoffs" | "tooling";
 export type CaseStudyTone = "proof" | "target" | "retained" | "risk";
 
 export type CaseStudyCard = {
@@ -35,7 +35,7 @@ export const CASE_STUDY_SECTIONS: CaseStudySection[] = [
     cards: [
       { title: "The customer", body: "A rental marketplace like Apartments.com or StreetEasy. Its users are prospective tenants; its existing listings, data, identity, and release pipeline form our assumed starting point.", tone: "retained", tag: "Scenario" },
       { title: "The business case", body: "Photos cannot show a renter’s own furniture layout. Uncertainty can delay tours and create leasing questions. More qualified tours and fewer questions are hypotheses.", tone: "risk", tag: "Business friction" },
-      { title: "The technical friction", body: "Custom releases and separate model integrations slow feature iterations and increase maintenance. Unvalidated AI edits risk losing tenants’ designs.", tone: "risk", tag: "Engineering friction" },
+      { title: "The technical friction", body: "Assume developers wait for review environments and release help while maintaining delivery and model integrations. That diverts capacity from renter features and may create demand for dedicated DevOps staffing. Unvalidated AI edits also risk tenants’ designs.", tone: "risk", tag: "Engineering friction" },
     ],
     details: [
       { title: "Scenario assumptions", body: "AWS listing/catalog/photo services, MongoDB Atlas, an existing identity provider, and a web release pipeline are assumptions for this fictional customer. They are not claims about either reference brand’s actual architecture. Conversion gains and support savings are hypotheses to test." },
@@ -63,9 +63,27 @@ export const CASE_STUDY_SECTIONS: CaseStudySection[] = [
     intro: "Build the renter experience. Adopt the integration and delivery layers that support it.",
     cards: [],
     details: [
-      { title: "The recommendation", body: "Adopt the open-source AI SDK for application integration and managed AI Gateway for model operations. Use Next.js/Functions and Git previews for the planner’s release path. Keep AWS systems, Atlas, and customer identity. The expected return is engineering capacity for renter features, earlier feedback, and measurable AI operating costs." },
+      { title: "The recommendation", body: "The planner demonstrates AI SDK, managed AI Gateway, Next.js/Functions, and Git previews together. For a customer, start with the smallest useful change: keep the existing host and OpenAI SDK if Gateway alone meets the need. Adopt AI SDK feature by feature when its shared integration earns the migration effort; add managed delivery where the current release path is a bottleneck. Keep AWS systems, Atlas, and customer identity." },
       { title: "How to make the business case", body: "Compare implementation hours, ongoing maintenance and on-call effort, platform/model charges, and release or failure costs for each option. Use the customer’s own baselines; do not turn another company’s case-study results into a savings forecast. SDK adoption has no library fee, but model usage, hosting, upgrades, and managed services still have costs." },
       { title: "When another option can fit", body: "A direct provider SDK may be enough for a stable single-model feature. An existing internal gateway or release platform may already meet the requirements. Validate the extra value of Vercel against those capabilities, network/data policies, and total cost before expanding the pilot." },
+    ],
+  },
+  {
+    id: "developer-roi",
+    label: "Developer ROI",
+    title: "Ship more. Own less infrastructure.",
+    intro: "Recover engineering capacity for renter features—and potentially avoid future DevOps hires for the planner—with a simpler path from change to review to release.",
+    cards: [
+      { title: "Give developers a shorter path", body: "Self-service previews give reviewers a working link; a shared release workflow reduces environment and deployment handoffs. Measure shorter review queues and time to release against the customer’s current process.", tone: "target", tag: "Developer experience" },
+      { title: "Reduce the upkeep", body: "Managed Functions, delivery, and Gateway reduce infrastructure and provider plumbing the team must maintain. The opportunity is more product capacity and less need to add dedicated operations staff as the planner grows.", tone: "target", tag: "Capacity hypothesis" },
+      { title: "Published customer evidence", value: "72 h / month", body: "justInCase Technologies reports saving 72 hours of developer time per month across its team with Vercel. This is another customer’s result, not measured VoxBuild savings or a forecast for this marketplace.", tone: "retained", tag: "justInCase team result", source: { label: "Read the justInCase customer story", href: "https://vercel.com/customers/how-vercel-helped-justincase-technologies-cut-their-build-time-in-half" } },
+      { title: "Put a value on the capacity", body: "Value recovered engineering hours, then deduct incremental platform, usage, migration, and remaining operations costs. Count realized cash savings only when spending actually falls or a planned hire is avoided.", tone: "target", tag: "Customer baseline needed" },
+    ],
+    details: [
+      { title: "What the team still owns", body: "Managed services can reduce the need to build a DevOps team around this planner; they do not eliminate operations. The customer still owns IAM and security, SSO integration, data governance, incident response, and model evaluations, plus application and dependency maintenance. Confirm accountable owners before a pilot." },
+      { title: "A transparent annual model", body: "Annual capacity value = recovered engineering hours per month × loaded hourly cost × 12. Deduct incremental platform and model-usage costs, migration effort, and remaining operations costs not already reflected in recovered hours. Use the customer’s measured baseline and compare like-for-like workloads; no customer dollar savings are measured here." },
+      { title: "Capacity is not automatically cash", body: "Time redirected to renter features is recovered capacity. A reduced contractor bill or a documented avoided future hire can become cash savings. Do not count the same hours again as both capacity value and staffing savings, and do not subtract remaining operations twice. Track any conversion benefit separately until a pilot establishes it." },
+      { title: "Prove the developer experience", body: "Baseline review wait time, approved change to validated preview/production, release and rollback effort, maintenance hours, and on-call load. Compare the pilot with the current workflow and ask developers whether they can review and ship without waiting for environment support. Gateway alone may earn the return: retain the OpenAI SDK and existing host first, then adopt AI SDK or managed delivery only where measured benefits justify the change." },
     ],
   },
   {
@@ -115,7 +133,7 @@ export const CASE_STUDY_SECTIONS: CaseStudySection[] = [
     title: "Measure delivery, cost, and renter value",
     intro: "Four assessment outcomes, plus renter value.",
     cards: [
-      { title: "Faster delivery", body: "Track release time and engineer hours against the current pipeline. Savings are not yet measured.", tone: "target", tag: "Baseline needed" },
+      { title: "Faster delivery", body: "Compare review wait, release effort, maintenance hours, and on-call load with the customer’s current workflow. Measure capacity returned to renter features; delivery and staffing savings are not yet measured.", tone: "target", tag: "Customer baseline needed" },
       { title: "Less provider-specific code", body: "OpenAI and Google share one text executor. Voice shares Gateway access and the scene contract; maintenance savings still need a baseline.", tone: "proof", tag: "Shared text path proven" },
       { title: "Cost per model / run", value: "$0.0177", body: "Total for 14 text requests; each returned usage and cost. Excludes voice and unpriced failures.", tone: "proof", tag: "Recorded sample" },
       { title: "Resilience & fallback", value: "14 / 14", body: "Text checks; p95 2.76 s. Pilot: ≥90% success, warm p95 <5 s. Real outage untested.", tone: "proof", tag: "Recorded sample" },
@@ -123,7 +141,7 @@ export const CASE_STUDY_SECTIONS: CaseStudySection[] = [
     ],
     details: [
       { title: "How to judge the pilot", rows: [
-        { label: "Faster path from prototype to production", value: "Measure approved change → validated preview/production time, engineer hours, and rollback time. Set the improvement threshold after baselining the existing pipeline." },
+        { label: "Faster path from prototype to production", value: "Baseline the customer’s review wait, approved change → validated preview/production time, release/rollback effort, maintenance hours, and on-call load. Track recovered product capacity and any documented avoided staffing separately; agree the improvement threshold after measuring the current workflow." },
         { label: "Less provider-specific application code", value: "Count provider-specific integrations, files changed, and time to switch approved text models. Keep the scene schema, executor, and persistence contract unchanged; qualify each model on the same semantic suite." },
         { label: "Per-model or per-run cost visibility", value: "Attribute executed model/provider, tokens, cost, latency, and outcome by request. Mark missing prices as unknown. Reconcile provider spend and priced failures; account for Gateway realtime sessions separately from the recorded text sample." },
         { label: "Improved resilience through model flexibility and failover", value: "Measure semantic success, p95 latency, invalid-write rejection, and save/reload recovery by model route. Exercise a real provider outage and rollback. Benchmark voice separately." },
