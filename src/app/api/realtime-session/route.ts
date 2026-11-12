@@ -3,6 +3,7 @@ import { z } from "zod";
 import { CATALOG } from "@/lib/catalog-data";
 import { ENVIRONMENTS } from "@/lib/environments";
 import { estimateFurniture } from "@/lib/furniture-estimate";
+import { getDemoLimits } from "@/lib/demo-limits";
 import { getRoomArtworks, getRoomWindows } from "@/lib/room-decor";
 import { SceneSchema, type Scene } from "@/lib/schema";
 import { ModelToolSchema } from "@/lib/model-schema";
@@ -86,8 +87,9 @@ export async function POST(request: Request) {
     // Client data selects the scene; ownership and model context come from the store.
     const scene = await getScene(owner.id, parsed.data.scene.id);
     if (!scene) throw new HttpError(404, "This scene is no longer available. Reload the room before starting voice.", "SCENE_NOT_FOUND");
-    await enforceRateLimit(owner.id, "voice-session", 5, 60 * 60 * 1000);
-    await enforceRateLimit("global", "voice-session", 20, 24 * 60 * 60 * 1000);
+    const limits = getDemoLimits().voice;
+    await enforceRateLimit(owner.id, "voice-session", limits.perVisitorHour, 60 * 60 * 1000, `This visitor has reached the ${limits.perVisitorHour} voice starts per hour allowance.`);
+    await enforceRateLimit("global", "voice-session", limits.globalDay, 24 * 60 * 60 * 1000, `The demo has reached its ${limits.globalDay} voice starts per day allowance.`);
 
     const session = {
       type: "realtime",
