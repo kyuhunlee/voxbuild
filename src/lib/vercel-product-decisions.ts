@@ -111,12 +111,13 @@ export const VERCEL_PRODUCT_DECISIONS: VercelProductDecision[] = [
     adopt: [
       { title: "Give developers a direct path to release", body: "Deploy the Next.js planner and server routes together. A product engineer can take a change from code to a running application through the same workflow, with fewer infrastructure handoffs." },
       { title: "Offload runtime capacity management", body: "Vercel manages Function execution and scaling within platform limits. Avoid provisioning a dedicated planner server fleet and maintaining its scaling setup; use that engineering capacity for renter features." },
-      { title: "Investigate issues where the team ships", body: "Use deployment context and Function logs to trace an issue back to the application. Keep regions close to retained services, and keep AWS APIs and Atlas ownership with the existing team." },
+      { title: "Use a platform aligned with Next.js", body: "Vercel maintains Next.js and integrates its deployment, rendering, and caching features. That can reduce framework-specific setup and coordination work. Existing applications still need compatibility and migration testing." },
+      { title: "Pay for active CPU during AI requests", body: "With Fluid Compute, CPU billing pauses while a Function waits on models or databases. Memory remains billable while requests are in flight, with invocation and model charges additional. Compare total costs against the current workload." },
     ],
-    benefit: "Reduce the platform work needed to launch and operate the planner. The opportunity is recovered engineering capacity and potentially avoided incremental staffing, measured against platform charges and remaining operational work.",
+    benefit: "Protect senior engineering time and shorten the path to a customer-facing release. Compare the total cost of managed delivery with building and operating the alternative, including delayed product work, migration, usage charges, and retained operations.",
     proof: "VoxBuild’s interface and Node.js APIs deploy together. Accepted edits reach external Atlas and survive reloads.",
     ownership: "Authorization, business logic, pooling, timeouts, regional choices, and data security remain application decisions. New listings should normally arrive through the existing listing API as data updates, without a code deployment. Faster deployments benefit new features and fixes; VoxBuild does not implement listing publication. Compare platform and usage charges with existing operating costs; no saving has been measured here.",
-    source: { label: "Vercel Functions docs", href: "https://vercel.com/docs/functions" },
+    source: { label: "Next.js on Vercel docs", href: "https://vercel.com/docs/frameworks/full-stack/nextjs" },
     example: {
       customer: "Coxwave",
       summary: "Adopted Next.js and Vercel to reduce release overhead for its GenAI applications.",
