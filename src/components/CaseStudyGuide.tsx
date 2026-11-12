@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { ArrowLeft, ArrowRight, AudioLines, BookOpen, CheckCircle2, ChevronDown, Database, ExternalLink, Flag, MessageSquare, ShieldCheck, TriangleAlert, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, AudioLines, BookOpen, CheckCircle2, ChevronDown, Database, ExternalLink, Flag, Maximize2, MessageSquare, Minimize2, ShieldCheck, TriangleAlert, X } from "lucide-react";
 import { CASE_STUDY_SECTIONS, type CaseStudyTone } from "@/lib/case-study";
 import VercelProductDecision from "./VercelProductDecision";
 import "./case-study-guide.css";
@@ -24,6 +24,7 @@ export default function CaseStudyGuide({ onOpen }: { onOpen: () => void }) {
   const content = useRef<HTMLElement>(null);
   const sectionTitle = useRef<HTMLHeadingElement>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [sectionIndex, setSectionIndex] = useState(0);
   const section = CASE_STUDY_SECTIONS[sectionIndex];
 
@@ -54,11 +55,11 @@ export default function CaseStudyGuide({ onOpen }: { onOpen: () => void }) {
     <button className="case-study-trigger" type="button" onClick={openGuide} aria-label="Open VoxBuild case study" aria-haspopup="dialog" aria-expanded={isOpen} aria-controls="case-study-guide">
       <BookOpen size={16} aria-hidden="true" /><span>Case study</span>
     </button>
-    <dialog ref={dialog} id="case-study-guide" className="case-study-dialog" aria-labelledby="case-study-title" onClose={() => setIsOpen(false)} onKeyDown={handlePresentationKeys} onClick={(event) => { if (event.target === event.currentTarget) closeGuide(); }}>
+    <dialog ref={dialog} id="case-study-guide" className={`case-study-dialog${isExpanded ? " is-expanded" : ""}`} aria-labelledby="case-study-title" onClose={() => { setIsOpen(false); setIsExpanded(false); }} onKeyDown={handlePresentationKeys} onClick={(event) => { if (event.target === event.currentTarget) closeGuide(); }}>
       <div className="case-study-shell">
         <header className="case-study-header">
           <div className="case-study-brand"><span className="case-study-brand-mark"><BookOpen size={20} aria-hidden="true" /></span><div><h2 id="case-study-title">VoxBuild case study</h2><p>Customer scenario, architecture, and business case</p></div></div>
-          <button type="button" className="case-study-close" onClick={closeGuide}><span>Return to demo</span><X size={17} aria-hidden="true" /></button>
+          <div className="case-study-header-actions"><button type="button" className="case-study-expand" onClick={() => setIsExpanded((expanded) => !expanded)} aria-label={isExpanded ? "Restore case study side panel" : "Expand case study to full screen"} aria-controls="case-study-guide">{isExpanded ? <Minimize2 size={15} aria-hidden="true" /> : <Maximize2 size={15} aria-hidden="true" />}<span>{isExpanded ? "Side panel" : "Full screen"}</span></button><button type="button" className="case-study-close" onClick={closeGuide}><span>Return to demo</span><X size={17} aria-hidden="true" /></button></div>
         </header>
         <div className="case-study-body">
           <nav className="case-study-nav" aria-label="Case study sections">

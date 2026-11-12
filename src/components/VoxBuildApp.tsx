@@ -13,6 +13,8 @@ import { useVoice, type VoiceEvent } from "@/hooks/useVoice";
 import { readGatewayTrace, type GatewayTrace } from "@/lib/gateway-telemetry";
 import CaseStudyGuide from "./CaseStudyGuide";
 import GatewayActivity from "./GatewayActivity";
+import SystemArchitecture from "./SystemArchitecture";
+import "./architecture-views.css";
 
 const RoomCanvas = dynamic(() => import("./canvas/RoomCanvas"), { ssr: false, loading: () => <div className="canvas-loading"><Box size={28} strokeWidth={1.25} /><span>Opening your room…</span></div> });
 
@@ -206,6 +208,9 @@ export default function VoxBuildApp() {
   const [showDimensions, setShowDimensions] = useState(false);
   const [cameraKey, setCameraKey] = useState(0);
   const [architectureOpen, setArchitectureOpen] = useState(false);
+  const [architectureView, setArchitectureView] = useState<"activity" | "system">("activity");
+  const activityTab = useRef<HTMLButtonElement>(null);
+  const systemTab = useRef<HTMLButtonElement>(null);
   const [testFallback, setTestFallback] = useState(false);
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [inspectorOpen, setInspectorOpen] = useState(false);
@@ -533,7 +538,8 @@ export default function VoxBuildApp() {
 
       {architectureOpen && <aside className="architecture-drawer" aria-label="Architecture and observed activity">
         <div className="architecture-heading"><div><Code2 size={18} /><h2>Under the hood</h2></div><button className="icon-button" onClick={() => setArchitectureOpen(false)} aria-label="Close architecture"><X size={17} /></button></div>
-        <div className="architecture-content"><p className="architecture-intro">A scene you can inspect.<br />A system you can explain.</p>
+        <div className="architecture-views" role="tablist" aria-label="Architecture views" onKeyDown={(event) => { if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return; event.preventDefault(); const next = event.key === "Home" ? "activity" : event.key === "End" ? "system" : architectureView === "activity" ? "system" : "activity"; setArchitectureView(next); (next === "activity" ? activityTab : systemTab).current?.focus(); }}><button ref={activityTab} type="button" id="architecture-activity-tab" role="tab" aria-selected={architectureView === "activity"} aria-controls="architecture-activity-panel" tabIndex={architectureView === "activity" ? 0 : -1} onClick={() => setArchitectureView("activity")}>Activity</button><button ref={systemTab} type="button" id="architecture-system-tab" role="tab" aria-selected={architectureView === "system"} aria-controls="architecture-system-panel" tabIndex={architectureView === "system" ? 0 : -1} onClick={() => setArchitectureView("system")}>System map</button></div>
+        <div id="architecture-system-panel" role="tabpanel" aria-labelledby="architecture-system-tab" hidden={architectureView !== "system"} className="architecture-content"><SystemArchitecture onOpen={() => voice.stop()} /></div><div id="architecture-activity-panel" role="tabpanel" aria-labelledby="architecture-activity-tab" hidden={architectureView !== "activity"} className="architecture-content"><p className="architecture-intro">A scene you can inspect.<br />A system you can explain.</p>
           <div className="architecture-path"><span>Browser</span><ChevronRight size={13} /><span>Vercel</span><ChevronRight size={13} /><span>AI + Atlas</span></div>
           <div className="integration-list">
             <div><span className="integration-icon"><Layers size={15} /></span><span><strong>Vercel Functions</strong><small>Validate commands · commit scene revisions</small></span><span className={`integration-dot ${mode !== "error" && mode !== "loading" ? "connected" : ""}`} /></div>
@@ -545,7 +551,7 @@ export default function VoxBuildApp() {
           <label className="fallback-test"><span><strong>Test Gateway fallback</strong><small>One test on your next typed prompt. Switching on makes no request; the switch resets after submission. Gateway allows Google only, and the returned route appears below. This tests routing, not an outage.</small></span><input type="checkbox" checked={testFallback} disabled={!capabilities.gateway || mode !== "live" || busy} onChange={(event) => setTestFallback(event.target.checked)} /><span className="toggle-track" aria-hidden="true" /></label>
           <div className="activity-heading"><h3><Activity size={14} />Observed activity</h3><span>{activity.length} events</span></div>
           <p className="activity-note">Real events from this tab. Timings are browser round trips. Expand a text event to compare requested, fallback, and executed models.</p>
-          <div className="activity-list">{activity.map((entry) => <details key={entry.id} className={`activity-entry activity-${entry.status}`}><summary><span className="event-dot" /><div><span className="event-title">{entry.title}</span>{entry.gatewayTrace && <span className="gateway-route-preview">{entry.gatewayTrace.routingTest ? "Routing test · " : ""}{entry.gatewayTrace.executedModel ?? "Executed model not returned"} · {entry.gatewayTrace.executedProvider ?? "Provider not returned"}</span>}<span className="event-meta">{entry.source}<span>{entry.duration !== undefined ? `${Math.round(entry.duration)} ms · ` : ""}{entry.time}</span></span></div><ChevronDown size={12} /></summary>{entry.gatewayTrace && <GatewayActivity trace={entry.gatewayTrace} />}{entry.detail !== undefined && (entry.gatewayTrace ? <details className="gateway-raw"><summary>Raw response metadata</summary><pre>{JSON.stringify(entry.detail, null, 2)}</pre></details> : <pre>{JSON.stringify(entry.detail, null, 2)}</pre>)}</details>)}{!activity.length && <p className="empty-inventory">Your first scene event will appear here.</p>}</div>
+          <div className="activity-list">{activity.map((entry) => <details key={entry.id} className={`activity-entry activity-${entry.status}`}><summary><span className="event-dot" /><div><span className="event-title">{entry.title}</span>{entry.gatewayTrace && <span className="gateway-route-preview">{entry.gatewayTrace.routingTest ? "Routing test · " : ""}Executed: {entry.gatewayTrace.executedModel ?? "not returned"} · Provider: {entry.gatewayTrace.executedProvider ?? "not returned"}</span>}<span className="event-meta">{entry.source}<span>{entry.duration !== undefined ? `${Math.round(entry.duration)} ms · ` : ""}{entry.time}</span></span></div><ChevronDown size={12} /></summary>{entry.gatewayTrace && <GatewayActivity trace={entry.gatewayTrace} />}{entry.detail !== undefined && (entry.gatewayTrace ? <details className="gateway-raw"><summary>Raw response metadata</summary><p className="gateway-raw-note">The SDK label may echo the requested model. Executed model and serving provider above come from Gateway routing metadata.</p><pre>{JSON.stringify(entry.detail, null, 2)}</pre></details> : <pre>{JSON.stringify(entry.detail, null, 2)}</pre>)}</details>)}{!activity.length && <p className="empty-inventory">Your first scene event will appear here.</p>}</div>
         </div><div className="architecture-footer">Models propose. The server validates and saves.</div>
       </aside>}
     </div>

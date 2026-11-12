@@ -1,0 +1,7 @@
+.architecture-views { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); flex-shrink: 0; gap: 5px; padding: 10px 20px 13px; border-bottom: 1px solid var(--border); }
+.architecture-views button { min-height: 40px; border: 1px solid transparent; border-radius: 6px; color: var(--muted); font-size: 12px; }
+.architecture-views button:hover { color: var(--text); background: var(--well); }
+.architecture-views button[aria-selected="true"] { color: var(--accent); background: #b8d3c50c; border-color: #b8d3c52b; }
+.architecture-views button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.gateway-raw-note { margin: 0; padding: 0 12px 12px; font-size: 11px; line-height: 1.7; color: var(--muted); }
+.architecture-content[hidden] { display: none; }
