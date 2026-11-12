@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { Component, useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Activity, AlertCircle, ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Box, Check, ChevronDown, ChevronRight, Cloud, Code2, Database, Grid2X2, Layers, LoaderCircle, Maximize2, Mic, MicOff, MousePointer2, PanelLeft, Plus, RefreshCw, RotateCcw, RotateCw, Ruler, Search, Send, SlidersHorizontal, Sparkles, Trash2, X } from "lucide-react";
 import { CATALOG, getCatalogItem } from "@/lib/catalog-data";
-import { ENVIRONMENTS, getEnvironmentForRoom } from "@/lib/environments";
+import { ENVIRONMENTS, getEnvironmentForRoom, type Environment } from "@/lib/environments";
 import { createScene, PRESETS, type PresetId } from "@/lib/presets";
 import { ARTWORK_DESIGNS, ARTWORK_HEIGHT, ARTWORK_WIDTH, findArtworkPlacement, getRoomArtworks, type ArtworkDesign } from "@/lib/room-decor";
 import { applyOperations } from "@/lib/scene-engine";
@@ -84,19 +84,37 @@ function FurnitureIllustration({ category, sku, color }: Pick<CatalogItem, "cate
       <rect x="15" y="32" width="12" height="23" rx="4" fill={color} /><rect x="83" y="32" width="12" height="23" rx="4" fill={color} />
       <rect x="30" y="28" width="13" height="15" rx="3" transform="rotate(-10 30 28)" fill="#e2d7c3" />
     </>}
-    {category === "table" && sku !== "pebble-side-table" && <>
+    {category === "table" && sku !== "pebble-side-table" && sku !== "gather-table" && <>
       <path d="M27 36L29 60M82 36L80 60M39 31L39 51M72 31L72 51" stroke="#7b583e" strokeWidth="5" />
       <path d="M18 31C18 24 34 20 55 20C76 20 92 24 92 31V36C92 43 18 43 18 36V31Z" fill={color} /><ellipse cx="55" cy="30" rx="37" ry="10" fill="white" fillOpacity=".12" />
       <path d="M40 27L58 26L65 31L46 33Z" fill="#e4dac5" /><path d="M40 30L46 35L65 33" stroke="#82907c" strokeWidth="3" />
+    </>}
+    {category === "table" && sku === "gather-table" && <>
+      <path d="M24 30L25 62M84 30L83 62M35 25V51M73 25V51" stroke={color} strokeWidth="5" />
+      <path d="M17 24L72 16L95 27V33L39 43L17 31Z" fill={color} />
+      <path d="M17 24L72 16L95 27L39 37Z" fill="white" fillOpacity=".12" />
+      <path d="M25 25L77 21M35 31L85 25" stroke="black" strokeOpacity=".08" />
+      <ellipse cx="57" cy="26" rx="9" ry="3" fill="#d9d2bc" />
+      <path d="M53 25V16M57 24L64 14" stroke="#879478" strokeWidth="1.5" />
+      <ellipse cx="51" cy="15" rx="3" ry="6" transform="rotate(-30 51 15)" fill="#879478" />
+      <ellipse cx="63" cy="14" rx="3" ry="5" transform="rotate(35 63 14)" fill="#6f846d" />
     </>}
     {category === "table" && sku === "pebble-side-table" && <>
       <path d="M40 29L36 60M70 29L74 60M55 30V56" stroke={color} strokeWidth="5" />
       <ellipse cx="55" cy="28" rx="25" ry="10" fill={color} /><ellipse cx="55" cy="26" rx="25" ry="8" fill="white" fillOpacity=".12" />
     </>}
-    {category === "chair" && <>
+    {category === "chair" && sku !== "reed-dining-chair" && <>
       <path d="M34 40L29 61M77 40L82 61M40 33L39 54M70 33L71 54" stroke="#926f4f" strokeWidth="4" />
       <path d="M30 21C30 15 41 13 55 13C69 13 80 15 80 21L76 39H34L30 21Z" fill={color} /><path d="M35 20C45 17 65 17 75 20" stroke="white" strokeOpacity=".15" strokeWidth="3" />
       <path d="M31 39C31 33 79 33 79 39V46C79 52 31 52 31 46V39Z" fill={color} /><ellipse cx="55" cy="39" rx="24" ry="6" fill="white" fillOpacity=".13" />
+    </>}
+    {category === "chair" && sku === "reed-dining-chair" && <>
+      <path d="M37 37L33 64M73 37L77 64M43 32L42 56M67 32L68 56" stroke="#926f4f" strokeWidth="3.5" />
+      <path d="M35 10V36M75 10V36" stroke="#926f4f" strokeWidth="3" />
+      <path d="M34 13Q55 7 76 13V25Q55 20 34 25Z" fill={color} />
+      <path d="M35 12Q55 8 75 12" stroke="white" strokeOpacity=".17" />
+      <path d="M33 37L55 30L77 37V43L55 50L33 43Z" fill={color} />
+      <path d="M33 37L55 30L77 37L55 44Z" fill="white" fillOpacity=".14" />
     </>}
     {category === "lamp" && <>
       <ellipse cx="55" cy="60" rx="16" ry="3" fill={color} /><path d="M55 22V58" stroke={color} strokeWidth="3" /><path d="M43 10H67L77 33C68 39 42 39 33 33L43 10Z" fill="#e8deca" /><ellipse cx="55" cy="33" rx="22" ry="4" fill="#c3ad85" /><ellipse cx="55" cy="11" rx="12" ry="2" fill="#f3ead9" />
@@ -146,11 +164,29 @@ function ArtworkPreview({ design }: { design: ArtworkDesign }) {
   </svg>;
 }
 
+function EnvironmentPreview({ environment }: { environment: Environment }) {
+  const evening = environment.lighting === "night";
+  const warm = environment.lighting === "sunset";
+  const sky = evening ? "#8496b5" : warm ? "#f1c995" : "#c5dcdb";
+  return <svg viewBox="0 0 72 72" className="environment-miniature" aria-hidden="true" fill="none">
+    <path d="M7 18L36 7L65 18V49L36 65L7 49Z" fill={environment.wallColor} />
+    <path d="M7 18L36 29V65L7 49Z" fill="#182127" opacity={evening ? ".14" : ".08"} />
+    <path d="M7 49L36 36L65 49L36 65Z" fill={environment.floorColor} />
+    <path d="M18 54L47 41M28 60L57 46" stroke="#182127" strokeOpacity=".13" />
+    <path d="M44 20L59 14V36L44 42Z" fill={sky} stroke={evening ? "#b1b5ba" : "#faf6e9"} strokeWidth="2" />
+    <path d="M51.5 17V39M44 31L59 25" stroke="#faf6e9" strokeWidth="1" opacity=".8" />
+    {!evening && <path d="M44 42L59 36L44 55L29 49Z" fill={warm ? "#ffe5ab" : "#fff6d6"} opacity=".32" />}
+    <path d="M15 28L26 32V46L15 42Z" fill={evening ? "#b69f89" : "#b99a73"} />
+    <path d="M17 31L24 34V43L17 40Z" fill={warm ? "#c78161" : evening ? "#9baaa2" : "#879c8b"} />
+    <path d="M7 49L36 65L65 49M36 7V36" stroke="#182127" strokeOpacity=".12" />
+  </svg>;
+}
+
 class CanvasBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
   render() {
-    if (this.state.failed) return <div className="canvas-loading canvas-failed"><Box size={34} strokeWidth={1.3} /><strong>The 3D preview couldn’t open</strong><p>Enable WebGL in your browser and reload. You can still edit furniture with the side panels.</p><button className="button" onClick={() => window.location.reload()}><RefreshCw size={14} /> Reload preview</button></div>;
+    if (this.state.failed) return <div className="canvas-loading canvas-failed" role="status"><span className="preview-recovery-mark"><Box size={30} strokeWidth={1.15} /></span><strong>Your room is still here</strong><p>This browser couldn’t start the 3D preview. Reload to try again, or keep designing with the furniture and room controls.</p><button className="button" onClick={() => window.location.reload()}><RefreshCw size={14} /> Reload 3D preview</button><small>3D viewing requires WebGL.</small></div>;
     return this.props.children;
   }
 }
@@ -438,7 +474,7 @@ export default function VoxBuildApp() {
           <div className="room-toolbar-actions"><button className="icon-button" onClick={reloadScene} disabled={locked} aria-label="Reload saved room" title="Reload saved room"><RefreshCw size={15} /></button><span className="toolbar-divider" /><span className="room-size">{area.toFixed(0)} m²</span><span className="object-count">{scene.objects.length} pieces</span></div>
         </div>
         <div className="stage">
-          <div className="stage-topline"><div className="stage-caption"><span className="stage-caption-dot" />Sample apartment<span className="stage-caption-separator">/</span>{scene.room.width.toFixed(1)} × {scene.room.depth.toFixed(1)} m</div><div className="stage-view-controls"><button className={view === "perspective" ? "active" : ""} onClick={() => setView("perspective")} aria-label="Perspective view" title="Perspective view" aria-pressed={view === "perspective"}><Box size={15} /></button><button className={view === "top" ? "active" : ""} onClick={() => setView("top")} aria-label="Top view" title="Top view" aria-pressed={view === "top"}><Grid2X2 size={15} /></button></div></div>
+          <div className="stage-topline"><div className="stage-caption"><span className="stage-caption-dot" /><span>{environment?.name ?? "Custom"} interior</span><span className="stage-caption-separator">/</span><span>{scene.room.width.toFixed(1)} × {scene.room.depth.toFixed(1)} m</span></div><div className="stage-view-controls"><button className={view === "perspective" ? "active" : ""} onClick={() => setView("perspective")} aria-label="Perspective view" title="Perspective view" aria-pressed={view === "perspective"}><Box size={15} /></button><button className={view === "top" ? "active" : ""} onClick={() => setView("top")} aria-label="Top view" title="Top view" aria-pressed={view === "top"}><Grid2X2 size={15} /></button></div></div>
           <div className="canvas-wrap"><CanvasBoundary><RoomCanvas key={cameraKey} scene={scene} selectedId={selectedId} onSelect={selectObject} selectedArtworkId={selectedArtworkId} onSelectArtwork={selectArtwork} view={view} showDimensions={showDimensions} /></CanvasBoundary></div>
           <div className="stage-side-controls"><button className={showDimensions ? "active" : ""} onClick={() => setShowDimensions((show) => !show)} aria-label="Toggle room dimensions" title="Room dimensions" aria-pressed={showDimensions}><Ruler size={16} /></button><button onClick={() => { setView("perspective"); setCameraKey((key) => key + 1); }} aria-label="Reset camera" title="Reset camera"><Maximize2 size={15} /></button></div>
           <div className="stage-navigation"><MousePointer2 size={12} /><span>Drag to orbit</span><span className="navigation-dot" /> <span>Scroll to zoom</span></div>
@@ -462,14 +498,14 @@ export default function VoxBuildApp() {
               </form>
               <div className="prompt-suggestions"><span>{mode === "sample" ? "Try a preview" : "Try asking"}</span>{PROMPTS.map((text) => <button key={text} disabled={locked} onClick={() => void submitPrompt(text, true)}>{text}<Plus size={11} /></button>)}</div>
             </div>
-            <div className="composer-footnote">{mode === "sample" ? <><span className="small-status-dot" />Local sample · Changes stay in this tab · No AI connected</> : <><span className="small-status-dot live" />{voiceActive ? "Microphone is on. Click the mic to end your conversation." : "Every accepted change is validated and saved."}</>}</div>
+            <div className="composer-footnote">{mode === "sample" ? <><span className="small-status-dot" />Local sample · Changes stay in this tab · No AI connected</> : <><span className={`small-status-dot${mode === "live" ? " live" : ""}`} />{mode === "loading" ? "Opening your saved room…" : mode === "error" ? "Reconnect to check your latest saved room." : voiceActive ? "Microphone is on. Click the mic to end your conversation." : "Every accepted change is validated and saved."}</>}</div>
           </div>
         </div>
       </main>
 
       <aside className={`inspector-panel ${inspectorOpen ? "mobile-open" : ""}`} aria-label={selectedArtwork ? "Selected artwork inspector" : selected ? "Selected furniture inspector" : "Room details"}>
         <div className="inspector-heading"><h2>{selectedArtwork ? "Art on your walls" : selected ? "Make it yours" : "Room details"}</h2><button className="icon-button" onClick={() => { setSelectedId(null); setSelectedArtworkId(null); setInspectorOpen(false); }} aria-label={selectedArtwork ? "Deselect artwork and close inspector" : selected ? "Deselect furniture and close inspector" : "Close room details"}>{selected || selectedArtwork || inspectorOpen ? <X size={15} /> : <SlidersHorizontal size={15} />}</button></div>
-        <section className="room-style-section" aria-labelledby="room-style-heading"><div className="section-label"><h4 id="room-style-heading">Room style</h4><span>{environment?.name ?? "Custom palette"}</span></div><div className="environment-options">{ENVIRONMENTS.map((style) => <button key={style.id} className={`environment-option ${style.id === environment?.id ? "selected" : ""}`} aria-label={`Apply ${style.name} room style`} aria-pressed={style.id === environment?.id} title={style.description} disabled={locked || style.id === environment?.id} onClick={() => void handle(executeOperations([{ type: "set_environment", environmentId: style.id }]))}><span className="environment-swatch" aria-hidden="true" style={{ backgroundColor: style.wallColor }}><span style={{ backgroundColor: style.floorColor }} />{style.id === environment?.id && <Check size={12} />}</span><span>{style.name}</span></button>)}</div><p>Walls, flooring, and light. Your furniture stays.</p></section>
+        <section className="room-style-section" aria-labelledby="room-style-heading"><div className="section-label"><h4 id="room-style-heading">Room style</h4><span>{environment?.name ?? "Custom palette"}</span></div><div className="environment-options">{ENVIRONMENTS.map((style) => <button key={style.id} className={`environment-option ${style.id === environment?.id ? "selected" : ""}`} aria-label={`Apply ${style.name} room style`} aria-pressed={style.id === environment?.id} title={style.description} disabled={locked || style.id === environment?.id} onClick={() => void handle(executeOperations([{ type: "set_environment", environmentId: style.id }]))}><span className="environment-swatch" aria-hidden="true" style={{ backgroundColor: style.wallColor }}><EnvironmentPreview environment={style} />{style.id === environment?.id && <Check size={12} />}</span><span>{style.name}</span></button>)}</div><p>Walls, flooring, and light. Your furniture stays.</p></section>
         {selected && selectedItem ? <>
           <div className="inspector-preview"><FurnitureIllustration sku={selectedItem.sku} category={selectedItem.category} color={selected.color} /><span>Selected piece</span></div>
           <div className="selected-title"><h3>{selectedItem.name}</h3><span>${selectedItem.price.toLocaleString()}</span><p>{selectedItem.dimensions[0]} × {selectedItem.dimensions[2]} × {selectedItem.dimensions[1]} m <span>W × D × H</span></p></div>

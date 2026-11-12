@@ -1,11 +1,12 @@
 "use client";
 
 import { Html, Line } from "@react-three/drei";
-import { useMemo } from "react";
-import { Color } from "three";
+import { useEffect, useMemo } from "react";
+import { Color, PlaneGeometry } from "three";
 import type { Environment } from "@/lib/environments";
 import type { Room } from "@/lib/schema";
 import { ARTWORK_HEIGHT, ARTWORK_WIDTH, getRoomArtworks, getRoomWindows, type Artwork as ArtworkData, type WindowOpening } from "@/lib/room-decor";
+import { WovenMaterial } from "./Furniture";
 
 type Vec3 = [number, number, number];
 type Lighting = Environment["lighting"];
@@ -19,10 +20,10 @@ const WINDOW_PALETTES = {
   night: { sky: "#1b2b48", skyline: ["#253751", "#304561"], curtain: "#8993a5", frame: "#a1aab8", glass: "#aebfdb" },
 } as const;
 
-function WallBox({ size, position, color }: { size: Vec3; position: Vec3; color: string }) {
+function WallBox({ size, position, color, roughness = 0.94 }: { size: Vec3; position: Vec3; color: string; roughness?: number }) {
   return <mesh position={position} castShadow receiveShadow>
     <boxGeometry args={size} />
-    <meshStandardMaterial color={color} roughness={0.94} />
+    <meshStandardMaterial color={color} roughness={roughness} />
   </mesh>;
 }
 
@@ -46,7 +47,7 @@ function Floor({ room }: { room: Room }) {
     return result;
   }, [room.width, room.depth, room.floorColor]);
   return <group>
-    <WallBox size={[room.width + 0.16, 0.16, room.depth + 0.16]} position={[0, -0.095, 0]} color="#655448" />
+    <WallBox size={[room.width + 0.16, 0.16, room.depth + 0.16]} position={[0, -0.095, 0]} color={new Color(room.floorColor).multiplyScalar(0.64).getStyle()} />
     {planks.map((plank, index) => <mesh key={index} position={plank.position} receiveShadow>
       <boxGeometry args={plank.size} />
       <meshStandardMaterial color={plank.color} roughness={0.78} />
@@ -58,6 +59,16 @@ function Window({ room, opening, lighting, showCelestialDisc }: { room: Room; op
   const { width, height, sill, offset, wall } = opening;
   const position: Vec3 = wall === "back" ? [offset, sill + height / 2, -room.depth / 2] : [-room.width / 2, sill + height / 2, offset];
   const palette = WINDOW_PALETTES[lighting];
+  const curtainGeometry = useMemo(() => {
+    const geometry = new PlaneGeometry(0.21, height + 0.12, 12, 1);
+    const positions = geometry.attributes.position;
+    for (let index = 0; index < positions.count; index++) {
+      positions.setZ(index, Math.cos(positions.getX(index) / 0.21 * Math.PI * 6) * 0.023);
+    }
+    geometry.computeVertexNormals();
+    return geometry;
+  }, [height]);
+  useEffect(() => () => curtainGeometry.dispose(), [curtainGeometry]);
   return <group position={position} rotation={[0, wall === "left" ? Math.PI / 2 : 0, 0]}>
     <mesh position={[0, 0, -0.075]}>
       <planeGeometry args={[width, height]} />
@@ -89,12 +100,13 @@ function Window({ room, opening, lighting, showCelestialDisc }: { room: Room; op
     <WallBox size={[0.044, height, 0.065]} position={[0, 0, 0.03]} color="#a0a69e" />
     <WallBox size={[width, 0.038, 0.065]} position={[0, -height * 0.12, 0.03]} color="#a0a69e" />
     <WallBox size={[width + 0.22, 0.075, 0.3]} position={[0, -height / 2 - 0.06, 0.035]} color="#e5dfd2" />
-    {[-1, 1].map((side) => <group key={side} position={[side * (width / 2 + 0.06), 0.03, 0.13]}>
-      {[0, 1, 2].map((fold) => <mesh key={fold} position={[(fold - 1) * 0.025, 0, Math.sin(fold * 2) * 0.02]} castShadow>
-        <cylinderGeometry args={[0.028, 0.03, height + 0.12, 8, 1, true]} />
-        <meshStandardMaterial color={palette.curtain} roughness={1} side={2} />
-      </mesh>)}
-    </group>)}
+    <mesh position={[0, height / 2 + 0.12, 0.14]} rotation={[0, 0, Math.PI / 2]} castShadow>
+      <cylinderGeometry args={[0.014, 0.014, width + 0.43, 8]} />
+      <meshStandardMaterial color="#847866" roughness={0.48} metalness={0.5} />
+    </mesh>
+    {[-1, 1].map((side) => <mesh key={side} geometry={curtainGeometry} position={[side * (width / 2 + 0.065), 0.03, 0.13]} castShadow receiveShadow>
+      <WovenMaterial color={palette.curtain} doubleSided />
+    </mesh>)}
   </group>;
 }
 
@@ -160,7 +172,7 @@ function Artwork({ room, artwork, selected, onSelect, onHover }: { room: Room; a
     onPointerOver={(event) => { event.stopPropagation(); onHover(true); }}
     onPointerOut={() => onHover(false)}
   >
-    <WallBox size={[ARTWORK_WIDTH, ARTWORK_HEIGHT, 0.045]} position={[0, 0, 0]} color={artwork.design === "geometric" ? "#3e4343" : "#6b4e3a"} />
+    <WallBox size={[ARTWORK_WIDTH, ARTWORK_HEIGHT, 0.045]} position={[0, 0, 0]} color={artwork.design === "geometric" ? "#3e4343" : "#6b4e3a"} roughness={0.58} />
     <ArtRect size={[ARTWORK_WIDTH - 0.065, ARTWORK_HEIGHT - 0.065]} position={[0, 0, 0.024]} color="#e8e0d0" />
     <PaintedDesign design={artwork.design} />
     {selected && <Line points={border} color="#e2a16b" lineWidth={2} />}
@@ -188,7 +200,7 @@ function WallWithOpenings({ room, wall, openings }: { room: Room; wall: WindowOp
 export function Dimensions({ room, lighting = "day" }: { room: Room; lighting?: Lighting }) {
   const { width: w, depth: d } = room;
   const lineColor = lighting === "night" ? "#adbad1" : "#717973";
-  const style = { background: "#1b2223", color: "#d6ded8", border: "1px solid #444e49", borderRadius: "5px", padding: "4px 7px", fontFamily: "inherit", fontSize: "10px", whiteSpace: "nowrap" as const, letterSpacing: "0.03em", pointerEvents: "none" as const };
+  const style = { background: "#172126ed", color: "#e2ece7", border: "1px solid #526363", borderRadius: "6px", padding: "5px 8px", fontFamily: "inherit", fontSize: "11px", whiteSpace: "nowrap" as const, fontVariantNumeric: "tabular-nums", pointerEvents: "none" as const };
   return <group>
     <Line points={[[-w / 2, 0.025, d / 2 + 0.42], [w / 2, 0.025, d / 2 + 0.42]]} color={lineColor} lineWidth={1} />
     <Line points={[[w / 2 + 0.42, 0.025, -d / 2], [w / 2 + 0.42, 0.025, d / 2]]} color={lineColor} lineWidth={1} />

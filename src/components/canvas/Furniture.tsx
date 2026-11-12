@@ -2,10 +2,37 @@
 
 import { RoundedBox } from "@react-three/drei";
 import type { ThreeElements } from "@react-three/fiber";
+import { DataTexture, LinearFilter, LinearMipmapLinearFilter, RepeatWrapping } from "three";
 import type { CatalogItem } from "@/lib/schema";
 
 type Vector3 = [number, number, number];
 type Category = CatalogItem["category"];
+
+// One tiny, shared height map gives cloth a woven surface without more geometry.
+const weaveTexture = (() => {
+  const size = 32;
+  const pixels = new Uint8Array(size * size * 4);
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const value = 128 + (x % 4 < 2 ? 12 : -12) + (y % 4 < 2 ? 10 : -10);
+      const offset = (y * size + x) * 4;
+      pixels[offset] = pixels[offset + 1] = pixels[offset + 2] = value;
+      pixels[offset + 3] = 255;
+    }
+  }
+  const texture = new DataTexture(pixels, size, size);
+  texture.wrapS = texture.wrapT = RepeatWrapping;
+  texture.repeat.set(16, 16);
+  texture.magFilter = LinearFilter;
+  texture.minFilter = LinearMipmapLinearFilter;
+  texture.generateMipmaps = true;
+  texture.needsUpdate = true;
+  return texture;
+})();
+
+export function WovenMaterial({ color, doubleSided = false }: { color: string; doubleSided?: boolean }) {
+  return <meshPhysicalMaterial color={color} roughness={0.96} bumpMap={weaveTexture} bumpScale={0.0012} sheen={0.32} sheenColor="#dce0d6" sheenRoughness={1} side={doubleSided ? 2 : 0} />;
+}
 
 interface FurnitureProps {
   category: Category;
@@ -21,21 +48,22 @@ type BlockProps = {
   radius?: number;
   roughness?: number;
   metalness?: number;
+  fabric?: boolean;
 } & Pick<ThreeElements["mesh"], "rotation">;
 
-function Block({ size, position, color, radius = 0.035, rotation, roughness = 0.82, metalness = 0 }: BlockProps) {
+function Block({ size, position, color, radius = 0.035, rotation, roughness = 0.82, metalness = 0, fabric = false }: BlockProps) {
   return (
     <RoundedBox args={size} position={position} rotation={rotation} radius={Math.max(0.0001, Math.min(radius, ...size.map((v) => v * 0.45)))} smoothness={3} castShadow receiveShadow>
-      <meshStandardMaterial color={color} roughness={roughness} metalness={metalness} />
+      {fabric ? <WovenMaterial color={color} /> : <meshStandardMaterial color={color} roughness={roughness} metalness={metalness} />}
     </RoundedBox>
   );
 }
 
-function Leg({ position, height, radius = 0.025, color = "#77513a" }: { position: Vector3; height: number; radius?: number; color?: string }) {
+function Leg({ position, height, radius = 0.025, color = "#77513a", metalness = 0 }: { position: Vector3; height: number; radius?: number; color?: string; metalness?: number }) {
   return (
     <mesh position={position} castShadow>
       <cylinderGeometry args={[radius, radius * 0.75, height, 8]} />
-      <meshStandardMaterial color={color} roughness={0.65} />
+      <meshStandardMaterial color={color} roughness={metalness ? 0.42 : 0.65} metalness={metalness} />
     </mesh>
   );
 }
@@ -46,18 +74,18 @@ function Sofa({ dimensions: [w, h, d], color }: Omit<FurnitureProps, "category">
   return (
     <group>
       {[-1, 1].flatMap((x) => [-1, 1].map((z) => <Leg key={`${x}:${z}`} position={[x * (w / 2 - 0.15), h * 0.09, z * (d / 2 - 0.13)]} height={h * 0.18} radius={0.035} color="#533a2c" />))}
-      <Block size={[w - 0.05, h * 0.26, d - 0.045]} position={[0, h * 0.27, 0]} color={color} radius={0.07} />
-      <Block size={[w - 0.08, h * 0.66, d * 0.22]} position={[0, h * 0.66, -d * 0.37]} color={color} radius={0.07} />
+      <Block fabric size={[w - 0.05, h * 0.26, d - 0.045]} position={[0, h * 0.27, 0]} color={color} radius={0.07} />
+      <Block fabric size={[w - 0.08, h * 0.66, d * 0.22]} position={[0, h * 0.66, -d * 0.37]} color={color} radius={0.07} />
       {[-1, 1].map((side) => (
         <group key={side}>
-          <Block size={[arm, h * 0.55, d * 0.93]} position={[side * (w - arm) / 2, h * 0.49, 0]} color={color} radius={0.06} />
-          <Block size={[seatWidth, h * 0.2, d * 0.7]} position={[side * (seatWidth / 2 + 0.009), h * 0.47, d * 0.08]} color={color} radius={0.065} />
-          <Block size={[seatWidth * 0.96, h * 0.44, d * 0.18]} position={[side * (seatWidth / 2 + 0.009), h * 0.75, -d * 0.26]} rotation={[-0.09, 0, 0]} color={color} radius={0.075} />
+          <Block fabric size={[arm, h * 0.55, d * 0.93]} position={[side * (w - arm) / 2, h * 0.49, 0]} color={color} radius={0.06} />
+          <Block fabric size={[seatWidth, h * 0.2, d * 0.7]} position={[side * (seatWidth / 2 + 0.009), h * 0.47, d * 0.08]} color={color} radius={0.065} />
+          <Block fabric size={[seatWidth * 0.96, h * 0.44, d * 0.18]} position={[side * (seatWidth / 2 + 0.009), h * 0.75, -d * 0.26]} rotation={[-0.09, 0, 0]} color={color} radius={0.075} />
         </group>
       ))}
-      <Block size={[w * 0.17, h * 0.36, d * 0.13]} position={[-w * 0.31, h * 0.67, -d * 0.07]} rotation={[-0.19, -0.12, 0.13]} color="#e5d7c4" radius={0.065} />
-      <Block size={[w * 0.16, h * 0.33, d * 0.13]} position={[w * 0.3, h * 0.65, -d * 0.07]} rotation={[-0.19, 0.12, -0.17]} color="#9b654c" radius={0.065} />
-      <Block size={[w * 0.17, 0.018, d * 0.46]} position={[w * 0.22, h * 0.582, d * 0.19]} color="#c3b8a3" radius={0.008} />
+      <Block fabric size={[w * 0.17, h * 0.36, d * 0.13]} position={[-w * 0.31, h * 0.67, -d * 0.07]} rotation={[-0.19, -0.12, 0.13]} color="#e5d7c4" radius={0.065} />
+      <Block fabric size={[w * 0.16, h * 0.33, d * 0.13]} position={[w * 0.3, h * 0.65, -d * 0.07]} rotation={[-0.19, 0.12, -0.17]} color="#9b654c" radius={0.065} />
+      <Block fabric size={[w * 0.17, 0.018, d * 0.46]} position={[w * 0.22, h * 0.582, d * 0.19]} color="#c3b8a3" radius={0.008} />
     </group>
   );
 }
@@ -86,9 +114,9 @@ function Chair({ dimensions: [w, h, d], color }: Omit<FurnitureProps, "category"
   return (
     <group>
       {[-1, 1].flatMap((x) => [-1, 1].map((z) => <Leg key={`${x}:${z}`} position={[x * w * 0.34, h * 0.22, z * d * 0.33]} height={h * 0.44} radius={0.029} />))}
-      <Block size={[w * 0.92, h * 0.12, d * 0.92]} position={[0, h * 0.48, 0]} color={color} radius={0.075} />
+      <Block size={[w * 0.92, h * 0.12, d * 0.92]} position={[0, h * 0.48, 0]} color={color} radius={0.075} fabric />
       {[-1, 1].map((x) => <Block key={x} size={[0.04, h * 0.56, 0.05]} position={[x * w * 0.36, h * 0.7, -d * 0.38]} rotation={[-0.08, 0, 0]} color="#77513a" radius={0.012} />)}
-      <Block size={[w, h * 0.32, d * 0.17]} position={[0, h * 0.83, -d * 0.37]} rotation={[-0.08, 0, 0]} color={color} radius={0.07} />
+      <Block size={[w, h * 0.32, d * 0.17]} position={[0, h * 0.83, -d * 0.37]} rotation={[-0.08, 0, 0]} color={color} radius={0.07} fabric />
     </group>
   );
 }
@@ -100,7 +128,7 @@ function Lamp({ dimensions: [w, h, d], color }: Omit<FurnitureProps, "category">
         <cylinderGeometry args={[w * 0.32, w * 0.34, 0.07, 32]} />
         <meshStandardMaterial color={color} roughness={0.48} metalness={0.55} />
       </mesh>
-      <Leg position={[0, h * 0.43, 0]} height={h * 0.84} radius={0.018} color={color} />
+      <Leg position={[0, h * 0.43, 0]} height={h * 0.84} radius={0.018} color={color} metalness={0.55} />
       <mesh position={[0, h * 0.86, 0]} castShadow>
         <cylinderGeometry args={[w * 0.29, w * 0.49, h * 0.27, 32, 1, true]} />
         <meshStandardMaterial color="#eee0c7" roughness={1} side={2} emissive="#d5b782" emissiveIntensity={0.15} />
@@ -154,7 +182,7 @@ function Rug({ dimensions: [w, h, d], color }: Omit<FurnitureProps, "category">)
   const top = h - 0.003;
   return (
     <group>
-      <Block size={[w, top, d]} position={[0, top / 2, 0]} color={color} radius={0.012} roughness={1} />
+      <Block size={[w, top, d]} position={[0, top / 2, 0]} color={color} radius={0.012} fabric />
       {[-1, 1].map((side) => (
         <group key={side}>
           <Block size={[w - 0.12, 0.002, 0.013]} position={[0, top + 0.002, side * (d / 2 - 0.12)]} color="#a1917b" radius={0.0003} />
@@ -162,10 +190,7 @@ function Rug({ dimensions: [w, h, d], color }: Omit<FurnitureProps, "category">)
           {Array.from({ length: 17 }, (_, index) => <Block key={index} size={[0.009, 0.005, 0.055]} position={[(index / 16 - 0.5) * (w - 0.07), top / 2, side * (d / 2 - 0.0275)]} color={color} radius={0.001} />)}
         </group>
       ))}
-      {Array.from({ length: 12 }, (_, index) => <mesh key={index} position={[0, top + 0.001, (index / 11 - 0.5) * (d - 0.4)]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[w - 0.14, 0.004]} />
-        <meshStandardMaterial color="#998971" transparent opacity={0.14} roughness={1} depthWrite={false} />
-      </mesh>)}
+
     </group>
   );
 }
@@ -188,18 +213,18 @@ function Desk({ dimensions: [w, h, d], color }: Omit<FurnitureProps, "category">
 function Bed({ dimensions: [w, h, d], color }: Omit<FurnitureProps, "category">) {
   return <group>
     {[-1, 1].flatMap((x) => [-1, 1].map((z) => <Leg key={`${x}:${z}`} position={[x * w * 0.39, h * 0.065, z * d * 0.39]} height={h * 0.13} radius={0.035} color="#665044" />))}
-    <Block size={[w, h * 0.85, d * 0.075]} position={[0, h * 0.575, -d * 0.4625]} color={color} radius={0.075} />
-    {[-1, 0, 1].map((channel) => <Block key={channel} size={[w * 0.28, h * 0.66, d * 0.018]} position={[channel * w * 0.31, h * 0.62, -d * 0.418]} color={color} radius={0.06} />)}
-    <Block size={[w * 0.98, h * 0.25, d * 0.94]} position={[0, h * 0.255, d * 0.025]} color={color} radius={0.055} />
-    <Block size={[w * 0.93, h * 0.2, d * 0.89]} position={[0, h * 0.445, d * 0.035]} color="#e9e4da" radius={0.075} />
-    <Block size={[w * 0.94, h * 0.095, d * 0.63]} position={[0, h * 0.575, d * 0.155]} color={color} radius={0.05} />
-    <Block size={[w * 0.93, h * 0.035, d * 0.11]} position={[0, h * 0.631, -d * 0.105]} color="#ded5c6" radius={0.012} />
+    <Block fabric size={[w, h * 0.85, d * 0.075]} position={[0, h * 0.575, -d * 0.4625]} color={color} radius={0.075} />
+    {[-1, 0, 1].map((channel) => <Block fabric key={channel} size={[w * 0.28, h * 0.66, d * 0.018]} position={[channel * w * 0.31, h * 0.62, -d * 0.418]} color={color} radius={0.06} />)}
+    <Block fabric size={[w * 0.98, h * 0.25, d * 0.94]} position={[0, h * 0.255, d * 0.025]} color={color} radius={0.055} />
+    <Block fabric size={[w * 0.93, h * 0.2, d * 0.89]} position={[0, h * 0.445, d * 0.035]} color="#e9e4da" radius={0.075} />
+    <Block fabric size={[w * 0.94, h * 0.095, d * 0.63]} position={[0, h * 0.575, d * 0.155]} color={color} radius={0.05} />
+    <Block fabric size={[w * 0.93, h * 0.035, d * 0.11]} position={[0, h * 0.631, -d * 0.105]} color="#ded5c6" radius={0.012} />
     {[-1, 1].map((side) => <group key={side}>
-      <Block size={[w * 0.395, h * 0.13, d * 0.18]} position={[side * w * 0.225, h * 0.6, -d * 0.285]} color="#f1ebe1" radius={0.07} />
-      <Block size={[w * 0.35, h * 0.025, d * 0.14]} position={[side * w * 0.225, h * 0.667, -d * 0.285]} color="#f4eee4" radius={0.012} />
+      <Block fabric size={[w * 0.395, h * 0.13, d * 0.18]} position={[side * w * 0.225, h * 0.6, -d * 0.285]} color="#f1ebe1" radius={0.07} />
+      <Block fabric size={[w * 0.35, h * 0.025, d * 0.14]} position={[side * w * 0.225, h * 0.667, -d * 0.285]} color="#f4eee4" radius={0.012} />
     </group>)}
-    <Block size={[w * 0.94, h * 0.035, d * 0.2]} position={[0, h * 0.636, d * 0.325]} color="#a89b85" radius={0.012} />
-    {[-1, 1].map((side) => <Block key={side} size={[w * 0.91, h * 0.008, d * 0.008]} position={[0, h * 0.657, d * (0.325 + side * 0.075)]} color="#d6c9b2" radius={0.001} />)}
+    <Block fabric size={[w * 0.94, h * 0.035, d * 0.2]} position={[0, h * 0.636, d * 0.325]} color="#a89b85" radius={0.012} />
+    {[-1, 1].map((side) => <Block fabric key={side} size={[w * 0.91, h * 0.008, d * 0.008]} position={[0, h * 0.657, d * (0.325 + side * 0.075)]} color="#d6c9b2" radius={0.001} />)}
   </group>;
 }
 
@@ -279,20 +304,20 @@ function DiningChair({ dimensions: [w, h, d], color }: Omit<FurnitureProps, "cat
   return <group>
     {[-1, 1].flatMap((x) => [-1, 1].map((z) => <Leg key={`${x}:${z}`} position={[x * w * 0.36, h * 0.255, z * d * 0.32]} height={h * 0.51} radius={0.019} color="#9c7853" />))}
     <Block size={[w * 0.96, h * 0.065, d * 0.87]} position={[0, h * 0.515, d * 0.025]} color="#9c7853" radius={0.025} />
-    <Block size={[w * 0.9, h * 0.075, d * 0.78]} position={[0, h * 0.575, d * 0.04]} color={color} radius={0.035} />
+    <Block size={[w * 0.9, h * 0.075, d * 0.78]} position={[0, h * 0.575, d * 0.04]} color={color} radius={0.035} fabric />
     {[-1, 1].map((side) => <Leg key={side} position={[side * w * 0.37, h * 0.735, -d * 0.36]} height={h * 0.45} radius={0.02} color="#9c7853" />)}
     {[-1, 0, 1].map((reed) => <Block key={reed} size={[w * 0.075, h * 0.31, d * 0.055]} position={[reed * w * 0.19, h * 0.78, -d * 0.36]} color="#ad8861" radius={0.01} />)}
     <Block size={[w, h * 0.125, d * 0.125]} position={[0, h * 0.9375, -d * 0.36]} color="#9c7853" radius={0.03} />
-    <Block size={[w * 0.73, h * 0.12, d * 0.05]} position={[0, h * 0.91, -d * 0.28]} color={color} radius={0.02} />
+    <Block size={[w * 0.73, h * 0.12, d * 0.05]} position={[0, h * 0.91, -d * 0.28]} color={color} radius={0.02} fabric />
   </group>;
 }
 
 function Ottoman({ dimensions: [w, h, d], color }: Omit<FurnitureProps, "category">) {
   return <group>
     {[-1, 1].flatMap((x) => [-1, 1].map((z) => <Leg key={`${x}:${z}`} position={[x * w * 0.3, h * 0.075, z * d * 0.3]} height={h * 0.15} radius={0.024} color="#5a4538" />))}
-    <Block size={[w * 0.88, h * 0.27, d * 0.88]} position={[0, h * 0.265, 0]} color={color} radius={0.055} />
-    <Block size={[w, h * 0.64, d]} position={[0, h * 0.68, 0]} color={color} radius={0.115} />
-    <Block size={[w * 0.97, h * 0.025, d * 0.97]} position={[0, h * 0.49, 0]} color={color} radius={0.01} />
+    <Block fabric size={[w * 0.88, h * 0.27, d * 0.88]} position={[0, h * 0.265, 0]} color={color} radius={0.055} />
+    <Block fabric size={[w, h * 0.64, d]} position={[0, h * 0.68, 0]} color={color} radius={0.115} />
+    <Block fabric size={[w * 0.97, h * 0.025, d * 0.97]} position={[0, h * 0.49, 0]} color={color} radius={0.01} />
   </group>;
 }
 
