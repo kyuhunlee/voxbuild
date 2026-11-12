@@ -28,11 +28,11 @@ export type CaseStudySection = {
 export const CASE_STUDY_SECTIONS: CaseStudySection[] = [
   {
     id: "scenario",
-    label: "Customer problem",
+    label: "Customer scenario",
     title: "Help renters picture their next home",
-    intro: "A fictional long-term rental marketplace, inspired by Apartments.com and StreetEasy, wants renters to test furniture layouts before deciding whether to tour.",
+    intro: "A fictional long-term rental marketplace wants renters to explore furniture layouts before deciding whether to tour.",
     cards: [
-      { title: "The customer", body: "The customer is an established rental marketplace with listings, data, identity, and a release pipeline. Its users are prospective tenants considering a tour.", tone: "retained", tag: "Scenario" },
+      { title: "The customer", body: "A rental marketplace like Apartments.com or StreetEasy. Its users are prospective tenants; its existing listings, data, identity, and release pipeline form our assumed starting point.", tone: "retained", tag: "Scenario" },
       { title: "The business case", body: "Photos cannot show a renter’s own furniture layout. Uncertainty can delay tours and create leasing questions. More qualified tours and fewer questions are hypotheses.", tone: "risk", tag: "Business friction" },
       { title: "The technical friction", body: "Custom releases and separate model integrations slow feature iterations and increase maintenance. Unvalidated AI edits risk losing tenants’ designs.", tone: "risk", tag: "Engineering friction" },
     ],
