@@ -61,6 +61,10 @@ function CameraRig({ view, width, depth, height, reducedMotion }: { view: RoomCa
   const destination = useRef(new Vector3(6.4, 5.75, 8.05));
 
   useEffect(() => {
+    if (size.width <= 0 || size.height <= 0) {
+      moving.current = false;
+      return;
+    }
     camera.zoom = view === "top" ? 1 : DEFAULT_PERSPECTIVE_ZOOM;
     camera.updateProjectionMatrix();
     const scale = Math.max(width / 6, depth / 5.2);

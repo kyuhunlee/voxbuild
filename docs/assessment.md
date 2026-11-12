@@ -29,11 +29,11 @@ The current experience has **14 furniture SKUs**, **six presets**, and six envir
 
 ## Verification record
 
-This evidence ledger records checks completed on **October 19, 2026** and names the remaining gaps. Replace pending entries only after the corresponding verification. A build, mocked test, or configured environment variable does not establish live integration success.
+This evidence ledger records checks completed on **October 19 and November 12, 2026** and names the remaining gaps. Dated baseline reports are retained. A build, mocked test, or configured environment variable does not establish live integration success.
 
 | Check | Evidence to attach | Result |
 | --- | --- | --- |
-| Deterministic domain/store/voice tests | `npm test` | **Passed: 52 tests.** Includes OIDC regressions, provider-schema checks, legacy scene compatibility, artwork bounds/window conflicts, and atomic validation; separate live reports establish Atlas access |
+| Deterministic domain/store/voice tests | `npm test`, November 12 | **Passed: 59 tests.** Adds invalid-model classification, read-only revision freshness/ownership, and late interrupted voice-response regressions to the prior 52 checks; separate live reports establish Atlas access |
 | Type check | `npm run typecheck` | **Passed** |
 | Room/artwork local API | [14-case report](evidence/decor-local.json) | **Passed: 14/14:** six distinct presets, removed-loft rejection, saved painting edits, window conflicts, atomic rejection, style preservation, and real primary/policy-fallback requests |
 | Room/artwork desktop/mobile | Local live browser at desktop and 390×844 | **Passed:** painting selection, design changes, vertical movement, wall switching, and persisted reload; distinct office, bedroom, dining, and lounge windows/lighting inspected. No console errors after the completed code was reloaded |

@@ -10,6 +10,7 @@ import { ARTWORK_DESIGNS, ARTWORK_HEIGHT, ARTWORK_WIDTH, findArtworkPlacement, g
 import { applyOperations } from "@/lib/scene-engine";
 import { SceneSchema, type CatalogItem, type Operation, type Scene, type SceneObject } from "@/lib/schema";
 import { useVoice, type VoiceEvent } from "@/hooks/useVoice";
+import CaseStudyGuide from "./CaseStudyGuide";
 
 const RoomCanvas = dynamic(() => import("./canvas/RoomCanvas"), { ssr: false, loading: () => <div className="canvas-loading"><Box size={28} strokeWidth={1.25} /><span>Opening your room…</span></div> });
 
@@ -29,13 +30,20 @@ const COLOR_NAMES: Record<string, string> = {
 };
 
 async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
-  const response = await fetch(url, { ...options, headers: { ...(options.body ? { "Content-Type": "application/json" } : {}), ...options.headers } });
-  const data = await response.json().catch(() => null);
-  if (!response.ok) {
-    const message = typeof data?.error === "string" ? data.error : data?.error?.message ?? data?.message ?? `The request could not finish (${response.status}). Please try again.`;
-    throw new Error(message);
+  const timeout = AbortSignal.timeout(45_000);
+  try {
+    const response = await fetch(url, { ...options, signal: options.signal ? AbortSignal.any([options.signal, timeout]) : timeout, headers: { ...(options.body ? { "Content-Type": "application/json" } : {}), ...options.headers } });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      const message = typeof data?.error === "string" ? data.error : data?.error?.message ?? data?.message ?? `The request could not finish (${response.status}). Please try again.`;
+      throw new Error(message);
+    }
+    if (data === null) throw new Error("The server returned an unreadable response. Reload the saved room before trying again.");
+    return data as T;
+  } catch (error) {
+    if (timeout.aborted && !options.signal?.aborted) throw new Error("The connection timed out. Reload or reconnect to check the latest saved room before trying again.");
+    throw error;
   }
-  return data as T;
 }
 
 function estimateBounds(object: SceneObject) {
@@ -218,10 +226,22 @@ export default function VoxBuildApp() {
 
   useEffect(() => { const controller = new AbortController(); void initialize(controller.signal); return () => controller.abort(); }, [initialize]);
   useEffect(() => {
-    if (!notice) return;
-    const timer = setTimeout(() => setNotice((current) => current?.id === notice.id ? null : current), notice.kind === "error" ? 10000 : 6500);
+    if (!notice || notice.kind === "error") return;
+    const timer = setTimeout(() => setNotice((current) => current?.id === notice.id ? null : current), 6500);
     return () => clearTimeout(timer);
   }, [notice]);
+
+  useEffect(() => {
+    if (!architectureOpen && !catalogOpen && !inspectorOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || event.defaultPrevented || event.target instanceof Element && event.target.closest("dialog")) return;
+      setArchitectureOpen(false);
+      setCatalogOpen(false);
+      setInspectorOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [architectureOpen, catalogOpen, inspectorOpen]);
 
   const enqueue = useCallback(<T,>(work: (current: Scene) => Promise<T>): Promise<T> => {
     pending.current += 1;
@@ -381,12 +401,12 @@ export default function VoxBuildApp() {
     void handle(executeOperations([{ type: "move_artwork", artworkId: selectedArtworkId, wall, ...placement }]));
   }
 
-  return <div className="app-shell">
+  return <div className={`app-shell${architectureOpen ? " architecture-is-open" : ""}${catalogOpen || inspectorOpen ? " mobile-panel-is-open" : ""}`}>
     <header className="app-header">
       <a className="brand" href="/" aria-label="VoxBuild home"><span className="brand-mark"><Box size={21} strokeWidth={1.6} /></span><span>Vox<span className="brand-light">Build</span></span><span className="beta-label">Beta</span></a>
       <div className="header-divider" /><span className="workspace-label">Apartment planner</span>
       <div className="header-actions">
-        <span className={`save-status ${mode === "sample" ? "sample-status" : ""}`} title={mode === "sample" ? "This sample is local to this tab. No AI or cloud storage is used." : "Accepted changes are saved to MongoDB Atlas."}>
+        <span className={`save-status ${mode === "sample" ? "sample-status" : ""}`} role="status" aria-atomic="true" title={mode === "sample" ? "This sample is local to this tab. No AI or cloud storage is used." : "Accepted changes are saved to MongoDB Atlas."}>
           {busy || mode === "loading" ? <LoaderCircle className="spin" size={13} /> : mode === "live" ? <Cloud size={14} /> : mode === "error" ? <AlertCircle size={14} /> : <span className="status-dot" />}
           {busy ? mode === "sample" ? "Updating preview" : "Saving changes" : mode === "loading" ? "Connecting" : mode === "live" ? "All changes saved" : mode === "error" ? "Connection issue" : "Local sample"}
         </span>
@@ -426,7 +446,7 @@ export default function VoxBuildApp() {
           {(mode === "loading" || mode === "error") && <div className="workspace-connection"><span>{mode === "loading" ? <LoaderCircle size={15} className="spin" /> : <AlertCircle size={15} />}{mode === "loading" ? "Connecting your workspace…" : "Your workspace is unavailable."}</span>{mode === "error" && <button onClick={() => void initialize()}>Try again</button>}</div>}
 
           <div className="composer-area">
-            {notice && <div key={notice.id} className={`notice notice-${notice.kind}`} role={notice.kind === "error" ? "alert" : "status"}>{notice.kind === "error" ? <AlertCircle size={15} /> : notice.kind === "success" ? <Check size={15} /> : <Sparkles size={15} />}<span>{notice.message}</span><button onClick={() => setNotice(null)} aria-label="Dismiss message"><X size={13} /></button></div>}
+            {notice && <div key={notice.id} className={`notice notice-${notice.kind}`} role={notice.kind === "error" ? "alert" : "status"} aria-atomic="true">{notice.kind === "error" ? <AlertCircle size={15} /> : notice.kind === "success" ? <Check size={15} /> : <Sparkles size={15} />}<span>{notice.message}</span><button onClick={() => setNotice(null)} aria-label="Dismiss message"><X size={13} /></button></div>}
             <div className="command-composer">
               <div className="composer-heading"><span className="composer-spark"><Sparkles size={14} /></span><span>{voiceActive ? voice.status === "connecting" ? "Connecting your microphone…" : voice.status === "thinking" ? "Working on your room…" : voice.status === "speaking" ? "Your room, in conversation" : "Listening. Make yourself at home." : "A little change. A whole new room."}</span><span className="composer-mode">{mode === "sample" ? "Local preview" : voiceActive ? "Voice connected" : "Room assistant"}</span></div>
               <form onSubmit={(event: FormEvent) => { event.preventDefault(); void submitPrompt(prompt); }} className="command-form">
@@ -469,7 +489,7 @@ export default function VoxBuildApp() {
           <div className="estimate-total"><span>Furniture estimate</span><strong>${total.toLocaleString()}</strong><p>Illustrative catalog prices. No purchase is made.</p></div>
           <div className="inspector-help"><MousePointer2 size={17} /><p>Select furniture to change its finish or position. Select a framed artwork to change its design and move it along a wall.</p></div>
         </>}
-        <div className="inspector-footer"><span className="revision-label">Revision {scene.revision}</span><span>{mode === "live" ? "Cloud saved" : "Local sample"}</span></div>
+        <div className="inspector-footer"><span className="revision-label">Revision {scene.revision}</span><span>{busy ? mode === "sample" ? "Updating preview" : "Saving…" : mode === "live" ? "Cloud saved" : mode === "sample" ? "Local sample" : mode === "error" ? "Not connected" : "Connecting"}</span></div>
       </aside>
 
       {architectureOpen && <aside className="architecture-drawer" aria-label="Architecture and observed activity">
@@ -490,5 +510,6 @@ export default function VoxBuildApp() {
         </div><div className="architecture-footer">Models propose. The server validates and saves.</div>
       </aside>}
     </div>
+    <CaseStudyGuide onOpen={() => { voice.stop(); setArchitectureOpen(false); }} />
   </div>;
 }

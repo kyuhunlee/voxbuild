@@ -10,8 +10,8 @@ export class HttpError extends Error {
 
 export function errorResponse(error: unknown) {
   if (error instanceof HttpError) return NextResponse.json({ error: error.message, code: error.code }, { status: error.status, headers: { "Cache-Control": "no-store" } });
-  if (error instanceof DomainError) return NextResponse.json({ error: error.message, code: error.code }, { status: 422 });
-  if (error instanceof ZodError) return NextResponse.json({ error: "The request did not match the supported command format.", code: "INVALID_REQUEST" }, { status: 400 });
+  if (error instanceof DomainError) return NextResponse.json({ error: error.message, code: error.code }, { status: 422, headers: { "Cache-Control": "no-store" } });
+  if (error instanceof ZodError) return NextResponse.json({ error: "The request did not match the supported command format.", code: "INVALID_REQUEST" }, { status: 400, headers: { "Cache-Control": "no-store" } });
   console.error("VoxBuild request failed", { name: error instanceof Error ? error.name : "UnknownError" });
   return NextResponse.json({ error: "We could not confirm this request. Your last accepted room is safe. Reload to check its status before retrying.", code: "SERVICE_UNAVAILABLE" }, { status: 503, headers: { "Cache-Control": "no-store" } });
 }

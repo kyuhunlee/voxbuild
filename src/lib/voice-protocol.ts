@@ -34,6 +34,7 @@ const ArgumentsSchema = z.object({ operations: OperationsSchema }).strict();
 export class RealtimeCommandQueue {
   private calls = new Set<string>();
   private responses = new Set<string>();
+  private responseTurns = new Map<string, number>();
   private queue: Promise<void> = Promise.resolve();
   private turn = 0;
 
@@ -41,13 +42,18 @@ export class RealtimeCommandQueue {
 
   interrupt() { this.turn += 1; }
 
+  responseStarted(id: string) {
+    if (!this.responses.has(id) && !this.responseTurns.has(id)) this.responseTurns.set(id, this.turn);
+  }
+
   accept(response: RealtimeResponse): Promise<void> {
     if (!response.id || this.responses.has(response.id)) return Promise.resolve();
     this.responses.add(response.id);
+    const turn = this.responseTurns.get(response.id) ?? this.turn;
+    this.responseTurns.delete(response.id);
     if (response.status !== "completed" || response.metadata?.phase === "speech") return Promise.resolve();
     const calls = (Array.isArray(response.output) ? response.output : [])
       .filter((item) => item.type === "function_call" && item.status === "completed");
-    const turn = this.turn;
     this.queue = this.queue.then(async () => {
       if (!this.options.isConnected() || this.turn !== turn) return;
       let newCalls = 0;

@@ -29,7 +29,7 @@ export async function getDatabase(): Promise<Db> {
   const uri = process.env.MONGODB_URI;
   if (!uri) throw new HttpError(503, "Saved rooms are unavailable until MongoDB Atlas is configured.", "STORAGE_UNAVAILABLE");
   if (!mongoGlobal.voxbuildMongo) {
-    const client = new MongoClient(uri, { maxPoolSize: 5, serverSelectionTimeoutMS: 5000, connectTimeoutMS: 5000 });
+    const client = new MongoClient(uri, { maxPoolSize: 5, waitQueueTimeoutMS: 5000, serverSelectionTimeoutMS: 5000, connectTimeoutMS: 5000 });
     mongoGlobal.voxbuildMongo = client.connect().catch(async () => {
       delete mongoGlobal.voxbuildMongo;
       await client.close().catch(() => undefined);
@@ -66,6 +66,13 @@ export function createSceneRepository(collection: SceneCollectionPort) {
   async function getScene(ownerId: string, sceneId: string): Promise<Scene | null> {
     const document = await collection.findOne({ _id: sceneId, ownerId });
     return document ? canonicalScene(document) : null;
+  }
+
+  async function getSceneAtRevision(ownerId: string, sceneId: string, expectedRevision: number): Promise<Scene> {
+    const scene = await getScene(ownerId, sceneId);
+    if (!scene) throw new HttpError(404, "This room was not found.", "SCENE_NOT_FOUND");
+    if (scene.revision !== expectedRevision) throw new HttpError(409, "The room changed while this request was pending. Reload it and try again.", "REVISION_CONFLICT");
+    return scene;
   }
 
   async function createStoredScene(ownerId: string, preset: PresetId = "studio"): Promise<Scene> {
@@ -118,7 +125,7 @@ export function createSceneRepository(collection: SceneCollectionPort) {
     return (await collection.listOwned(ownerId)).map(canonicalScene);
   }
 
-  return { getScene, createStoredScene, applyCommand, resetScene, listScenes };
+  return { getScene, getSceneAtRevision, createStoredScene, applyCommand, resetScene, listScenes };
 }
 
 async function productionRepository() {
@@ -134,6 +141,9 @@ async function productionRepository() {
 
 export async function getScene(ownerId: string, sceneId: string): Promise<Scene | null> {
   return (await productionRepository()).getScene(ownerId, sceneId);
+}
+export async function getSceneAtRevision(ownerId: string, sceneId: string, expectedRevision: number): Promise<Scene> {
+  return (await productionRepository()).getSceneAtRevision(ownerId, sceneId, expectedRevision);
 }
 export async function createStoredScene(ownerId: string, preset: PresetId = "studio"): Promise<Scene> {
   return (await productionRepository()).createStoredScene(ownerId, preset);

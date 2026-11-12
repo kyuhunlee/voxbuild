@@ -94,6 +94,24 @@ test("competing edits from the same revision cannot overwrite each other", async
   assert.equal((await repository.getScene("owner-a", scene.id))?.revision, 1);
 });
 
+test("read-only model results cannot acknowledge a snapshot superseded during generation", async () => {
+  const { repository, successfulUpdates } = fakeCollection();
+  const initial = await repository.createStoredScene("owner-a", "empty");
+  assert.deepEqual(await repository.getSceneAtRevision("owner-a", initial.id, 0), initial);
+  const accepted = await repository.applyCommand("owner-a", command(initial.id));
+  await assert.rejects(repository.getSceneAtRevision("owner-a", initial.id, 0), hasCode("REVISION_CONFLICT"));
+  assert.deepEqual(await repository.getSceneAtRevision("owner-a", initial.id, 1), accepted.scene);
+  assert.equal(successfulUpdates(), 1, "a freshness check must never create a write or receipt");
+});
+
+test("revision-checked reads enforce scene ownership before revealing revision conflicts", async () => {
+  const { repository } = fakeCollection();
+  const scene = await repository.createStoredScene("owner-a", "empty");
+  await repository.applyCommand("owner-a", command(scene.id));
+  await assert.rejects(repository.getSceneAtRevision("owner-b", scene.id, 0), hasCode("SCENE_NOT_FOUND"));
+  await assert.rejects(repository.getSceneAtRevision("owner-a", "missing-scene", 0), hasCode("SCENE_NOT_FOUND"));
+});
+
 test("a lost acknowledgement can be retried without duplicating committed furniture", async () => {
   const storage = fakeCollection();
   const scene = await storage.repository.createStoredScene("owner-a", "empty");

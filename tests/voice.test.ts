@@ -95,6 +95,22 @@ test("barge-in drops edits that have not started executing", async () => {
   assert.deepEqual(events, []);
 });
 
+test("barge-in rejects an older response that completes after the interruption", async () => {
+  const { queue, events } = harness();
+  queue.responseStarted("older-response");
+  queue.interrupt();
+  // A duplicate creation event must not relabel the old response as the new turn.
+  queue.responseStarted("older-response");
+  await queue.accept(response("older-response", "older-call"));
+  assert.equal(events.length, 0);
+
+  queue.responseStarted("new-response");
+  await queue.accept(response("new-response", "new-call"));
+  assert.equal(events.filter((event) => event.kind === "execute").length, 1);
+  assert.equal(events.filter((event) => event.kind === "speak").length, 1);
+  assert.equal((events.find((event) => event.kind === "result")?.data as { callId: string }).callId, "new-call");
+});
+
 test("barge-in during a save preserves the acknowledged result but suppresses stale speech", async () => {
   let acknowledge!: (value: typeof saved) => void;
   const pending = new Promise<typeof saved>((resolve) => { acknowledge = resolve; });

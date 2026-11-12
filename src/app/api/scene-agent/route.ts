@@ -2,12 +2,13 @@ import { randomUUID } from "node:crypto";
 import { generateText, Output } from "ai";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { IdSchema, OperationsSchema } from "@/lib/schema";
+import { IdSchema } from "@/lib/schema";
 import { ModelPlanSchema } from "@/lib/model-schema";
 import { ENVIRONMENTS } from "@/lib/environments";
 import { getRoomArtworks, getRoomWindows } from "@/lib/room-decor";
 import { readCatalog } from "@/lib/server/catalog";
-import { applyCommand, getScene } from "@/lib/server/store";
+import { applyCommand, getSceneAtRevision } from "@/lib/server/store";
+import { parseGeneratedPlan } from "@/lib/server/scene-plan";
 import { enforceSameOrigin, requireSession } from "@/lib/server/session";
 import { errorResponse, HttpError, readJson } from "@/lib/server/errors";
 import { enforceRateLimit } from "@/lib/server/rate-limit";
@@ -27,9 +28,7 @@ export async function POST(request: Request) {
     const model = process.env.AI_GATEWAY_MODEL;
     if (!model || !hasGatewayCredentials()) throw new HttpError(503, "The AI Gateway is not configured on this deployment.", "AI_NOT_CONFIGURED");
     if (input.testFallback && (model.startsWith("google/") || !process.env.AI_GATEWAY_FALLBACK_MODEL?.startsWith("google/"))) throw new HttpError(400, "This routing test requires a non-Google primary and a Google fallback model.", "ROUTING_TEST_UNAVAILABLE");
-    const scene = await getScene(owner.id, input.sceneId);
-    if (!scene) throw new HttpError(404, "This room was not found.", "SCENE_NOT_FOUND");
-    if (scene.revision !== input.expectedRevision) throw new HttpError(409, "The room changed while this request was pending. Reload it and try again.", "REVISION_CONFLICT");
+    const scene = await getSceneAtRevision(owner.id, input.sceneId, input.expectedRevision);
     await enforceRateLimit(owner.id, "text-generation", 40, 60 * 60 * 1000);
     await enforceRateLimit("global", "text-generation", 400, 24 * 60 * 60 * 1000);
     const catalogStart = performance.now(); const catalog = await readCatalog();
@@ -65,14 +64,15 @@ export async function POST(request: Request) {
         user: owner.id, tags: ["voxbuild", "scene-command"],
       } },
     });
-    const generated = result.output;
-    const plan = { message: generated.message.slice(0, 400), operations: generated.operations.length ? OperationsSchema.parse(generated.operations) : [] };
+    const plan = parseGeneratedPlan(result.output);
     const modelMs = Math.round(performance.now() - modelStart);
     const databaseStart = performance.now();
     // [SA DECISION]: Partial model output never mutates the room. Schema and domain validation precede an atomic Atlas commit.
+    request.signal.throwIfAborted();
     const committed = plan.operations.length
       ? await applyCommand(owner.id, { sceneId: scene.id, commandId: input.commandId, expectedRevision: input.expectedRevision, operations: plan.operations })
-      : { scene, duplicate: false };
+      // Questions must not return a stale snapshot over a concurrently accepted edit.
+      : { scene: await getSceneAtRevision(owner.id, scene.id, input.expectedRevision), duplicate: false };
     const gateway = result.providerMetadata?.gateway;
     const routing = gateway?.routing && typeof gateway.routing === "object" && !Array.isArray(gateway.routing) ? gateway.routing : null;
     const resolvedModel = routing && "canonicalSlug" in routing && typeof routing.canonicalSlug === "string" ? routing.canonicalSlug : null;

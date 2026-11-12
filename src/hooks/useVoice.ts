@@ -36,6 +36,7 @@ type VoiceConnection = {
 };
 
 const MAX_SESSION_MS = 5 * 60 * 1000;
+const METER_INTERVAL_MS = 50;
 
 function send(connection: VoiceConnection, event: Record<string, unknown>) {
   if (connection.channel.readyState !== "open") return false;
@@ -223,7 +224,11 @@ export function useVoice(options: VoiceOptions) {
           setStatus("listening");
           break;
         case "input_audio_buffer.speech_stopped":
+          setStatus("thinking");
+          break;
         case "response.created":
+          // A late completed response from an interrupted turn must not become a new edit.
+          if (typeof event.response?.id === "string") commands.responseStarted(event.response.id);
           setStatus("thinking");
           break;
         case "output_audio_buffer.started":
@@ -249,12 +254,13 @@ export function useVoice(options: VoiceOptions) {
           if (!response?.id) return;
           if (response.usage) latest.current.onEvent({ kind: "voice", message: "Realtime response completed.", detail: { responseId: response.id, status: response.status, usage: response.usage } });
           // Never execute incomplete/cancelled tool arguments or streaming argument deltas.
+          // Passing every terminal response also retires its recorded turn after cancellation.
+          void commands.accept(response).catch(() => fail(connection, "The voice request could not finish. Please reconnect."));
           if (response.status !== "completed") {
             setStatus("listening");
             if (response.status === "failed") latest.current.onEvent({ kind: "error", message: "The voice model could not finish that request. Please try again." });
             return;
           }
-          void commands.accept(response).catch(() => fail(connection, "The voice request could not finish. Please reconnect."));
           break;
         }
       }
@@ -280,11 +286,18 @@ export function useVoice(options: VoiceOptions) {
         analyser.fftSize = 256;
         context.createMediaStreamSource(microphone).connect(analyser);
         const samples = new Uint8Array(analyser.fftSize);
+        let lastMeterUpdate = 0;
         const meter = () => {
           if (!isActive()) return;
-          analyser.getByteTimeDomainData(samples);
-          const rms = Math.sqrt(samples.reduce((sum, value) => sum + ((value - 128) / 128) ** 2, 0) / samples.length);
-          setLevel(Math.min(1, rms * 5));
+          const now = performance.now();
+          // Audio remains realtime; the decorative meter does not need a full UI render every frame.
+          if (now - lastMeterUpdate >= METER_INTERVAL_MS) {
+            lastMeterUpdate = now;
+            analyser.getByteTimeDomainData(samples);
+            const rms = Math.sqrt(samples.reduce((sum, value) => sum + ((value - 128) / 128) ** 2, 0) / samples.length);
+            const nextLevel = Math.min(1, rms * 5);
+            setLevel((previous) => Math.abs(previous - nextLevel) < 0.01 ? previous : nextLevel);
+          }
           connection.frame = requestAnimationFrame(meter);
         };
         void context.resume().then(meter).catch(() => undefined);

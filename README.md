@@ -14,6 +14,8 @@ Prospective tenants can explore a sample apartment, add catalog furniture, and r
 
 The initial post-artwork furniture regression passed [13/14](docs/evidence/semantic-production-decor-initial.json): one generated pot color omitted its leading `#` and was rejected without a write. Commit `66a7499` clarified the complete color format in model guidance while preserving strict validation. The [final production regression](docs/evidence/semantic-production-decor-fixed.json) passed **14/14**, including persisted plant-pot recoloring. Its p50 was **1,403 ms**, p95 **9,800 ms**, with **$0.0172744** in returned Gateway cost; one two-operation request took 9.8 seconds. The small run does not establish a latency guarantee. The [before/after diagnostic](docs/evidence/plant-color-format-diagnostic.json) and original failure remain available.
 
+**November 12 refinement:** an in-app Case study guide explains the full proposal. UI contrast, mobile targets, save-state announcements, and error recovery were refined. Read-only text responses now recheck revision freshness; invalid model plans return an upstream error; interrupted voice turns cannot apply a late edit. Client requests and database pool waits are bounded without automatically retrying ambiguous writes. All **59 deterministic tests**, typecheck, production build, local storage checks, and desktop/mobile guide/save/reload checks passed. A [new bounded Realtime compatibility report](docs/evidence/realtime-artwork-refinement.json) verifies tool/audio output with synthetic text, no microphone, and zero Atlas writes. The production dependency audit reported zero known advisories.
+
 - [Customer brief and assessment map](docs/assessment.md)
 - [Architecture and operating decisions](docs/architecture.md)
 - [Interview demo script](docs/demo-script.md)
@@ -29,6 +31,7 @@ The initial post-artwork furniture regression passed [13/14](docs/evidence/seman
 - Direct OpenAI WebRTC voice, started only by a microphone click. Completed tool calls use the same server command path as manual edits.
 - Signed anonymous visitor sessions, owner-scoped scenes, revision checks, and atomic command receipts in Atlas.
 - An Architecture drawer with request events, operation JSON, timings, returned model usage, and available Gateway routing metadata.
+- A Case study side tab with an eight-section guide to the customer scenario, pain, Vercel choices, retained systems, demo evidence, rollout, measures, and trade-offs. Recorded results are dated and proposed customer work is labeled.
 - Explicit local sample mode when storage is not configured. Sample controls and canned previews run locally; free-form AI and voice do not pretend to be connected, and changes are not saved across reloads.
 
 The furnishing catalog is a **labeled local fixture** representing an existing enterprise API. A server adapter can fetch known-SKU metadata from a configured HTTPS endpoint. Atlas is the verified real external boundary. There is no claim that fixture reads reach AWS.
@@ -78,6 +81,8 @@ CATALOG_API_TOKEN=YOUR_SERVER_SIDE_CATALOG_TOKEN
 That endpoint returns an array of `{sku,name,price,description}`. Only metadata for the finite known SKU set is accepted into the catalog adapter; geometry, dimensions, and allowed finishes remain the versioned application contract. The UI uses the bundled demo catalog. Extending the SKU set requires a renderer and validation update, not just a new remote URL.
 
 ## Validate
+
+GitHub's `Quality checks` workflow runs the type check, deterministic tests, and production build on main pushes and pull requests using Node.js 24 and pinned actions. It needs no application secrets or paid model calls. These checks run alongside Vercel's automatic deployment; they do not gate Production promotion.
 
 ```sh
 npm test
