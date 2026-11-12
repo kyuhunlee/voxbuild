@@ -21,7 +21,7 @@ const RoomCanvas = dynamic(() => import("./canvas/RoomCanvas"), { ssr: false, lo
 type Capabilities = { database: boolean; gateway: boolean; voice: boolean };
 type WorkspaceMode = "loading" | "sample" | "live" | "error";
 type Notice = { id: number; message: string; kind: "success" | "error" | "info" };
-type ActivityEntry = { id: string; time: string; title: string; source: string; status: "success" | "error" | "info"; detail?: unknown; duration?: number; gatewayTrace?: GatewayTrace | null };
+type ActivityEntry = { id: string; time: string; title: string; source: string; status: "success" | "error" | "info"; detail?: unknown; duration?: number; gatewayTrace?: GatewayTrace | null; voiceModel?: string; voiceModelReported?: boolean };
 type CommandResult = { scene: Scene; message?: string; duplicate?: boolean; operations?: Operation[]; telemetry?: unknown };
 
 const EMPTY_CAPABILITIES: Capabilities = { database: false, gateway: false, voice: false };
@@ -319,11 +319,14 @@ export default function VoxBuildApp() {
   }), [accept, enqueue, record]);
 
   const voiceEvent = useCallback((event: VoiceEvent) => {
-    record({ title: event.message, source: "OpenAI direct", status: event.kind === "error" ? "error" : "info", detail: event.detail });
+    const detail = event.detail !== null && typeof event.detail === "object" ? event.detail as Record<string, unknown> : null;
+    const reported = typeof detail?.reportedModel === "string" ? detail.reportedModel : undefined;
+    const requested = typeof detail?.requestedModel === "string" ? detail.requestedModel : undefined;
+    record({ title: event.message, source: "Voice · AI Gateway", status: event.kind === "error" ? "error" : "info", detail: event.detail, voiceModel: reported ?? requested, voiceModelReported: Boolean(reported) });
     if (event.kind === "error") notify(event.message, "error");
     else if (event.message.startsWith("You:")) notify(event.message, "info");
   }, [notify, record]);
-  const voice = useVoice({ scene, enabled: mode === "live" && capabilities.voice, onOperations: (operations, commandId, isCurrent) => executeOperations(operations, commandId, "OpenAI direct", isCurrent), onEvent: voiceEvent });
+  const voice = useVoice({ scene, enabled: mode === "live" && capabilities.voice, onOperations: (operations, commandId, isCurrent) => executeOperations(operations, commandId, "Voice · AI Gateway", isCurrent), onEvent: voiceEvent });
   const voiceActive = !["idle", "error"].includes(voice.status);
 
   const handle = useCallback(async (task: Promise<{ scene: Scene; message: string }>) => {
@@ -402,10 +405,10 @@ export default function VoxBuildApp() {
       try {
         const result = await request<CommandResult>("/api/scene-agent", { method: "POST", body: JSON.stringify({ sceneId: current.id, commandId: crypto.randomUUID(), expectedRevision: current.revision, prompt: trimmed, testFallback: requestFallback }) });
         const next = accept(result.scene);
-        record({ title: result.message ?? "Text command accepted", source: "AI Gateway", status: "success", duration: performance.now() - started, gatewayTrace: readGatewayTrace(result.telemetry), detail: { prompt: trimmed, operations: result.operations, revision: next.revision, telemetry: result.telemetry } });
+        record({ title: result.message ?? "Text command accepted", source: "Text · AI Gateway", status: "success", duration: performance.now() - started, gatewayTrace: readGatewayTrace(result.telemetry), detail: { prompt: trimmed, operations: result.operations, revision: next.revision, telemetry: result.telemetry } });
         return { scene: next, message: result.message ?? "Room updated and saved." };
       } catch (error) {
-        record({ title: error instanceof Error ? error.message : "Text command failed", source: "AI Gateway", status: "error", duration: performance.now() - started, detail: { prompt: trimmed, routingTestRequested: requestFallback, routing: "No successful response metadata returned; execution is unconfirmed." } });
+        record({ title: error instanceof Error ? error.message : "Text command failed", source: "Text · AI Gateway", status: "error", duration: performance.now() - started, detail: { prompt: trimmed, routingTestRequested: requestFallback, routing: "No successful response metadata returned; execution is unconfirmed." } });
         setPrompt(trimmed);
         throw error;
       }
@@ -543,15 +546,15 @@ export default function VoxBuildApp() {
           <div className="architecture-path"><span>Browser</span><ChevronRight size={13} /><span>Vercel</span><ChevronRight size={13} /><span>AI + Atlas</span></div>
           <div className="integration-list">
             <div><span className="integration-icon"><Layers size={15} /></span><span><strong>Vercel Functions</strong><small>Validate commands · commit scene revisions</small></span><span className={`integration-dot ${mode !== "error" && mode !== "loading" ? "connected" : ""}`} /></div>
-            <div><span className="integration-icon"><Sparkles size={15} /></span><span><strong>AI Gateway</strong><small>Structured text commands</small></span><span className={`integration-dot ${capabilities.gateway && mode === "live" ? "connected" : ""}`} title={capabilities.gateway ? "Configured" : "Not connected"} /></div>
-            <div><span className="integration-icon"><Mic size={15} /></span><span><strong>OpenAI direct</strong><small>WebRTC voice · shared command executor</small></span><span className={`integration-dot ${voiceActive ? "connected" : ""}`} title={voiceActive ? "Voice connected" : capabilities.voice ? "Ready to connect" : "Not configured"} /></div>
+            <div><span className="integration-icon"><Sparkles size={15} /></span><span><strong>AI Gateway</strong><small>Structured text + realtime voice access</small></span><span className={`integration-dot ${capabilities.gateway && mode === "live" ? "connected" : ""}`} title={capabilities.gateway ? "Configured" : "Not connected"} /></div>
+            <div><span className="integration-icon"><Mic size={15} /></span><span><strong>OpenAI Realtime</strong><small>Voice via AI Gateway · WebSocket</small></span><span className={`integration-dot ${voiceActive ? "connected" : ""}`} title={voiceActive ? "Voice connected" : capabilities.voice ? "Ready to connect" : "Not configured"} /></div>
             <div><span className="integration-icon"><Database size={15} /></span><span><strong>MongoDB Atlas</strong><small>{mode === "live" ? "Owned scenes · atomic revisions + receipts" : "Not connected · sample stays in this tab"}</small></span><span className={`integration-dot ${mode === "live" ? "connected" : ""}`} /></div>
           </div>
           <div className="architecture-catalog"><Box size={14} /><span>Catalog: explicit local fixture</span><span>{CATALOG.length} SKUs</span></div>
-          <label className="fallback-test"><span><strong>Test Gateway fallback</strong><small>One test on your next typed prompt. Switching on makes no request; the switch resets after submission. Gateway allows Google only, and the returned route appears below. This tests routing, not an outage.</small></span><input type="checkbox" checked={testFallback} disabled={!capabilities.gateway || mode !== "live" || busy} onChange={(event) => setTestFallback(event.target.checked)} /><span className="toggle-track" aria-hidden="true" /></label>
+          <label className="fallback-test"><span><strong>Test Gateway fallback</strong><small>Typed text only; this does not switch an active voice session. Submit your next typed prompt to force Google routing, then inspect the event below. The switch resets after submission. This tests routing, not an outage.</small></span><input type="checkbox" checked={testFallback} disabled={!capabilities.gateway || mode !== "live" || busy} onChange={(event) => setTestFallback(event.target.checked)} /><span className="toggle-track" aria-hidden="true" /></label>
           <div className="activity-heading"><h3><Activity size={14} />Observed activity</h3><span>{activity.length} events</span></div>
           <p className="activity-note">Real events from this tab. Timings are browser round trips. Expand a text event to compare requested, fallback, and executed models.</p>
-          <div className="activity-list">{activity.map((entry) => <details key={entry.id} className={`activity-entry activity-${entry.status}`}><summary><span className="event-dot" /><div><span className="event-title">{entry.title}</span>{entry.gatewayTrace && <span className="gateway-route-preview">{entry.gatewayTrace.routingTest ? "Routing test · " : ""}Executed: {entry.gatewayTrace.executedModel ?? "not returned"} · Provider: {entry.gatewayTrace.executedProvider ?? "not returned"}</span>}<span className="event-meta">{entry.source}<span>{entry.duration !== undefined ? `${Math.round(entry.duration)} ms · ` : ""}{entry.time}</span></span></div><ChevronDown size={12} /></summary>{entry.gatewayTrace && <GatewayActivity trace={entry.gatewayTrace} />}{entry.detail !== undefined && (entry.gatewayTrace ? <details className="gateway-raw"><summary>Raw response metadata</summary><p className="gateway-raw-note">The SDK label may echo the requested model. Executed model and serving provider above come from Gateway routing metadata.</p><pre>{JSON.stringify(entry.detail, null, 2)}</pre></details> : <pre>{JSON.stringify(entry.detail, null, 2)}</pre>)}</details>)}{!activity.length && <p className="empty-inventory">Your first scene event will appear here.</p>}</div>
+          <div className="activity-list">{activity.map((entry) => <details key={entry.id} className={`activity-entry activity-${entry.status}`}><summary><span className="event-dot" /><div><span className="event-title">{entry.title}</span>{entry.gatewayTrace && <span className="gateway-route-preview">{entry.gatewayTrace.routingTest ? "Routing test · " : ""}Executed: {entry.gatewayTrace.executedModel ?? "not returned"} · Provider: {entry.gatewayTrace.executedProvider ?? "not returned"}</span>}{entry.voiceModel && <span className="gateway-route-preview">{entry.voiceModelReported ? "Session-reported model: " : "Requested voice model: "}{entry.voiceModel} · Gateway WebSocket</span>}<span className="event-meta">{entry.source}<span>{entry.duration !== undefined ? `${Math.round(entry.duration)} ms · ` : ""}{entry.time}</span></span></div><ChevronDown size={12} /></summary>{entry.gatewayTrace && <GatewayActivity trace={entry.gatewayTrace} />}{entry.detail !== undefined && (entry.gatewayTrace ? <details className="gateway-raw"><summary>Raw response metadata</summary><p className="gateway-raw-note">The SDK label may echo the requested model. Executed model and serving provider above come from Gateway routing metadata.</p><pre>{JSON.stringify(entry.detail, null, 2)}</pre></details> : <pre>{JSON.stringify(entry.detail, null, 2)}</pre>)}</details>)}{!activity.length && <p className="empty-inventory">Your first scene event will appear here.</p>}</div>
         </div><div className="architecture-footer">Models propose. The server validates and saves.</div>
       </aside>}
     </div>

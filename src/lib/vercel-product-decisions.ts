@@ -40,7 +40,7 @@ export const VERCEL_PRODUCT_DECISIONS: VercelProductDecision[] = [
       { title: "Reuse request handling", body: "Work with common usage, result, and cancellation interfaces. Keep application behavior consistent as model choices change, while retaining responsibility for evaluations and dependency updates." },
     ],
     benefit: "Reduce integration work when evaluating models, so engineers can focus on the renter experience.",
-    proof: "VoxBuild uses AI SDK for primary and policy-routed fallback plans, feeding the same scene executor.",
+    proof: "Text primary and policy-routed fallback plans share one scene executor. The new voice transport uses AI SDK’s normalized realtime events and audio.",
     ownership: "Room rules, authorization, semantic validation, evaluations, and persistence remain ours. AI SDK is Apache-2.0, runs on other hosts, and can call providers directly. Model usage, hosting, and dependency maintenance still have costs.",
     source: { label: "AI SDK docs", href: "https://vercel.com/docs/ai-sdk" },
     example: {
@@ -73,12 +73,12 @@ export const VERCEL_PRODUCT_DECISIONS: VercelProductDecision[] = [
     ],
     adopt: [
       { title: "See shared AI spend in one dashboard", body: "Aggregate Gateway-routed usage and cost across team projects, with project views and model/provider request logs. Give engineering and finance a common place to investigate spend." },
-      { title: "Configure backup providers and models", body: "Route failed or unavailable requests to approved fallbacks. Preserve a path to service when a provider has trouble, rather than operating our own failover proxy." },
+      { title: "Configure text backup providers and models", body: "Route failed or unavailable text requests to approved fallbacks rather than operating our own failover proxy. Active realtime voice sessions need a separate recovery strategy; this demo does not switch them automatically." },
       { title: "Centralize model access", body: "Use one managed endpoint and Gateway authentication for supported models. Spend less effort maintaining individual provider connections and price tables as the approved model set grows." },
     ],
     benefit: "Consolidate routed AI spend across the team and keep approved backup models available, with less routing infrastructure to operate.",
-    proof: "Policy-routed fallback passed. All 14 recorded text requests returned usage and cost; a real outage remains untested.",
-    ownership: "Approve models and data policies, configure fallbacks, evaluate quality, set budgets, and reconcile spend. The dashboard aggregates Gateway requests across team projects, with project-level views and model/provider request logs. Calls that bypass Gateway are excluded: VoxBuild’s direct OpenAI voice spend is separate. Failover handles request failures; it does not guarantee a semantically correct room plan or a durable save.",
+    proof: "The recorded 14-request text run returned usage and cost, and policy-routed fallback passed. A Gateway voice WebSocket probe also connected; browser microphone behavior and dollar accounting still need separate validation.",
+    ownership: "Approve models and data policies, configure text fallbacks, evaluate quality, set budgets, and reconcile spend. Gateway aggregates routed usage across team projects. Voice now uses Gateway too, but missing session/provider/cost fields remain unknown; the app does not invent per-response voice costs. No automatic in-session voice fallback is implemented. Routing does not guarantee a correct plan or durable save.",
     source: { label: "AI Gateway docs", href: "https://vercel.com/docs/ai-gateway" },
     example: {
       customer: "Tailscale",

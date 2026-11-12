@@ -4,7 +4,7 @@ import { afterEach, beforeEach, test } from "node:test";
 import { hasGatewayCredentials } from "../src/lib/server/gateway-auth";
 import { capabilities } from "../src/lib/server/session";
 
-const environmentKeys = ["AI_GATEWAY_API_KEY", "VERCEL_OIDC_TOKEN", "AI_GATEWAY_MODEL", "MONGODB_URI", "SESSION_SECRET"] as const;
+const environmentKeys = ["AI_GATEWAY_API_KEY", "VERCEL_OIDC_TOKEN", "AI_GATEWAY_MODEL", "MONGODB_URI", "SESSION_SECRET", "OPENAI_API_KEY"] as const;
 const contextSymbol = Symbol.for("@vercel/request-context");
 const contexts = new AsyncLocalStorage<{ headers?: Record<string, string> }>();
 const runtime = globalThis as unknown as Record<symbol, unknown>;
@@ -55,6 +55,17 @@ test("local OIDC environment and explicit API key each enable Gateway", () => {
 test("missing credentials fail closed without throwing", () => {
   assert.equal(hasGatewayCredentials(), false);
   assert.equal(capabilities().gateway, false);
+});
+
+test("Gateway voice requires its server API key, not OIDC or a direct OpenAI key", () => {
+  process.env.VERCEL_OIDC_TOKEN = "test-local-token";
+  process.env.OPENAI_API_KEY = "test-direct-key";
+  assert.equal(capabilities().gateway, true);
+  assert.equal(capabilities().voice, false);
+  process.env.AI_GATEWAY_API_KEY = "test-gateway-key";
+  assert.equal(capabilities().voice, true);
+  delete process.env.MONGODB_URI;
+  assert.equal(capabilities().voice, false);
 });
 
 test("Gateway capability still requires model and persistence configuration", () => {

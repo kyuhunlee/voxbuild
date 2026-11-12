@@ -51,6 +51,6 @@ export function capabilities() {
   return {
     database,
     gateway: database && Boolean(process.env.AI_GATEWAY_MODEL) && hasGatewayCredentials(),
-    voice: database && Boolean(process.env.OPENAI_API_KEY),
+    voice: database && Boolean(process.env.AI_GATEWAY_API_KEY?.trim()),
   };
 }

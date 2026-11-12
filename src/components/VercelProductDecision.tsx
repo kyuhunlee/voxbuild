@@ -1,17 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Blocks, Check, ChevronDown, ExternalLink, TrendingUp } from "lucide-react";
 import { VERCEL_PRODUCT_DECISIONS } from "@/lib/vercel-product-decisions";
 import "./vercel-product-decision.css";
 
 export default function VercelProductDecision() {
   const [selectedId, setSelectedId] = useState(VERCEL_PRODUCT_DECISIONS[0].id);
+  const comparisons = useRef<HTMLDivElement>(null);
   const decision = VERCEL_PRODUCT_DECISIONS.find((entry) => entry.id === selectedId) ?? VERCEL_PRODUCT_DECISIONS[0];
 
-  return <div className="product-decisions">
+  return <div ref={comparisons} className="product-decisions">
     <div className="product-decision-picker" role="group" aria-label="Vercel product comparisons">
-      {VERCEL_PRODUCT_DECISIONS.map((entry) => <button type="button" key={entry.id} aria-pressed={entry.id === decision.id} aria-controls="vercel-product-decision" onClick={() => setSelectedId(entry.id)}>{entry.label}</button>)}
+      {VERCEL_PRODUCT_DECISIONS.map((entry) => <button type="button" key={entry.id} aria-pressed={entry.id === decision.id} aria-controls="vercel-product-decision" onClick={() => { setSelectedId(entry.id); comparisons.current?.scrollIntoView({ block: "start", behavior: "auto" }); }}>{entry.label}</button>)}
     </div>
     <p className="product-decision-status" role="status">Showing {decision.label} comparison.</p>
     <section id="vercel-product-decision" className="product-decision-panel" aria-labelledby="product-decision-title">

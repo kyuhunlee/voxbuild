@@ -9,12 +9,12 @@ import "./case-study-guide.css";
 const STATUS_ICONS = { proof: CheckCircle2, target: Flag, retained: Database, risk: TriangleAlert } satisfies Record<CaseStudyTone, typeof Flag>;
 
 function ArchitectureOverview() {
-  return <figure className="case-study-flow" aria-label="Assumed current architecture: a listing web app and existing release pipeline use AWS APIs, MongoDB Atlas, and customer identity. Target: the existing listing adds a Vercel planner and Functions alongside the current app, with validated edits saved to retained Atlas. Existing APIs and identity stay in place. Text uses AI Gateway; voice connects directly to OpenAI Realtime.">
+  return <figure className="case-study-flow" aria-label="Assumed current architecture: a listing web app and existing release pipeline use AWS APIs, MongoDB Atlas, and customer identity. Target: the existing listing adds Vercel planner and Functions alongside the current app. Text and realtime voice use AI SDK and AI Gateway; both save validated edits to retained Atlas. Voice uses a WebSocket relay to the configured OpenAI Realtime model.">
     <div className="case-study-before"><span>Assumed today</span><p><strong>Listing app + releases</strong><ArrowRight size={15} aria-hidden="true" /><strong>AWS APIs / Atlas / identity</strong></p></div>
     <div className="case-study-after"><span>Add alongside</span><p><strong>Existing listing</strong><ArrowRight size={15} aria-hidden="true" /><strong className="case-study-new-system">Vercel planner + Functions</strong><ArrowRight size={15} aria-hidden="true" /><strong>Retained Atlas</strong></p><small><ShieldCheck size={13} aria-hidden="true" />Existing app and services stay. Only validated edits are saved.</small></div>
     <figcaption>
-      <p><MessageSquare size={15} aria-hidden="true" /><strong>Text</strong><span>Functions → AI SDK → AI Gateway</span></p>
-      <p><AudioLines size={15} aria-hidden="true" /><strong>Voice</strong><span>Browser ↔ OpenAI Realtime over WebRTC</span></p>
+      <p><MessageSquare size={15} aria-hidden="true" /><strong>Text</strong><span>AI SDK → Gateway → text model</span></p>
+      <p><AudioLines size={15} aria-hidden="true" /><strong>Voice</strong><span>AI SDK ↔ Gateway WSS ↔ OpenAI Realtime</span></p>
     </figcaption>
   </figure>;
 }
@@ -67,7 +67,7 @@ export default function CaseStudyGuide({ onOpen }: { onOpen: () => void }) {
             {CASE_STUDY_SECTIONS.map((entry, index) => <button type="button" key={entry.id} onClick={() => navigate(index)} aria-current={index === sectionIndex ? "step" : undefined} aria-controls="case-study-content">
               <span className="case-study-nav-index" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span><span>{entry.label}</span><ArrowRight size={14} aria-hidden="true" />
             </button>)}
-            <div className="case-study-nav-links"><a href="https://voxbuild-nu.vercel.app/" target="_blank" rel="noopener noreferrer">Public demo<ExternalLink size={13} aria-hidden="true" /></a><a href="https://github.com/kyuhunlee/voxbuild" target="_blank" rel="noopener noreferrer">Source & history<ExternalLink size={13} aria-hidden="true" /></a></div>
+            <div className="case-study-nav-links"><a href="https://voxbuild-nu.vercel.app/" target="_blank" rel="noopener noreferrer">Public demo<ExternalLink size={13} aria-hidden="true" /></a><a href="https://github.com/kyuhunlee/voxbuild" target="_blank" rel="noopener noreferrer">Source & history<ExternalLink size={13} aria-hidden="true" /></a><details className="case-study-status-key"><summary>Status key<ChevronDown size={12} aria-hidden="true" /></summary><div><span data-tone="proof"><CheckCircle2 size={12} aria-hidden="true" />Demonstrated</span><span data-tone="target"><Flag size={12} aria-hidden="true" />Pilot / proposal</span><span data-tone="retained"><Database size={12} aria-hidden="true" />Customer / reference</span><span data-tone="risk"><TriangleAlert size={12} aria-hidden="true" />Risk / limit</span></div></details></div>
           </nav>
           <div className="case-study-mobile-navigation"><label htmlFor="case-study-section">Jump to a section</label><select id="case-study-section" value={sectionIndex} onChange={(event) => navigate(Number(event.target.value))}>{CASE_STUDY_SECTIONS.map((entry, index) => <option key={entry.id} value={index}>{entry.label}</option>)}</select></div>
           <article ref={content} id="case-study-content" className="case-study-content" aria-labelledby="case-study-section-title" data-section={section.id}>

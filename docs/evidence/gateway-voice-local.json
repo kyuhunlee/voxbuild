@@ -1,0 +1,20 @@
+{
+  "date": "2026-11-12",
+  "scope": "Isolated local application APIs, real AI Gateway WebSocket session, real Atlas persistence, and generated audio output. Input was synthetic text sent into the Realtime session; browser microphone capture and playback were not exercised.",
+  "route": "AI Gateway",
+  "transport": "WebSocket",
+  "model": "openai/gpt-realtime-2.1",
+  "requestedChange": "Change the sofa color to sage and preserve everything else.",
+  "writes": 1,
+  "audioBeforeCommit": false,
+  "audioBytes": 304800,
+  "finalRevision": 1,
+  "persistedSofaColor": "#687761",
+  "spokenTranscript": "The scene update was accepted and saved, with the sofa recolored successfully and everything else unchanged.",
+  "passed": true,
+  "limitations": [
+    "No browser microphone, audible browser playback, interruption, or Stop cleanup check in this run.",
+    "No per-response dollar cost or serving-provider metadata was established.",
+    "A single regression observation is not a latency, accuracy, or availability guarantee."
+  ]
+}

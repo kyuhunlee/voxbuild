@@ -22,33 +22,38 @@ The business hypothesis is that a clearer understanding of a property increases 
 
 ```mermaid
 flowchart LR
-  B["Browser: React UI + procedural 3D"]
-  O["OpenAI Realtime"]
+  B["Browser: React UI + procedural 3D + AI SDK Realtime audio"]
+  O["OpenAI Realtime 2.1"]
+  T["Text models: OpenAI primary / Google fallback"]
   subgraph V["Vercel application boundary"]
     N["Next.js shell and client bundles"]
-    A["Node.js Functions: session, commands, scenes"]
-    G["AI SDK structured output → AI Gateway"]
+    A["Node.js Functions: session, token, commands, scenes"]
+    S["AI SDK structured output"]
+    G["AI Gateway: text routing + Realtime WebSocket relay"]
     C["Catalog adapter: labeled fixture by default"]
   end
   DB[("Existing MongoDB Atlas: scenes + receipts + rate counters")]
   AWS["Existing AWS listing / catalog APIs"]
   B --> N
   B -->|"Text / validated manual or voice operations"| A
-  A --> G
+  A --> S --> G
+  A -->|"Server-key token mint"| G
+  A -->|"Single-use 60-second client token + configuration"| B
   A --> C
   A <-->|"Owner-scoped reads and atomic writes"| DB
-  A -->|"Server-authenticated SDP setup"| O
-  B <-->|"Direct WebRTC audio and events"| O
+  B <-->|"Gateway WebSocket: PCM audio and normalized events"| G
+  G --> T
+  G <-->|"Realtime model connection"| O
   C -.->|"Optional HTTPS metadata adapter; production integration"| AWS
 ```
 
-The implemented core uses a fixed sample apartment and a catalog fixture; no AWS call occurs unless the optional adapter is configured. The real external boundary is now evidenced by [ten passing production Atlas checks](evidence/storage-production.json) and a [14-case production run with real Gateway and Atlas](evidence/semantic-production.json). An [earlier local run](evidence/semantic-local-live.json) also passed all 14 cases. A local sample is explicitly marked and does not satisfy the live-boundary requirement.
+The implemented core uses a fixed sample apartment and a catalog fixture; no AWS call occurs unless the optional adapter is configured. The real external boundary is evidenced by [ten passing production Atlas checks](evidence/storage-production.json) and a [14-case production run with real Gateway and Atlas](evidence/semantic-production.json). An [earlier local run](evidence/semantic-local-live.json) also passed all 14 cases. The [Gateway voice integration check](evidence/gateway-voice-local.json) additionally exercised a real Realtime tool call through the local HTTP command API and an Atlas commit before audio output; its synthetic text input does not verify browser microphone capture. A local sample is explicitly marked and does not satisfy the live-boundary requirement.
 
 | Vercel choice | Customer value | Trade-off and scope |
 | --- | --- | --- |
 | Next.js on Vercel Functions | One delivery surface for UI and short request handlers; SDK and database access stay server-side | Node.js database connectivity and model waits need regional placement, timeouts, and bounded concurrency. Validate the account's Fluid Compute settings during deployment. |
-| AI SDK structured output | A typed plan contract decouples model selection from renderer and persistence | Schema-valid output can still be semantically wrong; domain validation and evaluation remain necessary. |
-| AI Gateway | Shared text-model authentication, model routing, fallback configuration, and returned usage/routing evidence | Voice takes a separate direct provider path. Catalog membership does not prove account access or a successful fallback. |
+| AI SDK | Typed text plans plus normalized Realtime audio/events avoid maintaining independent provider protocol code for the demo | Schema-valid output can still be semantically wrong; domain validation, save coordination, and evaluation remain application responsibilities. |
+| AI Gateway | Text and voice share a Gateway access and accounting surface; text supports model routing, fallback policy, and returned usage/routing evidence | Realtime uses a WebSocket relay and a server API key for token minting. Active voice failover/resume is not implemented; serving-provider identity and per-event dollar cost are unknown without returned metadata. |
 | Preview Deployments | Review the complete change before exposing it to tenants | Preview data and credentials must be isolated; the production canary policy is an operating proposal until exercised. |
 
 Blob and Workflows are intentionally absent from the core. Add Blob for a future photo-upload flow. A durable workflow becomes relevant for long-running reconstruction or human approval, rather than a single bounded furniture edit.
@@ -57,7 +62,7 @@ Blob and Workflows are intentionally absent from the core. Add Blob for a future
 
 Next.js supplies the document/UI shell and JavaScript. The WebGL canvas is dynamically imported with server rendering disabled. The browser draws meshes from validated scene JSON; it does not execute model-generated code or fetch remote GLB assets. Private scene/session/command responses use `no-store`. Public catalog responses use a five-minute shared cache window; the optional external metadata fetch has five-minute revalidation and a catalog tag. This implementation does not claim Cache Components or streamed model output: a complete validated plan is returned before the scene changes.
 
-Place Functions near the selected Atlas region to reduce database round trips; measure the actual deployed path before declaring a region SLA. The demo can cross a public TLS endpoint with an authorized Atlas access list. A production private-network requirement calls for a supported Atlas networking tier and Vercel Secure Compute/static egress design, validated against the customer's cloud, plan, and residency policy. Selecting a Function region alone does not constrain model-provider processing or direct voice geography.
+Place Functions near the selected Atlas region to reduce database round trips; measure the actual deployed path before declaring a region SLA. The demo can cross a public TLS endpoint with an authorized Atlas access list. A production private-network requirement calls for a supported Atlas networking tier and Vercel Secure Compute/static egress design, validated against the customer's cloud, plan, and residency policy. Selecting a Function region alone does not constrain Gateway media routing or model-provider processing geography.
 
 The provisioned demo has a new VoxBuild Atlas project and a Free/M0 cluster on AWS `US_EAST_1`. Production uses `voxbuild`; Preview uses `voxbuild_preview`. Each has a separate session secret and a database user granted `readWrite` for its application database, scoped to this cluster. Provisioning created `owner_updated` on scenes (`ownerId: 1, updatedAt: -1`) and the rate-counter TTL index on `expiresAt` with `expireAfterSeconds: 0`.
 
@@ -85,15 +90,23 @@ The production storage run passed all ten checks: owner reads/listing, foreign r
 
 Endpoint behavior is narrower than this shared executor guarantee. Manual and voice operations call `/api/commands`; an identical payload retry is idempotent while its receipt is retained. Text calls `/api/scene-agent`, which checks the expected revision **before** generation and receipt lookup. If a text edit committed but its HTTP response was lost, the same request returns `409 REVISION_CONFLICT` on retry. Reload the saved room to recover the accepted state, then issue a new request only if a further change is needed. There is no prompt/result ledger, and the complete text-generation endpoint is not idempotent.
 
-There is no silent storage fallback. A database error retains the last acknowledged browser state and surfaces an error. A request timeout is ambiguous: the write may have committed, so reload the canonical scene before retrying. Accepted scene state survives deployments; an in-progress model generation or WebRTC connection does not. There is no durable agent orchestration or automatic replay of unfinished conversations.
+There is no silent storage fallback. A database error retains the last acknowledged browser state and surfaces an error. A request timeout is ambiguous: the write may have committed, so reload the canonical scene before retrying. Accepted scene state survives deployments; an in-progress model generation or Realtime WebSocket connection does not. There is no durable agent orchestration or automatic replay of unfinished conversations.
 
 Furniture-to-furniture collisions and circulation clearances are not authoritative server checks. The model receives placement guidance and manual addition searches for a clear spot, but the product remains a conceptual preview. A production fit claim requires verified dimensions, collision/clearance validation, and accessible paths.
 
 ## Voice and security
 
-Only an explicit click requests microphone permission. A same-origin authenticated route configures OpenAI and exchanges SDP with the provider; the ordinary API key never reaches the browser. WebRTC then carries media directly. Voice only executes completed, validated function calls, with duplicate suppression and serialized edits. Planning responses are text/tools; an audio continuation is requested after the command acknowledgement. This adds a second Realtime response and latency but prevents the normal workflow from speaking a success before the save result. Server VAD handles barge-in; stale queued speech is suppressed. Disconnect and unmount release microphone tracks. The five-minute browser timer is a UX limit, not an authoritative provider billing cap.
+Only an explicit click requests microphone permission. The browser posts a scene ID to same-origin authenticated `/api/realtime-token`. The route verifies ownership, loads canonical scene context, enforces voice admission limits, and uses the server-only `AI_GATEWAY_API_KEY` to mint a model-scoped, single-use Gateway token with a 60-second connection window. The ordinary key never reaches the browser. Gateway's Realtime mint endpoint rejected OIDC-only authentication with 403 during preflight, even though ordinary text requests support OIDC.
 
-Two real provider checks on October 19, 2026 accepted this session configuration over **server WebSocket**, using synthetic text and a three-second TTS fixture respectively. Both produced a completed `response.done` containing a completed function call, and the emitted sofa recolor passed the strict schema and local scene engine. The audio fixture also triggered server VAD and input transcription. The provider accepted the coordinator's scene-context → correlated tool-result → audio-continuation order, preserving `metadata.phase: speech` and emitting no additional tool call. [Text evidence](evidence/realtime-text-compatibility.json), [audio evidence](evidence/realtime-audio-compatibility.json).
+The browser connects by WebSocket to Gateway, which relays audio/events to `openai/gpt-realtime-2.1`; the AI SDK normalizes the protocol and PCM audio handling. The 60 seconds is token validity for starting the connection, not the session duration. The server supplies scene instructions and tools, but those are client-applied session configuration, not a token-enforced authorization policy. `/api/commands` remains the authoritative ownership, schema, revision, and placement boundary.
+
+Voice only executes completed, validated function calls, with duplicate suppression and serialized edits. Planning responses are text/tools; an audio continuation is requested after the command acknowledgement. This adds a second Realtime response and latency but prevents the normal workflow from speaking a success before the save result. English captions use `gpt-4o-mini-transcribe` with `language: en`; the Realtime model interprets the audio independently of that displayed transcription. Server VAD handles barge-in; stale queued speech is suppressed. Disconnect and unmount release microphone tracks. The five-minute browser timer is a UX limit, not an authoritative provider billing cap. See the [Gateway Realtime documentation](https://vercel.com/docs/ai-gateway/modalities/realtime).
+
+On November 12, the [new local Gateway voice report](evidence/gateway-voice-local.json) exercised an anonymous HTTP session, token mint, a real Realtime completed tool call, `/api/commands`, and a canonical Atlas reread at revision 1. The sofa became `#687761`; 304,800 bytes of audio followed the accepted commit, with no audio before it. Input was synthetic text sent to the Realtime session, not a browser microphone. Browser capture, audible playback, interruption, Stop, deployed behavior, and end-to-end latency remain separate checks for this migration. The requested model and Gateway route are known; the report does not establish a serving-provider identity or per-event dollar cost.
+
+The following voice observations predate the Gateway migration and describe the former direct-OpenAI transport. They remain historical evidence, not proof of the new browser path.
+
+Two real direct-provider checks on October 19, 2026 accepted the then-current session configuration over **server WebSocket**, using synthetic text and a three-second TTS fixture respectively. Both produced a completed `response.done` containing a completed function call, and the emitted sofa recolor passed the strict schema and local scene engine. The audio fixture also triggered server VAD and input transcription. The provider accepted the coordinator's scene-context → correlated tool-result → audio-continuation order, preserving `metadata.phase: speech` and emitting no additional tool call. [Text evidence](evidence/realtime-text-compatibility.json), [audio evidence](evidence/realtime-audio-compatibility.json).
 
 These were bounded compatibility checks with an explicitly labeled in-memory fixture result (`persistence: none`) and **zero Atlas writes**. They did not exercise the browser, microphone, SDP/WebRTC negotiation, playback, interruption, or database-backed executor. The audio sample's completed tool arrived 670 ms after the service's speech-stopped event; it is one observation, not a p95 or end-to-end latency claim.
 
@@ -101,11 +114,11 @@ The user later tested the actual deployed microphone flow and reported, “It ch
 
 Anonymous sessions use a signed, HttpOnly, SameSite cookie and a seven-day expiry. Scene ownership is enforced in database filters. Mutating routes require same origin. Request bodies, operation counts, provider timeouts, and Atlas-backed rate counters are bounded. These controls are appropriate for an isolated public demo; production should add customer identity/authorization, account-wide provider budgets, stronger abuse protection, retention/deletion policy, and audit integration. Anonymous cookie loss means loss of access to that design.
 
-Voice admission is limited to five sessions per hour per visitor and 20 sessions per day globally. Text generation is limited to 40 requests per hour per visitor and 400 per day globally. These admission quotas and the browser's five-minute voice timer are not hard provider-dollar caps. Apply provider/project budgets separately and verify their behavior before a public pilot.
+Normal voice admission allows **20 starts/hour per visitor and 100/day globally**. Normal text generation allows **40 requests/hour per visitor and 400/day globally**. The November 12 interview allowance raises voice to **100/hour and 500/day**, and text to **200/hour and 2,000/day**; it ends automatically at **November 13, 2026, 05:00 UTC**, midnight in New York. These are application admission counters, not hard provider-dollar caps. Both active voice and text use Gateway accounting; apply Gateway budgets separately and verify their behavior before a public pilot. The five-minute browser timer also remains a UX guardrail rather than an authoritative billing limit.
 
 ## Rollout and incident plan — proposed
 
-The [hosted app](https://voxbuild-nu.vercel.app) now has production storage and semantic-text proof, plus user-confirmed voice edits, playback, interruption, and Stop releasing the microphone. The initial release served an explicit local sample. Neither release proves the Preview promotion or pilot rollout described below. The runtime OIDC detection fix is deployed; hosted primary and policy-fallback requests each persisted successfully. Node.js is pinned to 24.x, and `.vercelignore` keeps environment secrets, local diagnostics, build/dependency directories, and test reports out of deployment uploads.
+The [hosted app](https://voxbuild-nu.vercel.app) has recorded production storage and semantic-text proof. User-confirmed voice edits, playback, interruption, and Stop belong to the pre-migration direct-OpenAI path; the current Gateway voice path has the local integration evidence above, with its browser microphone check pending. The initial release served an explicit local sample. These records do not prove the Preview promotion or pilot rollout described below. The runtime OIDC detection fix for text is deployed; hosted primary and policy-fallback text requests each persisted successfully. Voice token minting additionally requires its server Gateway API key. Node.js is pinned to 24.x, and `.vercelignore` keeps environment secrets, local diagnostics, build/dependency directories, and test reports out of deployment uploads.
 
 1. **Preview:** deploy each change with a distinct Preview `SESSION_SECRET` and `MONGODB_DB=voxbuild_preview`; Production uses its own secret and `MONGODB_DB=voxbuild`. Verify effective environment scoping before the first release. Run unit/type/build checks, the 14-case live evaluation, and a short browser/microphone check. Inspect usage and latency before promotion.
 2. **Pilot canary:** expose the planner to an internal cohort, then a small property/visitor cohort. Use a feature flag or supported Rolling Releases configuration; neither staged traffic control nor statistical experimentation is implemented in this demo.
@@ -114,9 +127,9 @@ The [hosted app](https://voxbuild-nu.vercel.app) now has production storage and 
 5. **Incident:** if a provider fails, inspect actual Gateway routing metadata. If Atlas fails, stop accepting changes and show the last acknowledged scene. Do not turn an unconfirmed save into a success message. Correlate request/command IDs, assess whether writes committed, and restore service before resuming rollout.
 6. **Demo cleanup:** remove the explicitly approved `0.0.0.0/0` Atlas access-list entry after the demo. It does not expire automatically. Retained verification fixtures can be identified from the reports; no automated cleanup or deletion has been claimed.
 
-Fallback is configured with `AI_GATEWAY_FALLBACK_MODEL`. On October 19, 2026, a real request to primary `openai/gpt-4.1-mini` succeeded. A separate routing test set `gateway.only: ['google']`, deliberately excluding the primary provider; Gateway selected `google/gemini-2.5-flash` and returned `modelAttemptCount: 2`. This demonstrates policy-driven fallback routing. It does not simulate or prove recovery from a provider outage, timeout, or rate limit.
+Text fallback is configured with `AI_GATEWAY_FALLBACK_MODEL`. On October 19, 2026, a real request to primary `openai/gpt-4.1-mini` succeeded. A separate routing test set `gateway.only: ['google']`, deliberately excluding the primary provider; Gateway selected `google/gemini-2.5-flash` and returned `modelAttemptCount: 2`. The in-app switch applies this policy once to the next typed prompt. This demonstrates policy-driven fallback routing; it does not simulate or prove recovery from a provider outage, timeout, or rate limit. Realtime sessions do not use that text policy: no `only`/`order` routing, automatic active-voice failover, or session resume is implemented.
 
-Read the executed model from `providerMetadata.gateway.routing.canonicalSlug`. In the routing test, `response.modelId` still identified the requested primary, so it is retained as SDK-reported metadata rather than treated as proof of execution. Application telemetry distinguishes requested model, executed model, and SDK-reported model. Application events supply immediate feedback; provider dashboards are a separate verification source.
+For text, read the executed model from `providerMetadata.gateway.routing.canonicalSlug`. In the routing test, `response.modelId` still identified the requested primary, so it is retained as SDK-reported metadata rather than treated as proof of execution. Application telemetry distinguishes requested model, executed model, and SDK-reported model. Voice telemetry identifies the Gateway route and requested Realtime model, without inferring an executed serving provider from the model vendor or inventing dollar cost. Application events supply immediate feedback; the Gateway dashboard is a separate accounting and verification source for both paths.
 
 ## Measures to establish
 
