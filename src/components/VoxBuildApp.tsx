@@ -256,7 +256,8 @@ export default function VoxBuildApp() {
     return task.finally(() => { pending.current -= 1; setBusy(pending.current > 0); });
   }, []);
 
-  const executeOperations = useCallback((operations: Operation[], commandId = crypto.randomUUID(), source = "Manual controls") => enqueue(async (current) => {
+  const executeOperations = useCallback((operations: Operation[], commandId = crypto.randomUUID(), source = "Manual controls", isCurrent?: () => boolean) => enqueue(async (current) => {
+    if (isCurrent && !isCurrent()) throw new Error("The voice edit was interrupted before it started and was not applied.");
     const started = performance.now();
     if (modeRef.current === "sample") {
       const next = accept(applyOperations(current, operations));
@@ -279,7 +280,7 @@ export default function VoxBuildApp() {
     if (event.kind === "error") notify(event.message, "error");
     else if (event.message.startsWith("You:")) notify(event.message, "info");
   }, [notify, record]);
-  const voice = useVoice({ scene, enabled: mode === "live" && capabilities.voice, onOperations: (operations, commandId) => executeOperations(operations, commandId, "OpenAI direct"), onEvent: voiceEvent });
+  const voice = useVoice({ scene, enabled: mode === "live" && capabilities.voice, onOperations: (operations, commandId, isCurrent) => executeOperations(operations, commandId, "OpenAI direct", isCurrent), onEvent: voiceEvent });
   const voiceActive = !["idle", "error"].includes(voice.status);
 
   const handle = useCallback(async (task: Promise<{ scene: Scene; message: string }>) => {

@@ -10,7 +10,7 @@ export type VoiceEvent = { kind: "voice" | "error"; message: string; detail?: un
 type VoiceOptions = {
   scene: Scene | null;
   enabled: boolean;
-  onOperations: (operations: Operation[], commandId: string) => Promise<{ scene: Scene; message: string }>;
+  onOperations: (operations: Operation[], commandId: string, isCurrent: () => boolean) => Promise<{ scene: Scene; message: string }>;
   onEvent: (event: VoiceEvent) => void;
 };
 
@@ -160,7 +160,7 @@ export function useVoice(options: VoiceOptions) {
       isConnected: isActive,
       currentScene: () => latest.current.scene,
       commandId: () => crypto.randomUUID(),
-      execute: (operations, commandId) => latest.current.onOperations(operations, commandId),
+      execute: (operations, commandId, isCurrent) => latest.current.onOperations(operations, commandId, isCurrent),
       onBusy: () => setStatus("thinking"),
       onResult: (callId, result) => send(connection, {
         type: "conversation.item.create",

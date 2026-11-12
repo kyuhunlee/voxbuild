@@ -68,7 +68,7 @@ export const CASE_STUDY_SECTIONS: CaseStudySection[] = [
           { label: "Next.js on Vercel Functions", value: "Delivers the web application and Node.js request handlers together. Database connections and model waits still need pooling, timeouts, and regional planning." },
           { label: "AI SDK", value: "Turns text requests into structured plans through a shared model interface. Valid JSON can still be wrong, so domain validation remains authoritative." },
           { label: "AI Gateway", value: "Centralizes text-model access, routing, configured fallback, and returned usage/cost metadata. Voice uses a separate direct provider path." },
-          { label: "Git deployments and Preview Deployments", value: "Makes each change reviewable and deployable. Main deploys automatically; a gated Preview promotion and canary rollout remain proposed operating steps." },
+          { label: "Git deployments and Preview Deployments", value: "Makes each change reviewable and deployable. Main deploys automatically, with repository type/test/build checks. A gated Preview promotion and canary rollout remain proposed operating steps." },
         ],
       },
     ],
@@ -113,7 +113,7 @@ export const CASE_STUDY_SECTIONS: CaseStudySection[] = [
       },
       {
         title: "Refined on November 12, 2026",
-        body: "59 deterministic tests passed after fixes for stale text responses and interrupted voice turns. Local storage checks passed 10/10; a synthetic Realtime session validated painting edits and audio output without microphone access or Atlas writes. Desktop and mobile checks covered the guide and saved-edit reload.",
+        body: "61 deterministic tests passed, including stale text responses and interrupted or queued voice edits. Production passed 10 storage, 14 room/artwork, and 14 text-command checks. Automated type/test/build checks also passed. A synthetic Realtime session validated tool/audio output without a microphone or Atlas writes; desktop/mobile checks covered the guide and saved-edit reload.",
       },
     ],
   },
@@ -148,8 +148,8 @@ export const CASE_STUDY_SECTIONS: CaseStudySection[] = [
         body: "Initial targets: at least 90% semantic success on the command suite, rejection of invalid domain mutations, successful save/reload checks, and warm-pilot p95 text response below five seconds. Measure voice end-of-utterance to visible change separately.",
       },
       {
-        title: "A measured improvement area",
-        body: "The final October 19 text run passed 14/14, with median 1,403 ms and p95 9,800 ms. Returned Gateway cost was $0.0172744 across 14 requests. The latency tail exceeds the proposed target; this small sample excludes voice cost and is not total account spend.",
+        title: "Recorded latency and cost",
+        body: "The November 12 production text run passed 14/14, with median 1,802 ms and p95 2,762 ms; returned Gateway cost was $0.0176794. An earlier October run had a 9,800 ms p95, so keep monitoring the latency tail. Small regression samples are not performance guarantees, and these costs exclude voice and total account spend.",
       },
       {
         title: "Business pilot",

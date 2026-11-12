@@ -106,7 +106,7 @@ svg { flex-shrink: 0; }
 .stage-view-controls button { width: 29px; height: 25px; display: grid; place-items: center; color: #929489; border-radius: 3px; }
 .stage-view-controls button.active { background: #fffef7; color: #4e584d; box-shadow: 0 1px 4px #565e4d19; }
 .stage-view-controls button:hover { color: #333b30; }
-.canvas-wrap { position: absolute; inset: 0 0 160px; z-index: 0; }
+.canvas-wrap { --viewer-overlay-space: 160px; position: absolute; inset: 0; z-index: 0; }
 .canvas-wrap canvas { display: block; touch-action: none; }
 .canvas-loading { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 13px; color: #777e71; font-size: 12px; }
 .canvas-failed { text-align: center; padding: 60px; gap: 14px; }
@@ -143,7 +143,7 @@ svg { flex-shrink: 0; }
 .prompt-suggestions button { font-size: 9px; display: inline-flex; align-items: center; gap: 7px; padding: 5px 7px; border: 1px solid #30302c; background: #1d1d1b; border-radius: 5px; color: #a5a59a; }
 .prompt-suggestions button:hover:not(:disabled) { border-color: #68685b; color: #dbdbcf; }
 .prompt-suggestions button svg { opacity: .45; }
-.composer-footnote { display: flex; align-items: center; justify-content: center; gap: 6px; color: #898d80; margin-top: 10px; font-size: 9px; }
+.composer-footnote { display: flex; align-items: center; justify-content: center; gap: 6px; width: fit-content; max-width: 100%; padding: 4px 8px; color: #c4cabd; background: #141414cf; border: 1px solid #ffffff14; border-radius: 5px; margin: 10px auto 0; font-size: 9px; line-height: 1.5; text-align: center; }
 .small-status-dot { height: 4px; width: 4px; border-radius: 50%; background: #989777; }
 .small-status-dot.live { background: #718a68; }
 .notice { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 7px; border: 1px solid #737867; color: #e0e3d7; background: #343d31; font-size: 11px; line-height: 1.6; margin: 0 auto 10px; box-shadow: 0 3px 10px #0001; max-width: 600px; }
@@ -386,7 +386,7 @@ svg { flex-shrink: 0; }
   .catalog-item-name { font-size: 11px; }
   .catalog-grid { gap: 12px 10px; padding-inline: 18px; }
   .catalog-note { padding-top: 24px; }
-  .canvas-wrap { bottom: 180px; }
+  .canvas-wrap { --viewer-overlay-space: 180px; }
   .composer-area { bottom: 26px; }
   .command-composer { padding: 15px 16px 13px; }
   .stage-navigation { bottom: 192px; }
@@ -434,7 +434,7 @@ svg { flex-shrink: 0; }
   .stage-caption-separator { margin: 0 1px; }
   .stage-view-controls { padding: 2px; }
   .stage-view-controls button { width: 36px; height: 36px; }
-  .canvas-wrap { inset: 20px -20px 190px; }
+  .canvas-wrap { --viewer-overlay-space: 190px; inset: 20px -20px 0; }
   .stage-navigation { left: 17px; bottom: 231px; font-size: 8px; }
   .stage-side-controls { right: 15px; top: 38%; }
   .stage-side-controls button { width: 40px; height: 40px; }
@@ -492,7 +492,7 @@ svg { flex-shrink: 0; }
   .inspector-section { padding-block: 13px; }
   .selected-title { padding-block: 13px; }
   .composer-area { bottom: 13px; }
-  .canvas-wrap { bottom: 145px; }
+  .canvas-wrap { --viewer-overlay-space: 145px; }
   .stage-navigation { bottom: 166px; }
   .mobile-panel-buttons { bottom: 167px; }
   .room-overview { padding-top: 20px; padding-bottom: 18px; }

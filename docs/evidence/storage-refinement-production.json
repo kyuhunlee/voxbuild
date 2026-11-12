@@ -1,0 +1,157 @@
+{
+  "runId": "storage-2026-11-12T14-48-22-513Z-f4d366b0",
+  "baseUrl": "https://voxbuild-nu.vercel.app",
+  "status": "passed",
+  "reason": null,
+  "capabilities": {
+    "database": true,
+    "gateway": true,
+    "voice": true
+  },
+  "fixtureSceneId": "ccbd8f45-a343-4b5d-ab09-8ce3b6153490",
+  "checksPlanned": 10,
+  "checksRun": 10,
+  "passed": 10,
+  "failed": 0,
+  "blocked": 0,
+  "checksNotRun": [],
+  "notes": [
+    "Uses two fresh, independent anonymous sessions and one studio created specifically by this run. No preexisting scene is modified.",
+    "No AI/model endpoint is called. This verifies live HTTP/database semantics, not voice, model quality, rendering, or physical fit.",
+    "Canonical reads verify saved state; concurrent requests have identical or deliberately competing revisions as specified per check.",
+    "The fixture is intentionally retained for inspection; there is no delete API. Cookies are not written to this report, so the runner's ownership session cannot be resumed from the evidence file.",
+    "No automatic retries are made. A timed-out write may have committed; inspect the fixture scene ID before rerunning."
+  ],
+  "results": [
+    {
+      "id": "owned-read",
+      "outcome": "passed",
+      "durationMs": 129,
+      "issues": [],
+      "evidence": {
+        "revision": 0,
+        "objects": 6
+      }
+    },
+    {
+      "id": "owned-list",
+      "outcome": "passed",
+      "durationMs": 66,
+      "issues": [],
+      "evidence": {
+        "httpStatus": 200,
+        "fixtureMatches": 1
+      }
+    },
+    {
+      "id": "foreign-read",
+      "outcome": "passed",
+      "durationMs": 73,
+      "issues": [],
+      "evidence": {
+        "foreignReadStatus": 404,
+        "foreignListStatus": 200,
+        "fixtureDisclosed": false
+      }
+    },
+    {
+      "id": "foreign-command",
+      "outcome": "passed",
+      "durationMs": 237,
+      "issues": [],
+      "evidence": {
+        "httpStatus": 404,
+        "revision": 0,
+        "unchanged": true
+      }
+    },
+    {
+      "id": "invalid-schema",
+      "outcome": "passed",
+      "durationMs": 794,
+      "issues": [],
+      "evidence": {
+        "httpStatus": 400,
+        "errorCode": "INVALID_REQUEST",
+        "unchanged": true
+      }
+    },
+    {
+      "id": "out-of-bounds",
+      "outcome": "passed",
+      "durationMs": 227,
+      "issues": [],
+      "evidence": {
+        "httpStatus": 422,
+        "errorCode": "OUT_OF_BOUNDS",
+        "unchanged": true
+      }
+    },
+    {
+      "id": "concurrent-duplicate",
+      "outcome": "passed",
+      "durationMs": 342,
+      "issues": [],
+      "evidence": {
+        "commandId": "84d3d60a-f458-42b0-9b63-efea09aa6a01",
+        "statuses": [
+          200,
+          200
+        ],
+        "duplicateFlags": [
+          false,
+          true
+        ],
+        "revisionBefore": 0,
+        "revisionAfter": 1,
+        "targetColor": "#687761"
+      }
+    },
+    {
+      "id": "reused-command-id",
+      "outcome": "passed",
+      "durationMs": 157,
+      "issues": [],
+      "evidence": {
+        "commandId": "84d3d60a-f458-42b0-9b63-efea09aa6a01",
+        "httpStatus": 409,
+        "errorCode": "COMMAND_ID_REUSED",
+        "revision": 1,
+        "unchanged": true
+      }
+    },
+    {
+      "id": "concurrent-conflict",
+      "outcome": "passed",
+      "durationMs": 85,
+      "issues": [],
+      "evidence": {
+        "commandIds": [
+          "cfb5b7eb-5855-4af4-87e4-7a74d5db86b3",
+          "93475cfb-804f-4d85-9c7f-15d119b748df"
+        ],
+        "statuses": [
+          200,
+          409
+        ],
+        "expectedRevision": 1,
+        "winnerCommandId": "cfb5b7eb-5855-4af4-87e4-7a74d5db86b3"
+      }
+    },
+    {
+      "id": "canonical-winner",
+      "outcome": "passed",
+      "durationMs": 62,
+      "issues": [],
+      "evidence": {
+        "winningCommandId": "cfb5b7eb-5855-4af4-87e4-7a74d5db86b3",
+        "winningColor": "#446a87",
+        "finalRevision": 2,
+        "preservedObjects": 5,
+        "preservedRoom": true,
+        "matchesWinningResponse": true
+      }
+    }
+  ],
+  "verifiedCommit": "6ac3565c6ffba89c1625023afdb304934b42e7fd"
+}

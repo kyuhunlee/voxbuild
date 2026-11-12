@@ -1,0 +1,1194 @@
+{
+  "runId": "eval-2026-11-12T14-48-23-127Z-da23b932",
+  "baseUrl": "https://voxbuild-nu.vercel.app",
+  "status": "passed",
+  "casesRun": 14,
+  "passed": 14,
+  "failed": 0,
+  "successRate": 1,
+  "latencyMs": {
+    "p50": 1802,
+    "p95": 2762,
+    "samples": 14
+  },
+  "returnedUsage": {
+    "requestsWithUsage": 14,
+    "inputTokenCoverage": 14,
+    "outputTokenCoverage": 14,
+    "inputTokens": 48546,
+    "outputTokens": 1177
+  },
+  "returnedCost": {
+    "requestsWithCost": 14,
+    "sum": 0.017679399999999998,
+    "note": "Only returned Gateway costs are included. Missing or failed-request cost is unknown; this is not total account spend."
+  },
+  "notes": [
+    "One new anonymous session and one fresh studio per case; fixture scene IDs are retained below.",
+    "Tests check semantic results and a subsequent persisted read. They do not certify visual quality, real furniture fit, voice recognition, live fallback, or browser interaction.",
+    "No retries are automatic; a timeout may have committed. Inspect the recorded scene ID before retrying."
+  ],
+  "results": [
+    {
+      "id": "sofa-sage",
+      "prompt": "Make the sofa sage green.",
+      "sceneId": "e41b53dd-d4ef-46a4-80c8-afa4a20bc282",
+      "commandId": "2f66f3df-5403-471e-80f4-55e2351618a2",
+      "passed": true,
+      "issues": [],
+      "httpStatus": 200,
+      "durationMs": 2762,
+      "fixtureAndVerificationMs": 2953,
+      "revision": 1,
+      "message": "Recoloring the sofa to sage green as requested.",
+      "telemetry": {
+        "requestId": "ab62793b-6641-4335-bf0e-cf517637f930",
+        "commandId": "2f66f3df-5403-471e-80f4-55e2351618a2",
+        "source": "AI Gateway",
+        "requestedModel": "openai/gpt-4.1-mini",
+        "model": "openai/gpt-4.1-mini",
+        "sdkReportedModel": "openai/gpt-4.1-mini",
+        "usage": {
+          "inputTokens": 3388,
+          "inputTokenDetails": {
+            "noCacheTokens": 3388,
+            "cacheReadTokens": 0,
+            "cacheWriteTokens": 0
+          },
+          "outputTokens": 37,
+          "outputTokenDetails": {
+            "textTokens": 37,
+            "reasoningTokens": 0
+          },
+          "totalTokens": 3425
+        },
+        "routingTest": null,
+        "gateway": {
+          "cost": "0.0014144",
+          "routing": {
+            "originalModelId": "openai/gpt-4.1-mini",
+            "resolvedProvider": "openai",
+            "fallbacksAvailable": [
+              "azure"
+            ],
+            "canonicalSlug": "openai/gpt-4.1-mini",
+            "finalProvider": "openai",
+            "modelAttemptCount": 1,
+            "modelAttempts": [
+              {
+                "canonicalSlug": "openai/gpt-4.1-mini",
+                "success": true,
+                "providerAttemptCount": 1,
+                "providerAttempts": [
+                  {
+                    "provider": "openai",
+                    "success": true,
+                    "startTime": 1794494904942,
+                    "endTime": 1794494906017,
+                    "statusCode": 200
+                  }
+                ]
+              }
+            ],
+            "totalProviderAttemptCount": 1
+          }
+        },
+        "catalogSource": "fixture",
+        "catalogMs": 0,
+        "modelMs": 1769,
+        "databaseMs": 27,
+        "totalMs": 2105,
+        "revision": 1,
+        "operations": [
+          {
+            "type": "recolor",
+            "objectId": "studio-sofa",
+            "color": "#687761"
+          }
+        ],
+        "duplicate": false
+      }
+    },
+    {
+      "id": "sofa-blue",
+      "prompt": "Change the sofa upholstery to blue.",
+      "sceneId": "10a9839a-0596-47d9-8c63-72dd26a75b75",
+      "commandId": "182c9ee9-1eee-43f7-8197-8729d155a6f6",
+      "passed": true,
+      "issues": [],
+      "httpStatus": 200,
+      "durationMs": 1386,
+      "fixtureAndVerificationMs": 1500,
+      "revision": 1,
+      "message": "Changed sofa upholstery color to blue.",
+      "telemetry": {
+        "requestId": "3a56eaff-7f52-4a8f-98f5-e065ce19ae5c",
+        "commandId": "182c9ee9-1eee-43f7-8197-8729d155a6f6",
+        "source": "AI Gateway",
+        "requestedModel": "openai/gpt-4.1-mini",
+        "model": "openai/gpt-4.1-mini",
+        "sdkReportedModel": "openai/gpt-4.1-mini",
+        "usage": {
+          "inputTokens": 3390,
+          "inputTokenDetails": {
+            "noCacheTokens": 3390,
+            "cacheReadTokens": 0,
+            "cacheWriteTokens": 0
+          },
+          "outputTokens": 34,
+          "outputTokenDetails": {
+            "textTokens": 34,
+            "reasoningTokens": 0
+          },
+          "totalTokens": 3424
+        },
+        "routingTest": null,
+        "gateway": {
+          "cost": "0.0014104",
+          "routing": {
+            "originalModelId": "openai/gpt-4.1-mini",
+            "resolvedProvider": "openai",
+            "fallbacksAvailable": [
+              "azure"
+            ],
+            "canonicalSlug": "openai/gpt-4.1-mini",
+            "finalProvider": "openai",
+            "modelAttemptCount": 1,
+            "modelAttempts": [
+              {
+                "canonicalSlug": "openai/gpt-4.1-mini",
+                "success": true,
+                "providerAttemptCount": 1,
+                "providerAttempts": [
+                  {
+                    "provider": "openai",
+                    "success": true,
+                    "startTime": 1794494906447,
+                    "endTime": 1794494907586,
+                    "statusCode": 200
+                  }
+                ]
+              }
+            ],
+            "totalProviderAttemptCount": 1
+          }
+        },
+        "catalogSource": "fixture",
+        "catalogMs": 0,
+        "modelMs": 1218,
+        "databaseMs": 9,
+        "totalMs": 1241,
+        "revision": 1,
+        "operations": [
+          {
+            "type": "recolor",
+            "objectId": "studio-sofa",
+            "color": "#446a87"
+          }
+        ],
+        "duplicate": false
+      }
+    },
+    {
+      "id": "chair-left",
+      "prompt": "Move the lounge chair exactly half a meter to the left. Keep its other coordinates unchanged.",
+      "sceneId": "82cb90f6-a90a-4b56-aab3-fd547feb973a",
+      "commandId": "d349826c-d4cd-43e5-8403-396993f08aa1",
+      "passed": true,
+      "issues": [],
+      "httpStatus": 200,
+      "durationMs": 1059,
+      "fixtureAndVerificationMs": 1182,
+      "revision": 1,
+      "message": "Moved the lounge chair 0.5 meters to the left, keeping other coordinates unchanged.",
+      "telemetry": {
+        "requestId": "658ef178-8f73-476b-b522-5f5bd4470f1a",
+        "commandId": "d349826c-d4cd-43e5-8403-396993f08aa1",
+        "source": "AI Gateway",
+        "requestedModel": "openai/gpt-4.1-mini",
+        "model": "openai/gpt-4.1-mini",
+        "sdkReportedModel": "openai/gpt-4.1-mini",
+        "usage": {
+          "inputTokens": 3398,
+          "inputTokenDetails": {
+            "noCacheTokens": 3398,
+            "cacheReadTokens": 0,
+            "cacheWriteTokens": 0
+          },
+          "outputTokens": 48,
+          "outputTokenDetails": {
+            "textTokens": 48,
+            "reasoningTokens": 0
+          },
+          "totalTokens": 3446
+        },
+        "routingTest": null,
+        "gateway": {
+          "cost": "0.001436",
+          "routing": {
+            "originalModelId": "openai/gpt-4.1-mini",
+            "resolvedProvider": "openai",
+            "fallbacksAvailable": [
+              "azure"
+            ],
+            "canonicalSlug": "openai/gpt-4.1-mini",
+            "finalProvider": "openai",
+            "modelAttemptCount": 1,
+            "modelAttempts": [
+              {
+                "canonicalSlug": "openai/gpt-4.1-mini",
+                "success": true,
+                "providerAttemptCount": 1,
+                "providerAttempts": [
+                  {
+                    "provider": "openai",
+                    "success": true,
+                    "startTime": 1794494907903,
+                    "endTime": 1794494908764,
+                    "statusCode": 200
+                  }
+                ]
+              }
+            ],
+            "totalProviderAttemptCount": 1
+          }
+        },
+        "catalogSource": "fixture",
+        "catalogMs": 0,
+        "modelMs": 979,
+        "databaseMs": 10,
+        "totalMs": 1010,
+        "revision": 1,
+        "operations": [
+          {
+            "type": "move",
+            "objectId": "studio-chair",
+            "position": [
+              0.9,
+              0,
+              -0.55
+            ]
+          }
+        ],
+        "duplicate": false
+      }
+    },
+    {
+      "id": "sofa-window",
+      "prompt": "Move the sofa exactly 0.2 meters toward the back window, in negative Z. Keep its X coordinate unchanged.",
+      "sceneId": "fce41bfb-26cd-477c-a91e-c0b598eca8e3",
+      "commandId": "d12c49a0-17b7-4589-8893-8cbc1056708a",
+      "passed": true,
+      "issues": [],
+      "httpStatus": 200,
+      "durationMs": 1126,
+      "fixtureAndVerificationMs": 1246,
+      "revision": 1,
+      "message": "Moved the sofa 0.2 meters toward the back window, adjusting its Z position accordingly.",
+      "telemetry": {
+        "requestId": "aecce699-887d-4c65-bf9c-86e4fb5d8c1b",
+        "commandId": "d12c49a0-17b7-4589-8893-8cbc1056708a",
+        "source": "AI Gateway",
+        "requestedModel": "openai/gpt-4.1-mini",
+        "model": "openai/gpt-4.1-mini",
+        "sdkReportedModel": "openai/gpt-4.1-mini",
+        "usage": {
+          "inputTokens": 3405,
+          "inputTokenDetails": {
+            "noCacheTokens": 3405,
+            "cacheReadTokens": 0,
+            "cacheWriteTokens": 0
+          },
+          "outputTokens": 51,
+          "outputTokenDetails": {
+            "textTokens": 51,
+            "reasoningTokens": 0
+          },
+          "totalTokens": 3456
+        },
+        "routingTest": null,
+        "gateway": {
+          "cost": "0.0014436",
+          "routing": {
+            "originalModelId": "openai/gpt-4.1-mini",
+            "resolvedProvider": "openai",
+            "fallbacksAvailable": [
+              "azure"
+            ],
+            "canonicalSlug": "openai/gpt-4.1-mini",
+            "finalProvider": "openai",
+            "modelAttemptCount": 1,
+            "modelAttempts": [
+              {
+                "canonicalSlug": "openai/gpt-4.1-mini",
+                "success": true,
+                "providerAttemptCount": 1,
+                "providerAttempts": [
+                  {
+                    "provider": "openai",
+                    "success": true,
+                    "startTime": 1794494909048,
+                    "endTime": 1794494910018,
+                    "statusCode": 200
+                  }
+                ]
+              }
+            ],
+            "totalProviderAttemptCount": 1
+          }
+        },
+        "catalogSource": "fixture",
+        "catalogMs": 0,
+        "modelMs": 1063,
+        "databaseMs": 9,
+        "totalMs": 1085,
+        "revision": 1,
+        "operations": [
+          {
+            "type": "move",
+            "objectId": "studio-sofa",
+            "position": [
+              -0.8,
+              0,
+              -1.95
+            ]
+          }
+        ],
+        "duplicate": false
+      }
+    },
+    {
+      "id": "chair-rotation",
+      "prompt": "Set the existing lounge chair's rotation to 90 degrees around the vertical axis.",
+      "sceneId": "36936fd2-1526-43e1-9ee4-13f9db41281d",
+      "commandId": "4cba7dc3-a4eb-492c-a63c-4f3b07b2f6fc",
+      "passed": true,
+      "issues": [],
+      "httpStatus": 200,
+      "durationMs": 2160,
+      "fixtureAndVerificationMs": 2280,
+      "revision": 1,
+      "message": "Rotated the existing lounge chair to face 90 degrees.",
+      "telemetry": {
+        "requestId": "80234c50-a359-42cb-a777-0f8b54de5ab3",
+        "commandId": "4cba7dc3-a4eb-492c-a63c-4f3b07b2f6fc",
+        "source": "AI Gateway",
+        "requestedModel": "openai/gpt-4.1-mini",
+        "model": "openai/gpt-4.1-mini",
+        "sdkReportedModel": "openai/gpt-4.1-mini",
+        "usage": {
+          "inputTokens": 3398,
+          "inputTokenDetails": {
+            "noCacheTokens": 3398,
+            "cacheReadTokens": 0,
+            "cacheWriteTokens": 0
+          },
+          "outputTokens": 37,
+          "outputTokenDetails": {
+            "textTokens": 37,
+            "reasoningTokens": 0
+          },
+          "totalTokens": 3435
+        },
+        "routingTest": null,
+        "gateway": {
+          "cost": "0.0014184",
+          "routing": {
+            "originalModelId": "openai/gpt-4.1-mini",
+            "resolvedProvider": "openai",
+            "fallbacksAvailable": [
+              "azure"
+            ],
+            "canonicalSlug": "openai/gpt-4.1-mini",
+            "finalProvider": "azure",
+            "modelAttemptCount": 1,
+            "modelAttempts": [
+              {
+                "canonicalSlug": "openai/gpt-4.1-mini",
+                "success": true,
+                "providerAttemptCount": 1,
+                "providerAttempts": [
+                  {
+                    "provider": "azure",
+                    "success": true,
+                    "startTime": 1794494910349,
+                    "endTime": 1794494912298,
+                    "statusCode": 200
+                  }
+                ]
+              }
+            ],
+            "totalProviderAttemptCount": 1
+          }
+        },
+        "catalogSource": "fixture",
+        "catalogMs": 0,
+        "modelMs": 2075,
+        "databaseMs": 10,
+        "totalMs": 2099,
+        "revision": 1,
+        "operations": [
+          {
+            "type": "rotate",
+            "objectId": "studio-chair",
+            "rotation": 1.5708
+          }
+        ],
+        "duplicate": false
+      }
+    },
+    {
+      "id": "remove-lamp",
+      "prompt": "Remove the floor lamp.",
+      "sceneId": "1d747d9d-1a54-4aad-9854-a85a50ee0677",
+      "commandId": "555e5089-ae21-4332-b50f-a2c8f9392f20",
+      "passed": true,
+      "issues": [],
+      "httpStatus": 200,
+      "durationMs": 1884,
+      "fixtureAndVerificationMs": 2041,
+      "revision": 1,
+      "message": "Removed the floor lamp from the room.",
+      "telemetry": {
+        "requestId": "46c931f4-26c0-4268-aa38-b0745134367c",
+        "commandId": "555e5089-ae21-4332-b50f-a2c8f9392f20",
+        "source": "AI Gateway",
+        "requestedModel": "openai/gpt-4.1-mini",
+        "model": "openai/gpt-4.1-mini",
+        "sdkReportedModel": "openai/gpt-4.1-mini",
+        "usage": {
+          "inputTokens": 3387,
+          "inputTokenDetails": {
+            "noCacheTokens": 3387,
+            "cacheReadTokens": 0,
+            "cacheWriteTokens": 0
+          },
+          "outputTokens": 27,
+          "outputTokenDetails": {
+            "textTokens": 27,
+            "reasoningTokens": 0
+          },
+          "totalTokens": 3414
+        },
+        "routingTest": null,
+        "gateway": {
+          "cost": "0.001398",
+          "routing": {
+            "originalModelId": "openai/gpt-4.1-mini",
+            "resolvedProvider": "openai",
+            "fallbacksAvailable": [
+              "azure"
+            ],
+            "canonicalSlug": "openai/gpt-4.1-mini",
+            "finalProvider": "azure",
+            "modelAttemptCount": 1,
+            "modelAttempts": [
+              {
+                "canonicalSlug": "openai/gpt-4.1-mini",
+                "success": true,
+                "providerAttemptCount": 1,
+                "providerAttempts": [
+                  {
+                    "provider": "azure",
+                    "success": true,
+                    "startTime": 1794494913132,
+                    "endTime": 1794494914255,
+                    "statusCode": 200
+                  }
+                ]
+              }
+            ],
+            "totalProviderAttemptCount": 1
+          }
+        },
+        "catalogSource": "fixture",
+        "catalogMs": 0,
+        "modelMs": 1285,
+        "databaseMs": 29,
+        "totalMs": 1502,
+        "revision": 1,
+        "operations": [
+          {
+            "type": "remove",
+            "objectId": "studio-lamp"
+          }
+        ],
+        "duplicate": false
+      }
+    },
+    {
+      "id": "add-desk",
+      "prompt": "Add one Line writing desk at x=0, y=0, z=1.5 meters, with zero rotation and its default light oak finish. Keep all existing furniture.",
+      "sceneId": "c5ce044b-3556-41bb-b0d5-e7b737d2089a",
+      "commandId": "dd686d34-a089-4c79-ba0d-ea05ee848fb6",
+      "passed": true,
+      "issues": [],
+      "httpStatus": 200,
+      "durationMs": 1375,
+      "fixtureAndVerificationMs": 1496,
+      "revision": 1,
+      "message": "Added a Line writing desk at [0, 0, 1.5] with light oak finish and zero rotation.",
+      "telemetry": {
+        "requestId": "f1e07846-08ea-4253-9b08-9ad6f9acae58",
+        "commandId": "dd686d34-a089-4c79-ba0d-ea05ee848fb6",
+        "source": "AI Gateway",
+        "requestedModel": "openai/gpt-4.1-mini",
+        "model": "openai/gpt-4.1-mini",
+        "sdkReportedModel": "openai/gpt-4.1-mini",
+        "usage": {
+          "inputTokens": 3418,
+          "inputTokenDetails": {
+            "noCacheTokens": 602,
+            "cacheReadTokens": 2816,
+            "cacheWriteTokens": 0
+          },
+          "outputTokens": 65,
+          "outputTokenDetails": {
+            "textTokens": 65,
+            "reasoningTokens": 0
+          },
+          "totalTokens": 3483
+        },
+        "routingTest": null,
+        "gateway": {
+          "cost": "0.0006264",
+          "routing": {
+            "originalModelId": "openai/gpt-4.1-mini",
+            "resolvedProvider": "openai",
+            "fallbacksAvailable": [
+              "azure"
+            ],
+            "canonicalSlug": "openai/gpt-4.1-mini",
+            "finalProvider": "azure",
+            "modelAttemptCount": 1,
+            "modelAttempts": [
+              {
+                "canonicalSlug": "openai/gpt-4.1-mini",
+                "success": true,
+                "providerAttemptCount": 1,
+                "providerAttempts": [
+                  {
+                    "provider": "azure",
+                    "success": true,
+                    "startTime": 1794494914653,
+                    "endTime": 1794494915822,
+                    "statusCode": 200
+                  }
+                ]
+              }
+            ],
+            "totalProviderAttemptCount": 1
+          }
+        },
+        "catalogSource": "fixture",
+        "catalogMs": 0,
+        "modelMs": 1256,
+        "databaseMs": 9,
+        "totalMs": 1288,
+        "revision": 1,
+        "operations": [
+          {
+            "type": "add",
+            "sku": "line-desk",
+            "position": [
+              0,
+              0,
+              1.5
+            ],
+            "rotation": 0,
+            "color": "#d8bc91"
+          }
+        ],
+        "duplicate": false
+      }
+    },
+    {
+      "id": "add-chair",
+      "prompt": "Add one additional sage Arc lounge chair at x=1.6, y=0, z=0.8 meters with zero rotation. Keep the existing chair and all other furniture.",
+      "sceneId": "5961eaba-b5ff-4e7b-a0a5-3ad47757c754",
+      "commandId": "15706648-2449-4130-8a20-7369a4b058a0",
+      "passed": true,
+      "issues": [],
+      "httpStatus": 200,
+      "durationMs": 1284,
+      "fixtureAndVerificationMs": 1394,
+      "revision": 1,
+      "message": "Added an additional sage Arc lounge chair at the specified position with zero rotation.",
+      "telemetry": {
+        "requestId": "ae4f4ac7-c5ea-49a7-a04e-3fc427384127",
+        "commandId": "15706648-2449-4130-8a20-7369a4b058a0",
+        "source": "AI Gateway",
+        "requestedModel": "openai/gpt-4.1-mini",
+        "model": "openai/gpt-4.1-mini",
+        "sdkReportedModel": "openai/gpt-4.1-mini",
+        "usage": {
+          "inputTokens": 3419,
+          "inputTokenDetails": {
+            "noCacheTokens": 603,
+            "cacheReadTokens": 2816,
+            "cacheWriteTokens": 0
+          },
+          "outputTokens": 54,
+          "outputTokenDetails": {
+            "textTokens": 54,
+            "reasoningTokens": 0
+          },
+          "totalTokens": 3473
+        },
+        "routingTest": null,
+        "gateway": {
+          "cost": "0.0006092",
+          "routing": {
+            "originalModelId": "openai/gpt-4.1-mini",
+            "resolvedProvider": "openai",
+            "fallbacksAvailable": [
+              "azure"
+            ],
+            "canonicalSlug": "openai/gpt-4.1-mini",
+            "finalProvider": "azure",
+            "modelAttemptCount": 1,
+            "modelAttempts": [
+              {
+                "canonicalSlug": "openai/gpt-4.1-mini",
+                "success": true,
+                "providerAttemptCount": 1,
+                "providerAttempts": [
+                  {
+                    "provider": "azure",
+                    "success": true,
+                    "startTime": 1794494916150,
+                    "endTime": 1794494917232,
+                    "statusCode": 200
+                  }
+                ]
+              }
+            ],
+            "totalProviderAttemptCount": 1
+          }
+        },
+        "catalogSource": "fixture",
+        "catalogMs": 0,
+        "modelMs": 1201,
+        "databaseMs": 9,
+        "totalMs": 1222,
+        "revision": 1,
+        "operations": [
+          {
+            "type": "add",
+            "sku": "arc-chair",
+            "position": [
+              1.6,
+              0,
+              0.8
+            ],
+            "rotation": 0,
+            "color": "#687761"
+          }
+        ],
+        "duplicate": false
+      }
+    },
+    {
+      "id": "plant-pot",
+      "prompt": "Change the olive plant's pot to cream.",
+      "sceneId": "2132e5b1-2a80-4787-b2aa-fbbe6a19d112",
+      "commandId": "24e11efa-ea18-40eb-ac69-0bb962210e19",
+      "passed": true,
+      "issues": [],
+      "httpStatus": 200,
+      "durationMs": 2305,
+      "fixtureAndVerificationMs": 2436,
+      "revision": 1,
+      "message": "Recolored the olive plant's pot to cream.",
+      "telemetry": {
+        "requestId": "ddd37d3f-1c80-4980-91eb-9ba585f15c1b",
+        "commandId": "24e11efa-ea18-40eb-ac69-0bb962210e19",
+        "source": "AI Gateway",
+        "requestedModel": "openai/gpt-4.1-mini",
+        "model": "openai/gpt-4.1-mini",
+        "sdkReportedModel": "openai/gpt-4.1-mini",
+        "usage": {
+          "inputTokens": 3391,
+          "inputTokenDetails": {
+            "noCacheTokens": 575,
+            "cacheReadTokens": 2816,
+            "cacheWriteTokens": 0
+          },
+          "outputTokens": 38,
+          "outputTokenDetails": {
+            "textTokens": 38,
+            "reasoningTokens": 0
+          },
+          "totalTokens": 3429
+        },
+        "routingTest": null,
+        "gateway": {
+          "cost": "0.0005724",
+          "routing": {
+            "originalModelId": "openai/gpt-4.1-mini",
+            "resolvedProvider": "openai",
+            "fallbacksAvailable": [
+              "azure"
+            ],
+            "canonicalSlug": "openai/gpt-4.1-mini",
+            "finalProvider": "azure",
+            "modelAttemptCount": 1,
+            "modelAttempts": [
+              {
+                "canonicalSlug": "openai/gpt-4.1-mini",
+                "success": true,
+                "providerAttemptCount": 1,
+                "providerAttempts": [
+                  {
+                    "provider": "azure",
+                    "success": true,
+                    "startTime": 1794494917532,
+                    "endTime": 1794494919677,
+                    "statusCode": 200
+                  }
+                ]
+              }
+            ],
+            "totalProviderAttemptCount": 1
+          }
+        },
+        "catalogSource": "fixture",
+        "catalogMs": 0,
+        "modelMs": 2232,
+        "databaseMs": 7,
+        "totalMs": 2251,
+        "revision": 1,
+        "operations": [
+          {
+            "type": "recolor",
+            "objectId": "studio-plant",
+            "color": "#e7dfce"
+          }
+        ],
+        "duplicate": false
+      }
+    },
+    {
+      "id": "rug-sage",
+      "prompt": "Make the area rug sage.",
+      "sceneId": "914508e8-a93c-4065-9171-e2d041c5184d",
+      "commandId": "99c79151-52fd-4ff6-8603-62e913a74264",
+      "passed": true,
+      "issues": [],
+      "httpStatus": 200,
+      "durationMs": 1850,
+      "fixtureAndVerificationMs": 2020,
+      "revision": 1,
+      "message": "The area rug is now sage.",
+      "telemetry": {
+        "requestId": "8dc7ac22-1ac4-432a-8d9a-cf59260c4692",
+        "commandId": "99c79151-52fd-4ff6-8603-62e913a74264",
+        "source": "AI Gateway",
+        "requestedModel": "openai/gpt-4.1-mini",
+        "model": "google/gemini-2.5-flash",
+        "sdkReportedModel": "openai/gpt-4.1-mini",
+        "usage": {
+          "inputTokens": 3574,
+          "inputTokenDetails": {
+            "noCacheTokens": 3574,
+            "cacheReadTokens": 0
+          },
+          "outputTokens": 94,
+          "outputTokenDetails": {
+            "textTokens": 35,
+            "reasoningTokens": 59
+          },
+          "totalTokens": 3668
+        },
+        "routingTest": null,
+        "gateway": {
+          "cost": "0.0013072",
+          "routing": {
+            "originalModelId": "google/gemini-2.5-flash",
+            "resolvedProvider": "vertex",
+            "fallbacksAvailable": [
+              "google"
+            ],
+            "canonicalSlug": "google/gemini-2.5-flash",
+            "finalProvider": "vertex",
+            "modelAttemptCount": 2,
+            "modelAttempts": [
+              {
+                "canonicalSlug": "openai/gpt-4.1-mini",
+                "success": false,
+                "providerAttemptCount": 0,
+                "providerAttempts": []
+              },
+              {
+                "canonicalSlug": "google/gemini-2.5-flash",
+                "success": true,
+                "providerAttemptCount": 1,
+                "providerAttempts": [
+                  {
+                    "provider": "vertex",
+                    "success": true,
+                    "startTime": 1794494919972,
+                    "endTime": 1794494921639,
+                    "statusCode": 200
+                  }
+                ]
+              }
+            ],
+            "totalProviderAttemptCount": 1
+          }
+        },
+        "catalogSource": "fixture",
+        "catalogMs": 0,
+        "modelMs": 1781,
+        "databaseMs": 8,
+        "totalMs": 1801,
+        "revision": 1,
+        "operations": [
+          {
+            "type": "recolor",
+            "objectId": "studio-rug",
+            "color": "#929b82"
+          }
+        ],
+        "duplicate": false
+      }
+    },
+    {
+      "id": "table-position",
+      "prompt": "Move the existing coffee table to x=0.2, y=0, z=-0.45 meters.",
+      "sceneId": "35fb3c20-b443-4541-9ba6-0a1523a29a5e",
+      "commandId": "39447581-38ea-42fd-a864-caec53b758f5",
+      "passed": true,
+      "issues": [],
+      "httpStatus": 200,
+      "durationMs": 1378,
+      "fixtureAndVerificationMs": 1519,
+      "revision": 1,
+      "message": "The coffee table has been moved.",
+      "telemetry": {
+        "requestId": "c10dc750-10b8-42a0-bb3c-1a639d70cfae",
+        "commandId": "39447581-38ea-42fd-a864-caec53b758f5",
+        "source": "AI Gateway",
+        "requestedModel": "openai/gpt-4.1-mini",
+        "model": "google/gemini-2.5-flash",
+        "sdkReportedModel": "openai/gpt-4.1-mini",
+        "usage": {
+          "inputTokens": 3590,
+          "inputTokenDetails": {
+            "noCacheTokens": 3590,
+            "cacheReadTokens": 0
+          },
+          "outputTokens": 108,
+          "outputTokenDetails": {
+            "textTokens": 37,
+            "reasoningTokens": 71
+          },
+          "totalTokens": 3698
+        },
+        "routingTest": null,
+        "gateway": {
+          "cost": "0.001347",
+          "routing": {
+            "originalModelId": "google/gemini-2.5-flash",
+            "resolvedProvider": "vertex",
+            "fallbacksAvailable": [
+              "google"
+            ],
+            "canonicalSlug": "google/gemini-2.5-flash",
+            "finalProvider": "vertex",
+            "modelAttemptCount": 2,
+            "modelAttempts": [
+              {
+                "canonicalSlug": "openai/gpt-4.1-mini",
+                "success": false,
+                "providerAttemptCount": 0,
+                "providerAttempts": []
+              },
+              {
+                "canonicalSlug": "google/gemini-2.5-flash",
+                "success": true,
+                "providerAttemptCount": 1,
+                "providerAttempts": [
+                  {
+                    "provider": "vertex",
+                    "success": true,
+                    "startTime": 1794494921998,
+                    "endTime": 1794494923193,
+                    "statusCode": 200
+                  }
+                ]
+              }
+            ],
+            "totalProviderAttemptCount": 1
+          }
+        },
+        "catalogSource": "fixture",
+        "catalogMs": 0,
+        "modelMs": 1304,
+        "databaseMs": 9,
+        "totalMs": 1328,
+        "revision": 1,
+        "operations": [
+          {
+            "type": "move",
+            "objectId": "studio-table",
+            "position": [
+              0.2,
+              0,
+              -0.45
+            ]
+          }
+        ],
+        "duplicate": false
+      }
+    },
+    {
+      "id": "two-edits",
+      "prompt": "Make the sofa sage and remove the existing lounge chair. Leave everything else unchanged.",
+      "sceneId": "0103a17f-2604-4c10-8283-8097a16c90c0",
+      "commandId": "6dec4efc-58f4-4a3c-800b-7364dcd86a2b",
+      "passed": true,
+      "issues": [],
+      "httpStatus": 200,
+      "durationMs": 1802,
+      "fixtureAndVerificationMs": 1957,
+      "revision": 1,
+      "message": "The sofa color has been changed to sage, and the lounge chair has been removed.",
+      "telemetry": {
+        "requestId": "7dc82a3e-4314-4845-ba3d-2d2cea66fcbd",
+        "commandId": "6dec4efc-58f4-4a3c-800b-7364dcd86a2b",
+        "source": "AI Gateway",
+        "requestedModel": "openai/gpt-4.1-mini",
+        "model": "google/gemini-2.5-flash",
+        "sdkReportedModel": "openai/gpt-4.1-mini",
+        "usage": {
+          "inputTokens": 3584,
+          "inputTokenDetails": {
+            "noCacheTokens": 3584,
+            "cacheReadTokens": 0
+          },
+          "outputTokens": 190,
+          "outputTokenDetails": {
+            "textTokens": 98,
+            "reasoningTokens": 92
+          },
+          "totalTokens": 3774
+        },
+        "routingTest": null,
+        "gateway": {
+          "cost": "0.0015502",
+          "routing": {
+            "originalModelId": "google/gemini-2.5-flash",
+            "resolvedProvider": "vertex",
+            "fallbacksAvailable": [
+              "google"
+            ],
+            "canonicalSlug": "google/gemini-2.5-flash",
+            "finalProvider": "vertex",
+            "modelAttemptCount": 2,
+            "modelAttempts": [
+              {
+                "canonicalSlug": "openai/gpt-4.1-mini",
+                "success": false,
+                "providerAttemptCount": 0,
+                "providerAttempts": []
+              },
+              {
+                "canonicalSlug": "google/gemini-2.5-flash",
+                "success": true,
+                "providerAttemptCount": 1,
+                "providerAttempts": [
+                  {
+                    "provider": "vertex",
+                    "success": true,
+                    "startTime": 1794494923505,
+                    "endTime": 1794494925123,
+                    "statusCode": 200
+                  }
+                ]
+              }
+            ],
+            "totalProviderAttemptCount": 1
+          }
+        },
+        "catalogSource": "fixture",
+        "catalogMs": 0,
+        "modelMs": 1710,
+        "databaseMs": 8,
+        "totalMs": 1743,
+        "revision": 1,
+        "operations": [
+          {
+            "type": "recolor",
+            "objectId": "studio-sofa",
+            "color": "#687761"
+          },
+          {
+            "type": "remove",
+            "objectId": "studio-chair"
+          }
+        ],
+        "duplicate": false
+      }
+    },
+    {
+      "id": "unknown-sku",
+      "prompt": "Add catalog SKU 'unknown-hover-bed-999' exactly. Do not substitute another product; if this exact SKU is unavailable, leave the room unchanged.",
+      "sceneId": "66002bdb-7b3d-4d95-a9d1-373c78990e68",
+      "commandId": "e6ce63f8-126e-4661-b63e-2cec80e7014a",
+      "passed": true,
+      "issues": [],
+      "httpStatus": 200,
+      "durationMs": 2084,
+      "fixtureAndVerificationMs": 2213,
+      "revision": 0,
+      "message": "SKU 'unknown-hover-bed-999' is not available in the catalog.",
+      "telemetry": {
+        "requestId": "82708530-a178-43e4-9587-8e0a0fb1390e",
+        "commandId": "e6ce63f8-126e-4661-b63e-2cec80e7014a",
+        "source": "AI Gateway",
+        "requestedModel": "openai/gpt-4.1-mini",
+        "model": "google/gemini-2.5-flash",
+        "sdkReportedModel": "openai/gpt-4.1-mini",
+        "usage": {
+          "inputTokens": 3600,
+          "inputTokenDetails": {
+            "noCacheTokens": 3600,
+            "cacheReadTokens": 0
+          },
+          "outputTokens": 217,
+          "outputTokenDetails": {
+            "textTokens": 27,
+            "reasoningTokens": 190
+          },
+          "totalTokens": 3817
+        },
+        "routingTest": null,
+        "gateway": {
+          "cost": "0.0016225",
+          "routing": {
+            "originalModelId": "google/gemini-2.5-flash",
+            "resolvedProvider": "vertex",
+            "fallbacksAvailable": [
+              "google"
+            ],
+            "canonicalSlug": "google/gemini-2.5-flash",
+            "finalProvider": "vertex",
+            "modelAttemptCount": 2,
+            "modelAttempts": [
+              {
+                "canonicalSlug": "openai/gpt-4.1-mini",
+                "success": false,
+                "providerAttemptCount": 0,
+                "providerAttempts": []
+              },
+              {
+                "canonicalSlug": "google/gemini-2.5-flash",
+                "success": true,
+                "providerAttemptCount": 1,
+                "providerAttempts": [
+                  {
+                    "provider": "vertex",
+                    "success": true,
+                    "startTime": 1794494925479,
+                    "endTime": 1794494927383,
+                    "statusCode": 200
+                  }
+                ]
+              }
+            ],
+            "totalProviderAttemptCount": 1
+          }
+        },
+        "catalogSource": "fixture",
+        "catalogMs": 0,
+        "modelMs": 2010,
+        "databaseMs": 2,
+        "totalMs": 2025,
+        "revision": 0,
+        "operations": [],
+        "duplicate": false
+      }
+    },
+    {
+      "id": "out-of-bounds",
+      "prompt": "Move the sofa to x=100, y=0, z=0 meters exactly. Do not clamp or substitute another position; if this is invalid, leave the room unchanged.",
+      "sceneId": "2590f0f8-9028-405f-b720-8e64879bbc22",
+      "commandId": "ceb24588-3855-40fa-ad6d-15a122835691",
+      "passed": true,
+      "issues": [],
+      "httpStatus": 200,
+      "durationMs": 1822,
+      "fixtureAndVerificationMs": 1987,
+      "revision": 0,
+      "message": "I can't move the sofa to x=100 meters, as that is outside the room's bounds. The room extends from x=-3 to x=3 meters.",
+      "telemetry": {
+        "requestId": "fd5fd002-db48-4e04-98af-d15a2d3c1d3d",
+        "commandId": "ceb24588-3855-40fa-ad6d-15a122835691",
+        "source": "AI Gateway",
+        "requestedModel": "openai/gpt-4.1-mini",
+        "model": "google/gemini-2.5-flash",
+        "sdkReportedModel": "openai/gpt-4.1-mini",
+        "usage": {
+          "inputTokens": 3604,
+          "inputTokenDetails": {
+            "noCacheTokens": 3604,
+            "cacheReadTokens": 0
+          },
+          "outputTokens": 177,
+          "outputTokenDetails": {
+            "textTokens": 53,
+            "reasoningTokens": 124
+          },
+          "totalTokens": 3781
+        },
+        "routingTest": null,
+        "gateway": {
+          "cost": "0.0015237",
+          "routing": {
+            "originalModelId": "google/gemini-2.5-flash",
+            "resolvedProvider": "vertex",
+            "fallbacksAvailable": [
+              "google"
+            ],
+            "canonicalSlug": "google/gemini-2.5-flash",
+            "finalProvider": "vertex",
+            "modelAttemptCount": 2,
+            "modelAttempts": [
+              {
+                "canonicalSlug": "openai/gpt-4.1-mini",
+                "success": false,
+                "providerAttemptCount": 0,
+                "providerAttempts": []
+              },
+              {
+                "canonicalSlug": "google/gemini-2.5-flash",
+                "success": true,
+                "providerAttemptCount": 1,
+                "providerAttempts": [
+                  {
+                    "provider": "vertex",
+                    "success": true,
+                    "startTime": 1794494927730,
+                    "endTime": 1794494929349,
+                    "statusCode": 200
+                  }
+                ]
+              }
+            ],
+            "totalProviderAttemptCount": 1
+          }
+        },
+        "catalogSource": "fixture",
+        "catalogMs": 0,
+        "modelMs": 1740,
+        "databaseMs": 2,
+        "totalMs": 1754,
+        "revision": 0,
+        "operations": [],
+        "duplicate": false
+      }
+    }
+  ],
+  "verifiedCommit": "6ac3565c6ffba89c1625023afdb304934b42e7fd"
+}

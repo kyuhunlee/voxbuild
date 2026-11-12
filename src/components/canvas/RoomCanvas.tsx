@@ -34,9 +34,11 @@ function useReducedMotion() {
   return reduced;
 }
 
-function centerPerspectiveRoom(camera: PerspectiveCamera, position: Vector3, target: Vector3, width: number, depth: number, height: number, viewport: { width: number; height: number }) {
+function centerPerspectiveRoom(camera: PerspectiveCamera, position: Vector3, target: Vector3, width: number, depth: number, height: number, viewport: { width: number; height: number }, renderHeight: number) {
   const framingCamera = camera.clone();
   framingCamera.clearViewOffset();
+  framingCamera.aspect = viewport.width / viewport.height;
+  framingCamera.updateProjectionMatrix();
   framingCamera.position.copy(position);
   framingCamera.lookAt(target);
   framingCamera.updateMatrixWorld();
@@ -50,12 +52,12 @@ function centerPerspectiveRoom(camera: PerspectiveCamera, position: Vector3, tar
   const center = new Box3().setFromPoints(outline.map((point) => point.project(framingCamera))).getCenter(new Vector3());
   const viewportWidth = Math.max(1, viewport.width);
   const viewportHeight = Math.max(1, viewport.height);
-  camera.setViewOffset(viewportWidth, viewportHeight, center.x * viewportWidth / 2, -center.y * viewportHeight / 2, viewportWidth, viewportHeight);
+  camera.setViewOffset(viewportWidth, viewportHeight, center.x * viewportWidth / 2, -center.y * viewportHeight / 2, viewportWidth, renderHeight);
 }
 
 function CameraRig({ view, width, depth, height, reducedMotion }: { view: RoomCanvasProps["view"]; width: number; depth: number; height: number; reducedMotion: boolean }) {
   const controls = useRef<ComponentRef<typeof OrbitControls>>(null);
-  const { camera, size } = useThree();
+  const { camera, size, gl } = useThree();
   const moving = useRef(true);
   const target = useRef(new Vector3(0, 0.5, 0));
   const destination = useRef(new Vector3(6.4, 5.75, 8.05));
@@ -67,13 +69,16 @@ function CameraRig({ view, width, depth, height, reducedMotion }: { view: RoomCa
     }
     camera.zoom = view === "top" ? 1 : DEFAULT_PERSPECTIVE_ZOOM;
     camera.updateProjectionMatrix();
+    const overlaySpace = Number.parseFloat(getComputedStyle(gl.domElement).getPropertyValue("--viewer-overlay-space")) || 0;
+    const usableHeight = Math.max(1, size.height - Math.max(0, overlaySpace));
     const scale = Math.max(width / 6, depth / 5.2);
-    const narrow = Math.max(1, 1.25 / (size.width / Math.max(size.height, 1)));
+    const narrow = Math.max(1, 1.25 / (size.width / usableHeight));
     destination.current.set(...(view === "top" ? [0, 12.6 * scale * narrow, 0.001] as const : [6.4 * scale * narrow, 5.75 * scale * narrow, 8.05 * scale * narrow] as const));
     target.current.set(0, view === "top" ? 0 : 0.6, 0);
     if (camera instanceof PerspectiveCamera) {
-      if (view === "top") camera.clearViewOffset();
-      else centerPerspectiveRoom(camera, destination.current, target.current, width, depth, height, size);
+      // Preserve the room's framing above the composer while extending the rendered environment below it.
+      if (view === "top") camera.setViewOffset(size.width, usableHeight, 0, 0, size.width, size.height);
+      else centerPerspectiveRoom(camera, destination.current, target.current, width, depth, height, { width: size.width, height: usableHeight }, size.height);
     }
     moving.current = true;
     if (reducedMotion) {
@@ -82,7 +87,7 @@ function CameraRig({ view, width, depth, height, reducedMotion }: { view: RoomCa
       controls.current?.update();
       moving.current = false;
     }
-  }, [view, width, depth, height, camera, reducedMotion, size.width, size.height]);
+  }, [view, width, depth, height, camera, gl, reducedMotion, size.width, size.height]);
 
   useFrame((_, delta) => {
     if (!moving.current || !controls.current) return;

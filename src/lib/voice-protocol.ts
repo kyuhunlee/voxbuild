@@ -20,7 +20,7 @@ type CoordinatorOptions = {
   isConnected: () => boolean;
   currentScene: () => Scene | null;
   commandId: () => string;
-  execute: (operations: Operation[], commandId: string) => Promise<{ scene: Scene; message: string }>;
+  execute: (operations: Operation[], commandId: string, isCurrent: () => boolean) => Promise<{ scene: Scene; message: string }>;
   onBusy: () => void;
   onResult: (callId: string, result: ToolResult) => void;
   onScene: (scene: Scene) => void;
@@ -72,7 +72,9 @@ export class RealtimeCommandQueue {
           const parsed = ArgumentsSchema.safeParse(args);
           if (!parsed.success) throw new Error("The requested room edit was not valid. Try a simpler instruction.");
           this.options.onBusy();
-          const accepted = await this.options.execute(parsed.data.operations, this.options.commandId());
+          // The application may queue this behind a text/manual save. Check the turn again there,
+          // immediately before starting a write, rather than capturing its current boolean value.
+          const accepted = await this.options.execute(parsed.data.operations, this.options.commandId(), () => this.options.isConnected() && this.turn === turn);
           result = { ok: true, ...accepted };
           if (this.options.isConnected()) this.options.onScene(accepted.scene);
         } catch (cause) {

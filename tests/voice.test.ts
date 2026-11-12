@@ -13,16 +13,16 @@ function response(id = "response-1", callId = "call-1"): RealtimeResponse {
   return { id, status: "completed", output: [{ type: "function_call", status: "completed", name: "apply_scene_operations", call_id: callId, arguments: JSON.stringify({ operations: [move] }) }] };
 }
 
-function harness(execute?: (operations: Operation[], commandId: string) => Promise<{ scene: Scene; message: string }>) {
+function harness(execute?: (operations: Operation[], commandId: string, isCurrent: () => boolean) => Promise<{ scene: Scene; message: string }>) {
   const events: { kind: string; data?: unknown }[] = [];
   let connected = true;
   const queue = new RealtimeCommandQueue({
     isConnected: () => connected,
     currentScene: () => scene,
     commandId: () => "command-test",
-    execute: async (operations, commandId) => {
+    execute: async (operations, commandId, isCurrent) => {
       events.push({ kind: "execute", data: { operations, commandId } });
-      return execute ? execute(operations, commandId) : saved;
+      return execute ? execute(operations, commandId, isCurrent) : saved;
     },
     onBusy: () => events.push({ kind: "busy" }),
     onScene: (scene) => events.push({ kind: "scene", data: scene }),
@@ -123,6 +123,36 @@ test("barge-in during a save preserves the acknowledged result but suppresses st
   assert.equal(events.some((event) => event.kind === "result"), true);
   assert.equal(events.some((event) => event.kind === "speak"), false);
 });
+
+for (const cancellation of ["interruption", "disconnect"] as const) {
+  test(`${cancellation} cancels a voice write waiting behind other application work`, async () => {
+    let finishEarlierWork!: () => void;
+    const earlierWork = new Promise<void>((resolve) => { finishEarlierWork = resolve; });
+    let writes = 0;
+    const { queue, events, disconnect } = harness(async (_operations, _commandId, isCurrent) => {
+      // Model the shared application queue waiting for an already-running text/manual task.
+      await earlierWork;
+      if (!isCurrent()) throw new Error("Interrupted before the write started.");
+      writes += 1;
+      return saved;
+    });
+    const pending = queue.accept(response());
+    await Promise.resolve();
+    assert.equal(events.filter((event) => event.kind === "execute").length, 1);
+    if (cancellation === "interruption") queue.interrupt();
+    else disconnect();
+    finishEarlierWork();
+    await pending;
+    assert.equal(writes, 0);
+    assert.equal(events.some((event) => event.kind === "scene" || event.kind === "speak"), false);
+
+    if (cancellation === "interruption") {
+      await queue.accept(response("next-response", "next-call"));
+      assert.equal(writes, 1);
+      assert.equal(events.filter((event) => event.kind === "speak").length, 1);
+    }
+  });
+}
 
 test("disconnect during a save sends no stale result or audio to a later session", async () => {
   let acknowledge!: (value: typeof saved) => void;

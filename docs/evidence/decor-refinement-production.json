@@ -1,0 +1,115 @@
+{
+  "date": "2026-11-12T14:48:30.673Z",
+  "baseUrl": "https://voxbuild-nu.vercel.app",
+  "capabilities": {
+    "database": true,
+    "gateway": true,
+    "voice": true
+  },
+  "checks": [
+    {
+      "name": "preset-studio",
+      "status": "passed",
+      "fixtureSceneId": "4fa2e59f-f6e1-462c-9581-9838f05c1400",
+      "revision": 0,
+      "windowLayout": "back-wide",
+      "windows": 1,
+      "artworks": 1
+    },
+    {
+      "name": "preset-office",
+      "status": "passed",
+      "fixtureSceneId": "33d4aa05-c346-44bd-b4bc-8e6612e875c6",
+      "revision": 0,
+      "windowLayout": "left-pair",
+      "windows": 2,
+      "artworks": 2
+    },
+    {
+      "name": "preset-bedroom",
+      "status": "passed",
+      "fixtureSceneId": "4e951754-08e6-4648-8e1b-9ed9a056ef33",
+      "revision": 0,
+      "windowLayout": "left-tall",
+      "windows": 1,
+      "artworks": 2
+    },
+    {
+      "name": "preset-dining",
+      "status": "passed",
+      "fixtureSceneId": "748c18ed-886c-4d15-8526-dd5cd8e1b7f2",
+      "revision": 0,
+      "windowLayout": "corner",
+      "windows": 2,
+      "artworks": 2
+    },
+    {
+      "name": "preset-lounge",
+      "status": "passed",
+      "fixtureSceneId": "92585931-87cc-4eaa-b57a-19122ca44439",
+      "revision": 0,
+      "windowLayout": "back-high",
+      "windows": 1,
+      "artworks": 2
+    },
+    {
+      "name": "preset-empty",
+      "status": "passed",
+      "fixtureSceneId": "e3078cb2-9c70-492d-ae12-4c317647faea",
+      "revision": 0,
+      "windowLayout": "none",
+      "windows": 0,
+      "artworks": 0
+    },
+    {
+      "name": "removed-loft-rejected",
+      "status": "passed"
+    },
+    {
+      "name": "artwork-move-saved",
+      "status": "passed",
+      "fixtureSceneId": "4fa2e59f-f6e1-462c-9581-9838f05c1400",
+      "revision": 1
+    },
+    {
+      "name": "artwork-design-saved",
+      "status": "passed",
+      "fixtureSceneId": "4fa2e59f-f6e1-462c-9581-9838f05c1400",
+      "revision": 2
+    },
+    {
+      "name": "window-overlap-rejected",
+      "status": "passed",
+      "fixtureSceneId": "4fa2e59f-f6e1-462c-9581-9838f05c1400",
+      "revision": 2
+    },
+    {
+      "name": "invalid-artwork-batch-atomic",
+      "status": "passed",
+      "fixtureSceneId": "4fa2e59f-f6e1-462c-9581-9838f05c1400",
+      "revision": 2
+    },
+    {
+      "name": "style-preserves-art-and-windows",
+      "status": "passed",
+      "fixtureSceneId": "4fa2e59f-f6e1-462c-9581-9838f05c1400",
+      "revision": 3
+    },
+    {
+      "name": "model-artwork-move-primary",
+      "status": "passed",
+      "fixtureSceneId": "4cbfbca1-97b0-4349-8b17-7d366268d489",
+      "revision": 1,
+      "model": "openai/gpt-4.1-mini"
+    },
+    {
+      "name": "model-artwork-design-policy-fallback",
+      "status": "passed",
+      "fixtureSceneId": "5fc63033-1118-4ec9-a1ff-a3b981551bcb",
+      "revision": 1,
+      "model": "google/gemini-2.5-flash"
+    }
+  ],
+  "passed": 14,
+  "verifiedCommit": "6ac3565c6ffba89c1625023afdb304934b42e7fd"
+}
