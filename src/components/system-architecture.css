@@ -9,6 +9,8 @@
 .system-architecture-routes svg { margin-top: 2px; color: #9cbbb1; }
 .system-architecture-open { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; min-height: 42px; padding: 10px 12px; border: 1px solid #759e93; border-radius: 7px; background: #2b4841; color: #d3e9dd; font-size: 12px; }
 .system-architecture-open:hover { background: #36594f; }
+.system-architecture-open-secondary { margin-top: 10px; background: #1d2d33; border-color: #4d666d; color: #c4d6d4; }
+.system-architecture-open-secondary:hover { background: #2a4146; }
 .system-architecture-note { color: #9daeb6; margin: 13px 1px 0; font-size: 11px; line-height: 1.7; }
 .system-map-dialog { width: 100vw; height: 100dvh; max-width: 100vw; max-height: 100dvh; margin: 0; padding: 0; border: 0; background: #141f23; color: #e8efec; overflow: hidden; }
 .system-map-dialog::backdrop { background: #071015d9; }
@@ -22,6 +24,10 @@
 .system-map-header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .system-map-header .system-map-view-toggle { background: #203a35; border-color: #61877a; color: #d0e7db; }
 .system-map-header .system-map-view-toggle:hover { background: #2c4b41; }
+.system-map-tabs { display: flex; flex-shrink: 0; gap: 25px; padding: 0 28px; border-bottom: 1px solid #35474d; background: #141f23; }
+.system-map-tabs button { min-height: 48px; padding: 12px 2px; border-bottom: 2px solid transparent; color: #a8bec0; font-size: 13px; }
+.system-map-tabs button:hover { color: #e0ece6; }
+.system-map-tabs button[aria-selected="true"] { color: #d6e9df; border-color: #acd0bc; }
 .system-map-legend { display: flex; flex-shrink: 0; flex-wrap: wrap; align-items: center; gap: 12px 25px; padding: 13px 28px; border-bottom: 1px solid #35474d; background: #1b282d; }
 .system-map-legend > span { display: inline-flex; align-items: center; gap: 8px; color: #b9cccd; font-size: 11px; line-height: 1.4; }
 .system-map-legend i { width: 24px; height: 0; border-top: 2px solid #9dceb4; }
@@ -29,11 +35,11 @@
 .system-map-legend .system-map-key-delivery { border-color: #9babba; border-top-style: dashed; }
 .system-map-legend .system-map-key-proposed { border-color: #86b7e8; border-top-style: dashed; }
 .system-map-scroll { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 18px 18px 25px; }
-.system-map-scroll:focus-visible { outline: 2px solid #bedbd0; outline-offset: -5px; }
+.system-map-scroll > [role="tabpanel"]:focus-visible { outline: 2px solid #bedbd0; outline-offset: -5px; }
 .system-map-figure { margin: 0; }
 .system-map-canvas { width: 100%; min-width: 1060px; max-width: 1440px; margin: 0 auto; }
 .system-map-svg { display: block; width: 100%; height: auto; font-family: var(--font-geist-sans), Arial, sans-serif; }
-.system-map-scroll[data-view="fit"] .system-map-canvas { min-width: 0; max-width: none; height: min(calc(100dvh - 220px), calc((100vw - 48px) * .6267)); }
+.system-map-scroll[data-view="fit"] .system-map-canvas { min-width: 0; max-width: none; height: min(calc(100dvh - 270px), calc((100vw - 48px) * .6267)); }
 .system-map-scroll[data-view="fit"] .system-map-svg { height: 100%; }
 .system-map-svg marker path { fill: none; stroke-width: 1.2; }
 .system-map-svg marker[id$="runtime"] path { stroke: #9dceb4; }
@@ -85,10 +91,14 @@
   .system-map-header h2 { font-size: 20px; }
   .system-map-header p { font-size: 11px; max-width: 26ch; }
   .system-map-header-actions { width: 100%; justify-content: space-between; }
+  .system-map-header[data-view="flow"] { flex-wrap: nowrap; }
+  .system-map-header[data-view="flow"] .system-map-header-actions { width: auto; }
   .system-map-header .system-map-view-toggle { min-height: 40px; padding: 9px 11px; font-size: 11px; }
   .system-map-header .system-map-close { width: 40px; height: 40px; min-height: 40px; padding: 0; }
   .system-map-header .system-map-close > span, .system-map-header .system-map-close > svg:first-child { display: none; }
   .system-map-legend { gap: 10px 17px; padding: 12px 18px; }
+  .system-map-tabs { gap: 20px; padding-inline: 18px; }
+  .system-map-tabs button { font-size: 12px; }
   .system-map-legend > span { font-size: 10px; }
   .system-map-scroll { padding: 15px 12px 22px; }
   .system-map-figure figcaption { text-align: left; font-size: 11px; }

@@ -39,6 +39,10 @@ Dashed connections show the proposed customer journey and delivery integration. 
 
 ## Implemented proof and integration seams
 
+### Reading the architecture views
+
+In the app, open **Architecture → System map**, then choose **Follow a prompt** for the simple walkthrough or **Open full system map** for the full diagram. The **How a prompt works** view has **Type** and **Speak** modes that follow one illustrative edit through model interpretation, server validation, the atomic scene save, and browser rendering. Voice additionally shows connection-token setup and spoken confirmation after the tool result; its captions are separate display output, not input to the typed-prompt model. These views explain the implementation without sending a request. Use **Architecture → Activity** for actual returned events and request metadata.
+
 ```mermaid
 flowchart LR
   B["Browser: React UI + procedural 3D + AI SDK Realtime audio"]
